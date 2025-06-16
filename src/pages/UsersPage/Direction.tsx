@@ -126,8 +126,7 @@ const Direction = () => {
       fetchKafedras()
     }
   }, [userGroup])
-
-  // Close dropdown when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (kafedraDropdownRef.current && !kafedraDropdownRef.current.contains(event.target as Node)) {
