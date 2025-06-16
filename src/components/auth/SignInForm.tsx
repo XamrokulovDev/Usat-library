@@ -72,12 +72,10 @@ export default function SignInForm() {
         const token = response.data.data.token;
         const full_name = response.data.data.full_name;
         const roles = response.data.data.userGroups?.map((item) => item.group_id);
-        const expiry = new Date().getTime() + 24 * 60 * 60 * 1000;
 
         localStorage.setItem("token", token);
         localStorage.setItem("name", full_name);
         localStorage.setItem("isRoles", JSON.stringify(roles));
-        localStorage.setItem("token_expiry", expiry.toString());
 
         antdMessage.success("Kirish muvaffaqiyatli");
         navigate("/");

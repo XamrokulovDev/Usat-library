@@ -7,15 +7,18 @@ import App from "./App.tsx";
 import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { BrowserRouter as Router } from "react-router-dom";
+import { ClearTokenOnClose } from "./components/common/ClearTokenOnClose";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
-      <ThemeProvider>
-        <AppWrapper>
-          <App />
-        </AppWrapper>
-      </ThemeProvider>
+      <ClearTokenOnClose>
+        <ThemeProvider>
+          <AppWrapper>
+            <App />
+          </AppWrapper>
+        </ThemeProvider>
+      </ClearTokenOnClose>
     </Router>
   </StrictMode>
 );
