@@ -1,3 +1,5 @@
+"use client"
+
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { Calendar } from "lucide-react"
@@ -43,7 +45,6 @@ const Order = () => {
   const [selectedStatus, setSelectedStatus] = useState<number | "all">("all")
   const [confirmingOrders, setConfirmingOrders] = useState<Set<string>>(new Set())
   const [cancellingOrders, setCancellingOrders] = useState<Set<string>>(new Set())
-  const [acceptingOrders, setAcceptingOrders] = useState<Set<string>>(new Set())
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null)
   const [bookCode, setBookCode] = useState<string>("")
@@ -335,7 +336,6 @@ const Order = () => {
   const renderActionButtons = (order: OrderType) => {
     const isConfirming = confirmingOrders.has(order.id)
     const isCancelling = cancellingOrders.has(order.id)
-    const isAccepting = acceptingOrders.has(order.id)
 
     switch (order.status_id) {
       case 1:
