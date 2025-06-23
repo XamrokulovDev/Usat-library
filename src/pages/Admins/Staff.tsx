@@ -94,7 +94,7 @@ const Staff = () => {
   return (
     <div>
       {fetchLoading ? (
-        <p className="text-center text-gray-700 dark:text-gray-300 py-4">Ma'lumotlar yuklanmoqda...</p>
+        ""
       ) : validStaff.length === 0 ? (
         <p className="text-center text-gray-500 dark:text-gray-400 py-4">Xodimlar hozircha mavjud emas</p>
       ) : (

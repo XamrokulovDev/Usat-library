@@ -33,8 +33,16 @@ const navItems: NavItem[] = [
       { name: "Kitob statuslari", permission: "kitob_status", path: "/status", pro: false },
       // { name: "Kitob va Kategoriya", permission: "kitob_kategoriya", path: "/book-categories", pro: false },
       { name: "Kitob qo'shish", permission: "kitob_qo'shish", path: "/book-create", pro: false },
+      { name: "Kitob detallarini bog'lash", permission: "kitob_detal", path: "/books-detail", pro: false },
       { name: "Kitoblar", permission: "kitob_ko'rish", path: "/books-all", pro: false },
     ],
+  },
+  {
+    name: "Dekanat",
+    icon: <GoBook />,
+    subItems: [
+      { name: "Qora ro'yxat", permission: "", path: "/black-list", pro: false },
+    ]
   },
   {
     name: "Talabalar",
@@ -53,6 +61,7 @@ const navItems: NavItem[] = [
       { name: "Xodim qo'shish", permission: "", path: "/admins", pro: false },
       { name: "Huquq qo'shish", permission: "", path: "/permission-create", pro: false },
       { name: "Xodimlarni boshqarish", permission: "", path: "/roles", pro: false },
+      { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false }
     ],
   },
 ]
@@ -65,12 +74,7 @@ const othersItems: NavItem[] = [
       { name: "Line Chart", permission: "", path: "/line-chart", pro: false },
       { name: "Bar Chart", permission: "", path: "/bar-chart", pro: false },
     ],
-  },
-  // {
-  //   icon: <PlugInIcon />,
-  //   name: "Authentication",
-  //   subItems: [{ name: "Sign In", permission: "", path: "/signin", pro: false }],
-  // },
+  }
 ]
 
 interface PermissionType {

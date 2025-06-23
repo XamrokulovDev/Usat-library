@@ -1,9 +1,8 @@
-"use client"
-
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import { Modal, Input, message as antdMessage } from "antd"
+import { Users, ChevronDown } from "lucide-react"
 
 interface FacultyType {
   id: string
@@ -114,7 +113,7 @@ const StudentGroup = () => {
           "X-permission": permissionIds[0],
         },
       })
-      setKafedras(response.data.data)
+      setKafedras(response.data.data);
     } catch (err) {
       console.error("Guruhlarni olishda xatolik:", err)
       antdMessage.error("Guruhlarni olishda xatolik yuz berdi.")
@@ -128,7 +127,6 @@ const StudentGroup = () => {
     }
   }, [userGroup])
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (kafedraDropdownRef.current && !kafedraDropdownRef.current.contains(event.target as Node)) {
@@ -145,7 +143,6 @@ const StudentGroup = () => {
     }
   }, [])
 
-  // Filter kafedras based on search term
   const filteredKafedras = kafedras.filter((kafedra) =>
     kafedra.name.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
   )
@@ -303,12 +300,29 @@ const StudentGroup = () => {
     setSelectedFaculty(null)
   }
 
+  if (fetchLoading && userGroup.length === 0) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Yuklanmoqda...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-[80%] p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Guruh Qo'shish</h2>
-      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+      <div className="flex items-center gap-2 mb-6">
+        <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Guruh Qo'shish</h3>
+      </div>
+
+      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6 mb-8">
         <div className="w-full md:col-span-2">
-          <label htmlFor="group" className="block font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="group" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
             Guruh nomi
           </label>
           <input
@@ -317,12 +331,12 @@ const StudentGroup = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Masalan: 12/21"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
           />
         </div>
         {/* Searchable Yo'nalish Select */}
         <div className="w-full md:col-span-2" ref={kafedraDropdownRef}>
-          <label htmlFor="kafedra" className="block font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="kafedra" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
             Yo'nalishni tanlang!
           </label>
           <div className="relative">
@@ -338,7 +352,7 @@ const StudentGroup = () => {
               }}
               onFocus={() => setIsKafedraDropdownOpen(true)}
               placeholder="Yo'nalishni tanlang!"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:text-white cursor-pointer"
+              className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white cursor-pointer"
               autoComplete="off"
             />
 
@@ -346,27 +360,21 @@ const StudentGroup = () => {
               className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
               onClick={() => setIsKafedraDropdownOpen(!isKafedraDropdownOpen)}
             >
-              <svg
+              <ChevronDown
                 className={`w-4 h-4 text-gray-400 transition-transform ${isKafedraDropdownOpen ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              />
             </div>
 
             {isKafedraDropdownOpen && (
-              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-auto">
                 {filteredKafedras.length > 0 ? (
                   filteredKafedras.map((kafedra) => (
                     <div
                       key={kafedra.id}
                       onClick={() => handleKafedraSelect(kafedra)}
-                      className={`px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-white ${
+                      className={`px-4 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white transition-colors ${
                         selectedKafedraId === kafedra.id
-                          ? "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100"
+                          ? "bg-blue-50 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100"
                           : ""
                       }`}
                     >
@@ -386,78 +394,82 @@ const StudentGroup = () => {
           <button
             type="submit"
             disabled={submitLoading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
             {submitLoading ? "Yuborilmoqda..." : "Qo'shish"}
           </button>
         </div>
       </form>
 
-      <div className="mt-20">
-        <h2 className="text-2xl font-medium mb-6 text-gray-800 dark:text-white">
-          {faculties.length === 0 ? "Guruhlar mavjud emas" : "Barcha Guruhlar"}
-        </h2>
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300">
+            {faculties.length === 0 ? "Guruhlar mavjud emas" : "Barcha Guruhlar"}
+          </h4>
+        </div>
+
         {fetchLoading ? (
-          <p className="text-gray-700 dark:text-gray-300">Ma'lumotlar yuklanmoqda...</p>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
+            </div>
+          </div>
         ) : error ? (
-          <p className="text-red-500">{error}</p>
+          <div className="text-center py-8">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : faculties.length === 0 ? (
+          <div className="text-center py-12">
+            <Users className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Ma'lumotlar mavjud emas!</p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-gray-700">
-                  <th className="font-normal border border-gray-300 dark:border-gray-600 px-4 py-3 text-left text-gray-800 dark:text-white">
+            <table className="w-full border-collapse border border-gray-200 dark:border-gray-700 rounded-lg">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
                     #
                   </th>
-                  <th className="font-normal border border-gray-300 dark:border-gray-600 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
                     Guruh nomi
                   </th>
-                  <th className="font-normal border border-gray-300 dark:border-gray-600 px-4 py-3 text-center text-gray-800 dark:text-white">
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     Yangilash
                   </th>
-                  <th className="font-normal border border-gray-300 dark:border-gray-600 px-4 py-3 text-center text-gray-800 dark:text-white">
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     O'chirish
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {faculties.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="border border-gray-300 dark:border-gray-600 px-4 py-8 text-center text-gray-500 dark:text-gray-400"
-                    >
-                      Hech qanday guruh topilmadi
+                {faculties.map((faculty, index) => (
+                  <tr key={faculty.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {index + 1}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {faculty.name}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
+                      <button
+                        className="text-blue-500 hover:text-blue-600 px-3 py-1 rounded-md transition-all duration-300"
+                        onClick={() => showUpdateModal(faculty)}
+                      >
+                        Yangilash
+                      </button>
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
+                      <button
+                        className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
+                        onClick={() => showDeleteModal(faculty)}
+                      >
+                        O'chirish
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  faculties.map((faculty, index) => (
-                    <tr key={faculty.id} className="">
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-white">
-                        {index + 1}
-                      </td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-white">
-                        {faculty.name}
-                      </td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">
-                        <button
-                          className="text-blue-500 hover:text-blue-600 px-3 py-1 rounded-md transition-all duration-300"
-                          onClick={() => showUpdateModal(faculty)}
-                        >
-                          Yangilash
-                        </button>
-                      </td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">
-                        <button
-                          className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
-                          onClick={() => showDeleteModal(faculty)}
-                        >
-                          O'chirish
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>
@@ -500,17 +512,11 @@ const StudentGroup = () => {
                 className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                 onClick={() => setIsEditKafedraDropdownOpen(!isEditKafedraDropdownOpen)}
               >
-                <svg
+                <ChevronDown
                   className={`w-4 h-4 text-gray-400 transition-transform ${
                     isEditKafedraDropdownOpen ? "rotate-180" : ""
                   }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </div>
 
               {isEditKafedraDropdownOpen && (

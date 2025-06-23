@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import axios, { type AxiosError } from "axios"
 import { Modal, Switch, Input, Button, message as antdMessage } from "antd"
@@ -139,6 +137,19 @@ const Group = () => {
         }
       },
     })
+  }
+
+  if (fetchLoading) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-gray-200 px-4 pb-3 pt-4 dark:border-gray-800 sm:px-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Yuklanmoqda...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

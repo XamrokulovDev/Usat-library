@@ -1,10 +1,9 @@
-"use client"
-
 import type React from "react"
 import { useState, type ChangeEvent, useEffect } from "react"
 import { Input, Modal, message as antdMessage } from "antd"
 import axios, { type AxiosError } from "axios"
 import { PermissionData } from "../../../data/data";
+import { BookPlus } from "lucide-react";
 
 interface FormData {
   name: string
@@ -119,9 +118,25 @@ const Permission: React.FC = () => {
     }
   }
 
+  if (fetchLoading) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Yuklanmoqda...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-[80%] p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Barcha huquqlar</h2>
+      <div className="flex items-center gap-2 mb-6">
+        <BookPlus className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Barcha huquqlar</h3>
+      </div>
     <div className="mt-20 my-10">
       <div className="flex items-center justify-end mb-6">
         <button

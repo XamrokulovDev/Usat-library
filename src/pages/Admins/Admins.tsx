@@ -1,11 +1,9 @@
-"use client"
-
 import type React from "react"
-
 import { useState, useEffect, type FormEvent } from "react"
 import { Button, Input, Modal, message as antdMessage } from "antd"
 import axios from "axios"
 import Staff from "./Staff";
+import { Users } from "lucide-react";
 
 interface Group {
   id: string
@@ -198,9 +196,25 @@ const Admins = () => {
     }
   }
 
+  if (fetchLoading && userGroup.length === 0) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Yuklanmoqda...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-[80%] p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Xodimlar</h2>
+      <div className="flex items-center gap-2 mb-6">
+        <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Xodimlar</h3>
+      </div>
       <div className="flex items-center justify-end mt-20">
         <button
           className="dark:bg-gray-600 bg-gray-500 dark:text-gray-200 text-gray-100 rounded-lg px-4 py-2"
@@ -215,7 +229,7 @@ const Admins = () => {
       </div>
       <Modal title="Xodim qo'shish" open={isModalOpen} centered onCancel={handleCloseModal} footer={null}>
         {fetchLoading ? (
-          <p className="text-center text-gray-700 dark:text-gray-300 py-4">Ma'lumotlar yuklanmoqda...</p>
+          ""
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6 mt-6">
             <div>

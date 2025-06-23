@@ -23,6 +23,9 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import Order from "./pages/OrderDetails/Order";
 import PermissionGroup from "./pages/Admins/PermissionGroup";
 import Permission from "./pages/Admins/Permission";
+import BlackList from "./pages/OrderDetails/BlackList";
+import UsersBuild from "./pages/Admins/UsersBuild";
+import BookItem from "./pages/BooksPage/BookItem";
 
 export default function App() {
   return (
@@ -51,6 +54,9 @@ export default function App() {
             <Route path="/roles/:id" element={<ProtectedRoute><PermissionGroup /></ProtectedRoute>} />
             <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>}/>
             <Route path="/permission-create" element={<ProtectedRoute><Permission /></ProtectedRoute>}/>
+            <Route path="/black-list" element={<ProtectedRoute><BlackList /></ProtectedRoute>}/>
+            <Route path="/users-build" element={<ProtectedRoute><UsersBuild /></ProtectedRoute>}/>
+            <Route path="/books-detail" element={<ProtectedRoute><BookItem /></ProtectedRoute>}/>
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

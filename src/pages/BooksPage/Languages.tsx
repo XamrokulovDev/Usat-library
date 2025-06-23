@@ -1,9 +1,8 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { Modal, Input, message as antdMessage } from "antd"
+import { LanguagesIcon } from "lucide-react"
 
 interface GroupType {
   id: string
@@ -202,10 +201,27 @@ const Languages = () => {
     setSelectedGroup(null)
   }
 
+  if (fetchLoading && userGroup.length === 0) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Yuklanmoqda...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-[80%] p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Kitob tilini qo'shish</h2>
-      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+      <div className="flex items-center gap-2 mb-6">
+        <LanguagesIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Kitob tilini qo'shish</h3>
+      </div>
+
+      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6 mb-8">
         <div className="w-full md:col-span-2">
           <label htmlFor="language" className="block font-medium text-gray-700 dark:text-gray-300 mb-1">
             Kitob tili
@@ -216,85 +232,89 @@ const Languages = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Masalan: O'zbek"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
           />
         </div>
         <div className="md:col-span-2">
           <button
             type="submit"
             disabled={submitLoading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
             {submitLoading ? "Yuborilmoqda..." : "Qo'shish"}
           </button>
         </div>
       </form>
 
-      <div className="mt-20">
-        <h2 className="text-2xl font-medium mb-6 text-gray-800 dark:text-white">
-          {groups.length === 0 ? "Kitob tillari yo'q!" : "Barcha kitob tillari"}
-        </h2>
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300">
+            {groups.length === 0 ? "Kitob tillari yo'q!" : "Barcha kitob tillari"}
+          </h4>
+        </div>
+
         {fetchLoading ? (
-          <p className="text-gray-700 dark:text-gray-300">Ma'lumotlar yuklanmoqda...</p>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
+            </div>
+          </div>
         ) : error ? (
-          <p className="text-red-500">{error}</p>
+          <div className="text-center py-8">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : groups.length === 0 ? (
+          <div className="text-center py-12">
+            <LanguagesIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Ma'lumotlar mavjud emas!</p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-gray-700">
-                  <th className="font-normal border border-gray-300 dark:border-gray-600 px-4 py-3 text-left text-gray-800 dark:text-white">
+            <table className="w-full border-collapse border border-gray-200 dark:border-gray-700 rounded-lg">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
                     #
                   </th>
-                  <th className="font-normal border border-gray-300 dark:border-gray-600 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
                     Til nomi
                   </th>
-                  <th className="font-normal border border-gray-300 dark:border-gray-600 px-4 py-3 text-center text-gray-800 dark:text-white">
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     Yangilash
                   </th>
-                  <th className="font-normal border border-gray-300 dark:border-gray-600 px-4 py-3 text-center text-gray-800 dark:text-white">
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     O'chirish
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {groups.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="border border-gray-300 dark:border-gray-600 px-4 py-8 text-center text-gray-500 dark:text-gray-400"
-                    >
-                      Hech qanday til topilmadi
+                {groups.map((group, index) => (
+                  <tr key={group.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {index + 1}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {group.name}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
+                      <button
+                        className="text-blue-500 hover:text-blue-600 px-3 py-1 rounded-md transition-all duration-300"
+                        onClick={() => showUpdateModal(group)}
+                      >
+                        Yangilash
+                      </button>
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
+                      <button
+                        className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
+                        onClick={() => showDeleteModal(group)}
+                      >
+                        O'chirish
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  groups.map((group, index) => (
-                    <tr key={group.id} className="">
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-white">
-                        {index + 1}
-                      </td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-white">
-                        {group.name}
-                      </td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">
-                        <button
-                          className="text-blue-500 hover:text-blue-600 px-3 py-1 rounded-md transition-all duration-300"
-                          onClick={() => showUpdateModal(group)}
-                        >
-                          Yangilash
-                        </button>
-                      </td>
-                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">
-                        <button
-                          className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
-                          onClick={() => showDeleteModal(group)}
-                        >
-                          O'chirish
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>
