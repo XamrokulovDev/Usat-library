@@ -101,7 +101,8 @@ const Order = () => {
           "X-permission": permissionHeader,
         },
       })
-      setOrders(data.data)
+      setOrders(data.data);
+      console.log(data.data);
     } catch (error) {
       console.error("Buyurtmalarni olishda xatolik:", error)
     }

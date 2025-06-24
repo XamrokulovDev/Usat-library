@@ -71,10 +71,10 @@ const navItems: NavItem[] = [
 const othersItems: NavItem[] = [
   {
     icon: <PieChartIcon />,
-    name: "Charts",
+    name: "Statistika",
     subItems: [
-      { name: "Line Chart", permission: "", path: "/line-chart", pro: false },
-      { name: "Bar Chart", permission: "", path: "/bar-chart", pro: false },
+      { name: "Line Charts", permission: "", path: "/line-chart", pro: false },
+      { name: "Yillik Statistika", permission: "", path: "/bar-chart", pro: false },
     ],
   },
 ]

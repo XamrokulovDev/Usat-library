@@ -6,7 +6,7 @@ import { Spin } from "antd"
 import { ScrollToTop } from "./components/common/ScrollToTop"
 import SignIn from "./pages/AuthPages/SignIn"
 import LineChart from "./pages/Charts/LineChart"
-import BarChart from "./pages/Charts/BarChart"
+import BarChart from "./pages/Charts/MonthlyOrderStatistics"
 import AppLayout from "./layout/AppLayout"
 import Home from "./pages/Dashboard/Home"
 import Books from "./pages/BooksPage/Books"
@@ -37,7 +37,7 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false)
-    }, 1500)
+    }, 1000)
 
     return () => clearTimeout(timer)
   }, [])
@@ -47,9 +47,6 @@ export default function App() {
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="text-center">
           <Spin size="large" />
-          <div className="mt-4">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Yuklanmoqda...</h2>
-          </div>
         </div>
       </div>
     )
