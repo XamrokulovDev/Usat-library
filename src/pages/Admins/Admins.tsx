@@ -1,9 +1,9 @@
 import type React from "react"
-import { useState, useEffect, type FormEvent } from "react"
+import { useState, useEffect, useRef, type FormEvent } from "react"
 import { Button, Input, Modal, message as antdMessage } from "antd"
 import axios from "axios"
-import Staff from "./Staff";
-import { Users } from "lucide-react";
+import Staff, { type StaffRef } from "./Staff"
+import { Users } from "lucide-react"
 
 interface Group {
   id: string
@@ -74,6 +74,9 @@ const Admins = () => {
   const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
   const [submitLoading, setSubmitLoading] = useState<boolean>(false)
+
+  // Staff komponentiga reference
+  const staffRef = useRef<StaffRef>(null)
 
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => {
@@ -185,6 +188,11 @@ const Admins = () => {
       if (data.success) {
         antdMessage.success("Xodim muvaffaqiyatli ishga olindi!")
         handleCloseModal()
+
+        // Staff komponentini yangilash
+        if (staffRef.current) {
+          staffRef.current.refreshStaff()
+        }
       } else {
         antdMessage.error("Ro'yxatdan o'tishda xatolik!")
       }
@@ -225,7 +233,7 @@ const Admins = () => {
       </div>
       {/* Xodimlar  */}
       <div className="mt-10">
-        <Staff />
+        <Staff ref={staffRef} />
       </div>
       <Modal title="Xodim qo'shish" open={isModalOpen} centered onCancel={handleCloseModal} footer={null}>
         {fetchLoading ? (

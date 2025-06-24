@@ -3,6 +3,7 @@
 import axios from "axios"
 import { Users } from "lucide-react"
 import { useEffect, useState } from "react"
+import { message as antdMessage } from "antd"
 
 interface PermissionType {
   id: string
@@ -26,6 +27,7 @@ const UsersBuild = () => {
   const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [error, setError] = useState<string | null>(null)
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
+  const [restoringUsers, setRestoringUsers] = useState<Set<string>>(new Set())
 
   const fetchPermission = async () => {
     const token = localStorage.getItem("token")
@@ -66,12 +68,57 @@ const UsersBuild = () => {
           "X-permission": permissionIds[0],
         },
       })
-      setBuild(response.data.data);
+      setBuild(response.data.data)
     } catch (err) {
       console.error("O'chirilgan foydalanuvchilarni olishda xatolik:", err)
       setError("O'chirilgan foydalanuvchilarni olishda xatolik yuz berdi.")
     } finally {
       setFetchLoading(false)
+    }
+  }
+
+  const handleRestore = async (user: BuildType) => {
+    setRestoringUsers((prev) => new Set(prev).add(user.id))
+
+    try {
+      const token = localStorage.getItem("token")
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
+      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
+      await axios.patch(
+        `${import.meta.env.VITE_API}/api/users/${user.id}/restore`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-permission": permissionIds[0],
+          },
+        },
+      )
+
+      setBuild((prevBuild) => prevBuild.filter((u) => u.id !== user.id))
+      antdMessage.success(`${user.full_name} muvaffaqiyatli tiklandi!`)
+    } catch (error) {
+      console.error("Foydalanuvchini tiklashda xatolik:", error)
+
+      let errorMessage = "Foydalanuvchini tiklashda xatolik yuz berdi"
+
+      if (error instanceof Error) {
+        errorMessage = error.message
+      } else if (typeof error === "object" && error !== null && "response" in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } }
+        errorMessage = axiosError.response?.data?.message || errorMessage
+      }
+
+      antdMessage.error(errorMessage)
+    } finally {
+      setRestoringUsers((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(user.id)
+        return newSet
+      })
     }
   }
 
@@ -136,27 +183,39 @@ const UsersBuild = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-              {build.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                    {index + 1}
-                  </td>
-                  <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                    {item.full_name || "Ma'lumot yo'q"}
-                  </td>
-                  <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                    {item.phone || "Ma'lumot yo'q"}
-                  </td>
-                  <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                    {item.passport_id || "Ma'lumot yo'q"}
-                  </td>
-                  <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="text-blue-500 hover:text-blue-500 px-3 py-1 rounded-md transition-all duration-300">
-                      Tiklash
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {build.map((item, index) => {
+                const isRestoring = restoringUsers.has(item.id)
+
+                return (
+                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {index + 1}
+                    </td>
+                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {item.full_name || "Ma'lumot yo'q"}
+                    </td>
+                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {item.phone || "Ma'lumot yo'q"}
+                    </td>
+                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      {item.passport_id || "Ma'lumot yo'q"}
+                    </td>
+                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm">
+                      <button
+                        onClick={() => handleRestore(item)}
+                        disabled={isRestoring}
+                        className={`px-3 py-1 rounded-md transition-all duration-300 ${
+                          isRestoring
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "text-blue-500 hover:text-blue-700"
+                        }`}
+                      >
+                        {isRestoring ? "Tiklanmoqda..." : "Tiklash"}
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         )}

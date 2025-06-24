@@ -165,16 +165,19 @@ const Order = () => {
 
     try {
       const token = localStorage.getItem("token")
-      await axios.delete(`${import.meta.env.VITE_API}/api/user-order/${order.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await axios.patch(
+        `${import.meta.env.VITE_API}/api/user-order/${order.id}/reject`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      )
 
       setOrders((prevOrders) => prevOrders.filter((o) => o.id !== order.id))
       antdMessage.success("Buyurtma bekor qilindi")
 
-      // Trigger immediate refresh
       const rolesStr = localStorage.getItem("isRoles") || "[]"
       const roles: string[] = JSON.parse(rolesStr)
       const matched = userGroups.filter((g) => roles.includes(g.group_id))
@@ -233,7 +236,6 @@ const Order = () => {
       setAcceptBookCode("")
       setSelectedAcceptOrder(null)
 
-      // Trigger immediate refresh
       fetchOrders(permissionCode)
     } catch (error) {
       console.error("Kitobni qabul qilishda xatolik:", error)
@@ -288,7 +290,6 @@ const Order = () => {
       setBookCode("")
       setSelectedOrder(null)
 
-      // Trigger immediate refresh
       fetchOrders(permissionCode)
     } catch (error) {
       console.error("Kitobni topshirishda xatolik:", error)
@@ -414,25 +415,25 @@ const Order = () => {
     return () => clearInterval(timer)
   }, [])
 
-  // Add auto-refresh functionality
+  // Real-time polling - har 5 soniyada yangilanadi
   useEffect(() => {
-    const autoRefreshInterval = setInterval(() => {
-      if (userGroups.length > 0) {
-        const rolesStr = localStorage.getItem("isRoles") || "[]"
-        const roles: string[] = JSON.parse(rolesStr)
-        const matched = userGroups.filter((g) => roles.includes(g.group_id))
-        const permissionCode = matched[0]?.permissionInfo.code_name || ""
-        fetchOrders(permissionCode)
-      }
-    }, 100000) // 100 seconds
+    if (userGroups.length === 0) return
 
-    return () => clearInterval(autoRefreshInterval)
+    const interval = setInterval(() => {
+      const rolesStr = localStorage.getItem("isRoles") || "[]"
+      const roles: string[] = JSON.parse(rolesStr)
+      const matched = userGroups.filter((g) => roles.includes(g.group_id))
+      const permissionCode = matched[0]?.permissionInfo.code_name || ""
+      fetchOrders(permissionCode)
+    }, 5000) // 5 soniya
+
+    return () => clearInterval(interval)
   }, [userGroups])
 
   const filteredOrders =
     selectedStatus === "all"
-      ? orders.filter((order) => order.status_id !== 8)
-      : orders.filter((order) => order.status_id === selectedStatus && order.status_id !== 8)
+      ? orders.filter((order) => order.status_id !== 8 && order.status_id !== 6)
+      : orders.filter((order) => order.status_id === selectedStatus && order.status_id !== 8 && order.status_id !== 6)
 
   if (loading) {
     return (

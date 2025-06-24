@@ -1,9 +1,14 @@
+"use client"
+
+import type React from "react"
+
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
 
-import { ChevronDownIcon, GridIcon, GroupIcon, HorizontaLDots, PieChartIcon /*PlugInIcon*/ } from "../icons"
+import { ChevronDownIcon, GridIcon, GroupIcon, HorizontaLDots, PieChartIcon } from "../icons"
 import { useSidebar } from "../context/SidebarContext"
 import { GoBook } from "react-icons/go"
+import { MdSchool } from "react-icons/md"
 import axios from "axios"
 
 type NavItem = {
@@ -31,18 +36,15 @@ const navItems: NavItem[] = [
       { name: "Kitob tillari", permission: "kitob_tili", path: "/languages", pro: false },
       { name: "Kitob alifbolari", permission: "kitob_alifbo", path: "/alphabet", pro: false },
       { name: "Kitob statuslari", permission: "kitob_status", path: "/status", pro: false },
-      // { name: "Kitob va Kategoriya", permission: "kitob_kategoriya", path: "/book-categories", pro: false },
       { name: "Kitob qo'shish", permission: "kitob_qo'shish", path: "/book-create", pro: false },
+      { name: "Barcha Kitoblar", permission: "kitob_ko'rish", path: "/books-all", pro: false },
       { name: "Kitob detallarini bog'lash", permission: "kitob_detal", path: "/books-detail", pro: false },
-      { name: "Kitoblar", permission: "kitob_ko'rish", path: "/books-all", pro: false },
     ],
   },
   {
-    name: "Dekanat",
-    icon: <GoBook />,
-    subItems: [
-      { name: "Qora ro'yxat", permission: "", path: "/black-list", pro: false },
-    ]
+    name: "Dekanat bo'limi",
+    icon: <MdSchool />,
+    subItems: [{ name: "Arxivdagi buyurtmalar", permission: "black_list", path: "/black-list", pro: false }],
   },
   {
     name: "Talabalar",
@@ -61,7 +63,7 @@ const navItems: NavItem[] = [
       { name: "Xodim qo'shish", permission: "", path: "/admins", pro: false },
       { name: "Huquq qo'shish", permission: "", path: "/permission-create", pro: false },
       { name: "Xodimlarni boshqarish", permission: "", path: "/roles", pro: false },
-      { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false }
+      { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false },
     ],
   },
 ]
@@ -74,7 +76,7 @@ const othersItems: NavItem[] = [
       { name: "Line Chart", permission: "", path: "/line-chart", pro: false },
       { name: "Bar Chart", permission: "", path: "/bar-chart", pro: false },
     ],
-  }
+  },
 ]
 
 interface PermissionType {
@@ -207,6 +209,10 @@ const AppSidebar: React.FC = () => {
           }
 
           if (nav.name === "Talabalar" && !userRoles.includes("1")) {
+            return null
+          }
+
+          if (nav.name === "Dekanat xizmatlari" && !userRoles.includes("1") && !userRoles.includes("4")) {
             return null
           }
 

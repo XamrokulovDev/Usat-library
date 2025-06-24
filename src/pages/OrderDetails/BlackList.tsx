@@ -63,7 +63,6 @@ const BlackList = () => {
         },
       })
       setOrders(data.data);
-      console.log(data.data);
     } catch (error) {
       console.error("Buyurtmalarni olishda xatolik:", error)
     }
@@ -99,11 +98,14 @@ const BlackList = () => {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Calendar className="w-6 h-6 text-blue-400 dark:text-blue-400" />
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Arxivdagi buyurtmalar</h3>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-6 h-6 text-blue-400 dark:text-blue-400" />
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Arxivdagi buyurtmalar</h3>
+        </div>
+        <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">Barcha Arxivdagi buyurtmalar soni: {archivedOrders.length}</h4>
       </div>
-      <div className="space-y-6 mt-10">
+      <div className="space-y-6 mt-15">
         {archivedOrders.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />

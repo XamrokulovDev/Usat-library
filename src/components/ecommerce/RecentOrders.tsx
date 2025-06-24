@@ -1,3 +1,5 @@
+"use client"
+
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { Calendar } from "lucide-react"
@@ -93,6 +95,13 @@ export default function RecentOrders() {
 
       setOrders((prevOrders) => prevOrders.filter((o) => o.id !== order.id))
       antdMessage.success("Buyurtma olib ketishga tayyorlandi")
+
+      // Ma'lumotlarni yangilash
+      const rolesStr = localStorage.getItem("isRoles") || "[]"
+      const roles: string[] = JSON.parse(rolesStr)
+      const matched = userGroups.filter((g) => roles.includes(g.group_id))
+      const permissionCode = matched[0]?.permissionInfo.code_name || ""
+      fetchOrders(permissionCode)
     } catch (error) {
       console.error("Buyurtmani tasdiqlashda xatolik:", error)
 
@@ -120,14 +129,25 @@ export default function RecentOrders() {
 
     try {
       const token = localStorage.getItem("token")
-      await axios.delete(`${import.meta.env.VITE_API}/api/user-order/${order.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await axios.patch(
+        `${import.meta.env.VITE_API}/api/user-order/${order.id}/reject`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      )
 
       setOrders((prevOrders) => prevOrders.filter((o) => o.id !== order.id))
       antdMessage.success("Buyurtma bekor qilindi")
+
+      // Ma'lumotlarni yangilash
+      const rolesStr = localStorage.getItem("isRoles") || "[]"
+      const roles: string[] = JSON.parse(rolesStr)
+      const matched = userGroups.filter((g) => roles.includes(g.group_id))
+      const permissionCode = matched[0]?.permissionInfo.code_name || ""
+      fetchOrders(permissionCode)
     } catch (error) {
       console.error("Buyurtmani bekor qilishda xatolik:", error)
 
@@ -161,6 +181,21 @@ export default function RecentOrders() {
     const matched = userGroups.filter((g) => roles.includes(g.group_id))
     const permissionCode = matched[0]?.permissionInfo.code_name || ""
     fetchOrders(permissionCode).finally(() => setLoading(false))
+  }, [userGroups])
+
+  // Real-time polling - har 5 soniyada yangilanadi
+  useEffect(() => {
+    if (userGroups.length === 0) return
+
+    const interval = setInterval(() => {
+      const rolesStr = localStorage.getItem("isRoles") || "[]"
+      const roles: string[] = JSON.parse(rolesStr)
+      const matched = userGroups.filter((g) => roles.includes(g.group_id))
+      const permissionCode = matched[0]?.permissionInfo.code_name || ""
+      fetchOrders(permissionCode)
+    }, 5000) // 5 soniya
+
+    return () => clearInterval(interval)
   }, [userGroups])
 
   const filteredOrders = orders.filter((order) => order.status_id === 1)

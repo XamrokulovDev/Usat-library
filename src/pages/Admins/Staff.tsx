@@ -1,7 +1,7 @@
 "use client"
 
 import axios from "axios"
-import { useEffect, useState } from "react"
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react"
 
 interface StaffType {
   id: number
@@ -25,7 +25,11 @@ interface PermissionType {
   }
 }
 
-const Staff = () => {
+export interface StaffRef {
+  refreshStaff: () => void
+}
+
+const Staff = forwardRef<StaffRef>((_, ref) => {
   const [staff, setStaff] = useState<StaffType[]>([])
   const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
@@ -46,9 +50,6 @@ const Staff = () => {
       setFetchLoading(false)
     }
   }
-  useEffect(() => {
-    fetchPermission()
-  }, [])
 
   const fetchStaff = async () => {
     setFetchLoading(true)
@@ -73,10 +74,35 @@ const Staff = () => {
       setFetchLoading(false)
     }
   }
+
+  // Refresh funksiyasini parent componentga expose qilamiz
+  useImperativeHandle(ref, () => ({
+    refreshStaff: () => {
+      if (userGroup.length > 0) {
+        fetchStaff()
+      }
+    },
+  }))
+
+  useEffect(() => {
+    fetchPermission()
+  }, [])
+
   useEffect(() => {
     if (userGroup.length > 0) {
       fetchStaff()
     }
+  }, [userGroup])
+
+  // Real-time polling - har 10 soniyada yangilanadi
+  useEffect(() => {
+    if (userGroup.length === 0) return
+
+    const interval = setInterval(() => {
+      fetchStaff()
+    }, 10000) // 10 soniya
+
+    return () => clearInterval(interval)
   }, [userGroup])
 
   const validStaff = staff.filter((item) => {
@@ -94,7 +120,12 @@ const Staff = () => {
   return (
     <div>
       {fetchLoading ? (
-        ""
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Yuklanmoqda...</p>
+          </div>
+        </div>
       ) : validStaff.length === 0 ? (
         <p className="text-center text-gray-500 dark:text-gray-400 py-4">Xodimlar hozircha mavjud emas</p>
       ) : (
@@ -143,6 +174,8 @@ const Staff = () => {
       )}
     </div>
   )
-}
+})
+
+Staff.displayName = "Staff"
 
 export default Staff;
