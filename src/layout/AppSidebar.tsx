@@ -41,7 +41,10 @@ const navItems: NavItem[] = [
   {
     name: "Dekanat bo'limi",
     icon: <MdSchool />,
-    subItems: [{ name: "Qora ro'yxatdagilar", permission: "black_list", path: "/decanat", pro: false }],
+    subItems: [
+      { name: "Qora ro'yxatdagilar", permission: "black_list", path: "/decanat", pro: false },
+      { name: "Direktor", permission: "direktor", path: "/direktor", pro: false }
+    ]
   },
   {
     name: "Talabalar",
@@ -70,7 +73,7 @@ const othersItems: NavItem[] = [
     icon: <PieChartIcon />,
     name: "Statistika",
     subItems: [
-      { name: "Line Charts", permission: "", path: "/line-chart", pro: false },
+      // { name: "Line Charts", permission: "", path: "/line-chart", pro: false },
       { name: "Yillik Statistika", permission: "", path: "/bar-chart", pro: false },
     ],
   },
@@ -212,13 +215,8 @@ const AppSidebar: React.FC = () => {
           if (
             nav.name === "Dashboard" &&
             !userRoles.includes("1") &&
-            !userRoles.includes("4") &&
             !userRoles.includes("2")
           ) {
-            return null
-          }
-
-          if (nav.name === "Dekanat bo'limi" && !userRoles.includes("1") && !userRoles.includes("4")) {
             return null
           }
 

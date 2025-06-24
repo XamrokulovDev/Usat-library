@@ -146,19 +146,6 @@ const History = () => {
     })
   }
 
-  const getActionText = (action: string) => {
-    switch (action) {
-      case "RETURNED":
-        return "Qaytarildi"
-      case "BORROWED":
-        return "Olingan"
-      case "CANCELLED":
-        return "Bekor qilingan"
-      default:
-        return action
-    }
-  }
-
   if (loading) {
     return (
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
@@ -206,9 +193,6 @@ const History = () => {
                     Kitob nomi
                   </th>
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                    Harakat
-                  </th>
-                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Qabul qilgan xodim
                   </th>
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
@@ -239,19 +223,6 @@ const History = () => {
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.order.Book?.name || "Kitob ma'lumoti yo'q"}
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium">
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          item.history.action === "RETURNED"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : item.history.action === "BORROWED"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                              : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                        }`}
-                      >
-                        {getActionText(item.history.action)}
-                      </span>
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.history.AdminUser.full_name}

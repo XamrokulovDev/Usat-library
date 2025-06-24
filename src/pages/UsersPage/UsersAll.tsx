@@ -155,7 +155,6 @@ const UsersAll: React.FC = () => {
       filtered = filtered.filter((u) => u.full_name.toLowerCase().includes(searchValue.toLowerCase()))
     }
 
-    // Final filtered data with validation check
     const validFilteredData = filtered.filter(
       (u) => u.StudentGroup && u.StudentGroup.Yonalish && u.StudentGroup.Yonalish.Kafedra,
     )

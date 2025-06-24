@@ -16,5 +16,6 @@ export const PermissionData: PermissionType[] = [
   { id: 10, name: "guruhlar" },
   { id: 11, name: "admin" },
   { id: 12, name: "kitob_detal" },
-  { id: 13, name: "black_list" }
+  { id: 13, name: "black_list" },
+  { id: 14, name: "direktor" }
 ];

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router"
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { ThemeProvider } from "./context/ThemeContext"
 import { ScrollToTop } from "./components/common/ScrollToTop"
 import SignIn from "./pages/AuthPages/SignIn"
@@ -29,47 +29,13 @@ import History from "./pages/OrderDetails/History"
 import UsersBuild from "./pages/Admins/UsersBuild"
 import BookItem from "./pages/BooksPage/BookItem"
 import BlackList from "./pages/OrderDetails/BlackList"
-
-// import image
-import img from "./assets/logo.png"
+import Direktor from "./pages/OrderDetails/Direktor"
 
 export default function App() {
-  const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     document.documentElement.classList.add("dark")
-
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 1000)
-
-    return () => clearTimeout(timer)
   }, [])
 
-  if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
-        <div className="text-center">
-          <img src={img || "/placeholder.svg"} alt="logo png" loading="eager" className="w-40" />
-          {/* 3 ta animatsiyali nuqta */}
-          <div className="flex justify-center space-x-2 mt-5">
-            <div
-              className="w-3 h-3 bg-blue-600 dark:bg-blue-500 rounded-full animate-bounce"
-              style={{ animationDelay: "0ms", animationDuration: "1.4s" }}
-            ></div>
-            <div
-              className="w-3 h-3 bg-blue-600 dark:bg-blue-500 rounded-full animate-bounce"
-              style={{ animationDelay: "200ms", animationDuration: "1.4s" }}
-            ></div>
-            <div
-              className="w-3 h-3 bg-blue-600 dark:bg-blue-500 rounded-full animate-bounce"
-              style={{ animationDelay: "400ms", animationDuration: "1.4s" }}
-            ></div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <ThemeProvider>
@@ -260,6 +226,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <BlackList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/direktor"
+              element={
+                <ProtectedRoute>
+                  <Direktor />
                 </ProtectedRoute>
               }
             />

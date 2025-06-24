@@ -1,6 +1,7 @@
 import axios from "axios"
-import { Ban } from "lucide-react"
+import { Ban } from 'lucide-react'
 import { useEffect, useState } from "react"
+import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics"
 
 interface OrderType {
   id: string
@@ -42,6 +43,10 @@ const BlackList = () => {
   const [userGroups, setUserGroups] = useState<PermissionType[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [removingIds, setRemovingIds] = useState<string[]>([])
+
+  const rolesStr = localStorage.getItem("isRoles") || "[]"
+  const roles: string[] = JSON.parse(rolesStr)
+  const shouldHideMetrics = roles.includes("1")
 
   const fetchPermissions = async () => {
     try {
@@ -132,7 +137,7 @@ const BlackList = () => {
 
   if (loading) {
     return (
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+      <div className={`overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 ${!shouldHideMetrics ? 'mt-6' : ''}`}>
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -144,10 +149,12 @@ const BlackList = () => {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+    <>
+    {!shouldHideMetrics && <EcommerceMetrics />}
+    <div className={`overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 ${!shouldHideMetrics ? 'mt-6' : ''}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Ban className="w-6 h-6 text-red-500 dark:text-red-400" />
+          <Ban className="w-6 h-6 text-blue-500 dark:text-blue-400" />
           <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Qora ro'yxat</h3>
         </div>
         <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">Jami: {blacklistedOrders.length} ta</h4>
@@ -242,6 +249,7 @@ const BlackList = () => {
         )}
       </div>
     </div>
+    </>
   )
 }
 
