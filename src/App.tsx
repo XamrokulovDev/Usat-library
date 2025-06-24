@@ -1,5 +1,3 @@
-"use client"
-
 import { BrowserRouter as Router, Routes, Route } from "react-router"
 import { useState, useEffect } from "react"
 import { Spin } from "antd"
