@@ -1,5 +1,3 @@
-"use client"
-
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { Calendar } from "lucide-react"
@@ -96,7 +94,6 @@ export default function RecentOrders() {
       setOrders((prevOrders) => prevOrders.filter((o) => o.id !== order.id))
       antdMessage.success("Buyurtma olib ketishga tayyorlandi")
 
-      // Ma'lumotlarni yangilash
       const rolesStr = localStorage.getItem("isRoles") || "[]"
       const roles: string[] = JSON.parse(rolesStr)
       const matched = userGroups.filter((g) => roles.includes(g.group_id))
@@ -142,7 +139,6 @@ export default function RecentOrders() {
       setOrders((prevOrders) => prevOrders.filter((o) => o.id !== order.id))
       antdMessage.success("Buyurtma bekor qilindi")
 
-      // Ma'lumotlarni yangilash
       const rolesStr = localStorage.getItem("isRoles") || "[]"
       const roles: string[] = JSON.parse(rolesStr)
       const matched = userGroups.filter((g) => roles.includes(g.group_id))
@@ -183,7 +179,6 @@ export default function RecentOrders() {
     fetchOrders(permissionCode).finally(() => setLoading(false))
   }, [userGroups])
 
-  // Real-time polling - har 5 soniyada yangilanadi
   useEffect(() => {
     if (userGroups.length === 0) return
 
@@ -193,7 +188,7 @@ export default function RecentOrders() {
       const matched = userGroups.filter((g) => roles.includes(g.group_id))
       const permissionCode = matched[0]?.permissionInfo.code_name || ""
       fetchOrders(permissionCode)
-    }, 5000) // 5 soniya
+    }, 2000)
 
     return () => clearInterval(interval)
   }, [userGroups])

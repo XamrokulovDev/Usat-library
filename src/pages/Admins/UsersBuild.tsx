@@ -188,19 +188,19 @@ const UsersBuild = () => {
 
                 return (
                   <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td className="text-center px-6 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {index + 1}
                     </td>
-                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td className="w-1/4 text-center px-6 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item.full_name || "Ma'lumot yo'q"}
                     </td>
-                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td className="w-1/4 text-center px-6 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item.phone || "Ma'lumot yo'q"}
                     </td>
-                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td className="w-1/4 text-center px-6 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item.passport_id || "Ma'lumot yo'q"}
                     </td>
-                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="w-1/4 text-center px-6 py-3 whitespace-nowrap text-sm">
                       <button
                         onClick={() => handleRestore(item)}
                         disabled={isRestoring}

@@ -1,5 +1,3 @@
-"use client"
-
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { Calendar } from "lucide-react"
@@ -415,7 +413,6 @@ const Order = () => {
     return () => clearInterval(timer)
   }, [])
 
-  // Real-time polling - har 5 soniyada yangilanadi
   useEffect(() => {
     if (userGroups.length === 0) return
 
@@ -425,7 +422,7 @@ const Order = () => {
       const matched = userGroups.filter((g) => roles.includes(g.group_id))
       const permissionCode = matched[0]?.permissionInfo.code_name || ""
       fetchOrders(permissionCode)
-    }, 5000) // 5 soniya
+    }, 2000)
 
     return () => clearInterval(interval)
   }, [userGroups])
