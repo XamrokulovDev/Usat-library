@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router"
 import { useState, useEffect } from "react"
 import { Spin } from "antd"
+import { ThemeProvider } from "./context/ThemeContext"
 import { ScrollToTop } from "./components/common/ScrollToTop"
 import SignIn from "./pages/AuthPages/SignIn"
 import LineChart from "./pages/Charts/LineChart"
@@ -33,6 +34,8 @@ export default function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    document.documentElement.classList.add("dark")
+
     const timer = setTimeout(() => {
       setLoading(false)
     }, 1000)
@@ -51,7 +54,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <ThemeProvider>
       <Router>
         <ScrollToTop />
         <Routes>
@@ -238,6 +241,6 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
-    </>
+    </ThemeProvider>
   )
 }
