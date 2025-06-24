@@ -208,7 +208,12 @@ const AppSidebar: React.FC = () => {
             return null
           }
 
-          if (nav.name === "Dashboard" && !userRoles.includes("1") && !userRoles.includes("4")) {
+          if (
+            nav.name === "Dashboard" &&
+            !userRoles.includes("1") &&
+            !userRoles.includes("4") &&
+            !userRoles.includes("2")
+          ) {
             return null
           }
 
