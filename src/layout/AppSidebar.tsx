@@ -1,7 +1,3 @@
-"use client"
-
-import type React from "react"
-
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
 
@@ -209,6 +205,14 @@ const AppSidebar: React.FC = () => {
           }
 
           if (nav.name === "Talabalar" && !userRoles.includes("1")) {
+            return null
+          }
+
+          if (nav.name === "Dashboard" && !userRoles.includes("1") && !userRoles.includes("4")) {
+            return null
+          }
+
+          if (nav.name === "Dekanat bo'limi" && !userRoles.includes("1") && !userRoles.includes("4")) {
             return null
           }
 
