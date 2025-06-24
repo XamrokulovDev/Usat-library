@@ -1,6 +1,8 @@
+"use client"
+
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { Calendar } from "lucide-react"
+import { Calendar } from 'lucide-react'
 import { message as antdMessage, Modal, Input } from "antd"
 
 interface PermissionType {
@@ -101,8 +103,7 @@ const Order = () => {
           "X-permission": permissionHeader,
         },
       })
-      setOrders(data.data);
-      console.log(data.data);
+      setOrders(data.data)
     } catch (error) {
       console.error("Buyurtmalarni olishda xatolik:", error)
     }
@@ -340,14 +341,14 @@ const Order = () => {
     switch (order.status_id) {
       case 1:
         return (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => handleCancelOrder(order)}
               disabled={isCancelling}
-              className={`border-2 rounded-lg px-5 py-1 transition-all duration-200 ${
+              className={`border rounded px-3 py-1 text-xs transition-all duration-200 ${
                 isCancelling
                   ? "border-gray-400 bg-gray-400 text-white cursor-not-allowed opacity-60"
-                  : "border-red-500/80 bg-red-500/80 text-white/90 cursor-pointer hover:bg-red-600/80"
+                  : "border-red-500 bg-red-500 text-white cursor-pointer hover:bg-red-600"
               }`}
             >
               {isCancelling ? "Bekor qilinmoqda..." : "Bekor qilish"}
@@ -355,10 +356,10 @@ const Order = () => {
             <button
               onClick={() => handleConfirmOrder(order)}
               disabled={isConfirming}
-              className={`border-2 rounded-lg px-5 py-1 transition-all duration-200 ${
+              className={`border rounded px-3 py-1 text-xs transition-all duration-200 ${
                 isConfirming
                   ? "border-gray-400 bg-gray-400 text-white cursor-not-allowed opacity-60"
-                  : "border-green-500/70 bg-green-500/70 text-white/90 cursor-pointer hover:bg-green-600/70"
+                  : "border-green-500 bg-green-500 text-white cursor-pointer hover:bg-green-600"
               }`}
             >
               {isConfirming ? "Tasdiqlanmoqda..." : "Tasdiqlash"}
@@ -367,26 +368,22 @@ const Order = () => {
         )
       case 2:
         return (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => handleOpenModal(order)}
-              className="border-2 border-green-500/80 bg-green-500/80 text-white/90 rounded-lg cursor-pointer px-5 py-1"
-            >
-              Topshirish
-            </button>
-          </div>
+          <button
+            onClick={() => handleOpenModal(order)}
+            className="border border-green-500 bg-green-500 text-white rounded cursor-pointer px-3 py-1 text-xs hover:bg-green-600"
+          >
+            Topshirish
+          </button>
         )
       case 3:
       case 4:
         return (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => handleOpenAcceptModal(order)}
-              className="border-2 border-orange-500/80 bg-orange-500/80 text-white/90 rounded-lg cursor-pointer px-5 py-1"
-            >
-              Qabul qilish
-            </button>
-          </div>
+          <button
+            onClick={() => handleOpenAcceptModal(order)}
+            className="border border-orange-500 bg-orange-500 text-white rounded cursor-pointer px-3 py-1 text-xs hover:bg-orange-600"
+          >
+            Qabul qilish
+          </button>
         )
       default:
         return null
@@ -435,7 +432,7 @@ const Order = () => {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -447,8 +444,8 @@ const Order = () => {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Barcha buyurtmalar</h3>
@@ -467,6 +464,7 @@ const Order = () => {
           </select>
         </div>
       </div>
+
       <div className="space-y-6 mt-15">
         {filteredOrders.length === 0 ? (
           <div className="text-center py-12">
@@ -476,20 +474,58 @@ const Order = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredOrders.map((order) => {
-              return (
-                <div
-                  key={order.id}
-                  className="p-4 border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 dark:border-gray-700 dark:hover:border-gray-600 bg-gradient-to-r from-white to-gray-50/50 dark:from-gray-900/50 dark:to-gray-800/30"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-5">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white truncate mb-2">
-                          {order.Book?.name || "Kitob ma'lumoti yo'q"}
-                        </h3>
-                      </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    #
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Kitob nomi
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Buyurtmachi
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Telefon raqami
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Status
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Topshirish vaqti
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Amallar
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                {filteredOrders.map((order, index) => (
+                  <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {index + 1}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {order.Book?.name || "Kitob ma'lumoti yo'q"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {order.User?.full_name || "Foydalanuvchi ma'lumoti yo'q"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {order.User?.phone ? (
+                        <a
+                          href={`tel:${order.User.phone}`}
+                          className="px-6 py-3 whitespace-nowrap text-center text-[13px] font-medium text-gray-600 dark:text-gray-400 underline"
+                        >
+                          {order.User.phone}
+                        </a>
+                      ) : (
+                        "Ma'lumot yo'q"
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full ${
                           order.status_id === 1
@@ -511,53 +547,27 @@ const Order = () => {
                       >
                         {order.status_message}
                       </span>
-                    </div>
-                    <div className="flex items-end justify-between gap-2 text-sm text-gray-600 dark:text-gray-300">
-                      <div className="flex flex-col items-start gap-2">
-                        <span className="flex items-center gap-1">
-                          <span className="font-medium">Buyurtmachi:</span>
-                          <span>{order.User?.full_name || "Foydalanuvchi ma'lumoti yo'q"}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-600 dark:text-gray-400">
+                      {order.status_id >= 3 && order.finished_at ? (
+                        <span className="text-red-600 dark:text-red-400 font-mono text-xs">
+                          {calculateTimeRemaining(order.finished_at)}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <span className="font-medium">Telefon raqami:</span>
-                          {order.User?.phone ? (
-                            <a href={`tel:${order.User.phone}`} className="underline cursor-pointer text-[12px]">
-                              {order.User.phone}
-                            </a>
-                          ) : (
-                            <span className="text-gray-400">Ma'lumot yo'q</span>
-                          )}
-                        </span>
-                        {order.status_id >= 3 && order.finished_at && (
-                          <span className="flex items-center gap-1">
-                            <span className="font-medium">Topshirish vaqti:</span>
-                            <span className="text-red-600 dark:text-red-400 font-mono text-xs">
-                              {calculateTimeRemaining(order.finished_at)}
-                            </span>
-                          </span>
-                        )}
-                        {order.Book?.year && (
-                          <span className="flex items-center gap-1">
-                            <span className="font-medium">Yil:</span>
-                            <span>{order.Book.year}</span>
-                          </span>
-                        )}
-                        {order.Book?.page && (
-                          <span className="flex items-center gap-1">
-                            <span className="font-medium">Sahifa:</span>
-                            <span>{order.Book.page}</span>
-                          </span>
-                        )}
-                      </div>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       {renderActionButtons(order)}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
+
       <Modal
         title="Kitobni topshirish"
         open={isModalVisible}

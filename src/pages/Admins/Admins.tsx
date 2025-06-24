@@ -59,7 +59,7 @@ const EyeCloseIcon = ({ className }: { className?: string }) => (
 )
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{children}</label>
+  <label className="block text-sm font-medium text-gray-700 dark:text-gray-900 mb-1">{children}</label>
 )
 
 const Admins = () => {
@@ -75,7 +75,6 @@ const Admins = () => {
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
   const [submitLoading, setSubmitLoading] = useState<boolean>(false)
 
-  // Staff komponentiga reference
   const staffRef = useRef<StaffRef>(null)
 
   const handleOpenModal = () => setIsModalOpen(true)
@@ -189,7 +188,6 @@ const Admins = () => {
         antdMessage.success("Xodim muvaffaqiyatli ishga olindi!")
         handleCloseModal()
 
-        // Staff komponentini yangilash
         if (staffRef.current) {
           staffRef.current.refreshStaff()
         }
@@ -239,7 +237,7 @@ const Admins = () => {
         {fetchLoading ? (
           ""
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+          <form onSubmit={handleSubmit} className="space-y-5 mt-6">
             <div>
               <Label>To'liq ismini kiriting!</Label>
               <Input

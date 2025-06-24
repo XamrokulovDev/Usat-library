@@ -21,6 +21,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Bosh sahifa", permission: "", path: "/", pro: false },
       { name: "Buyurtmalar", permission: "", path: "/order", pro: false },
+      { name: "Arxivdagi buyurtmalar", permission: "", path: "/black-list", pro: false }
     ],
   },
   {
@@ -34,13 +35,13 @@ const navItems: NavItem[] = [
       { name: "Kitob statuslari", permission: "kitob_status", path: "/status", pro: false },
       { name: "Kitob qo'shish", permission: "kitob_qo'shish", path: "/book-create", pro: false },
       { name: "Barcha Kitoblar", permission: "kitob_ko'rish", path: "/books-all", pro: false },
-      { name: "Kitob detallarini bog'lash", permission: "kitob_detal", path: "/books-detail", pro: false },
+      { name: "Kitob detallarini bog'lash", permission: "kitob_detal", path: "/books-detail", pro: false }
     ],
   },
   {
     name: "Dekanat bo'limi",
     icon: <MdSchool />,
-    subItems: [{ name: "Arxivdagi buyurtmalar", permission: "black_list", path: "/black-list", pro: false }],
+    subItems: [{ name: "Qora ro'yxatdagilar", permission: "black_list", path: "/decanat", pro: false }],
   },
   {
     name: "Talabalar",
