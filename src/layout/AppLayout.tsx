@@ -1,3 +1,4 @@
+import type React from "react"
 import { SidebarProvider, useSidebar } from "../context/SidebarContext"
 import { Outlet } from "react-router"
 import AppHeader from "./AppHeader"
@@ -19,7 +20,7 @@ const LayoutContent: React.FC = () => {
         } ${isMobileOpen ? "ml-0" : ""}`}
       >
         <AppHeader />
-        <div className="mx-auto max-w-(--breakpoint-2xl) md:p-6 p-4">
+        <div className="mx-auto max-w-7xl md:p-6 p-4">
           <Outlet />
         </div>
       </div>

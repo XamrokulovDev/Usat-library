@@ -1,3 +1,5 @@
+"use client"
+
 import { BrowserRouter as Router, Routes, Route } from "react-router"
 import { useEffect } from "react"
 import { ThemeProvider } from "./context/ThemeContext"
@@ -36,208 +38,48 @@ export default function App() {
     document.documentElement.classList.add("dark")
   }, [])
 
-
   return (
     <ThemeProvider>
       <Router>
         <ScrollToTop />
         <Routes>
           <Route path="/signin" element={<SignIn />} />
-          <Route element={<AppLayout />}>
-            <Route
-              index
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admins"
-              element={
-                <ProtectedRoute>
-                  <Admins />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/auther"
-              element={
-                <ProtectedRoute>
-                  <Auther />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/categories"
-              element={
-                <ProtectedRoute>
-                  <Category />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/languages"
-              element={
-                <ProtectedRoute>
-                  <Languages />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/alphabet"
-              element={
-                <ProtectedRoute>
-                  <Alphabet />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/status"
-              element={
-                <ProtectedRoute>
-                  <Status />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/books-all"
-              element={
-                <ProtectedRoute>
-                  <Books />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/book-create"
-              element={
-                <ProtectedRoute>
-                  <CreateBooks />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/kafedra"
-              element={
-                <ProtectedRoute>
-                  <Kafedra />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/direction"
-              element={
-                <ProtectedRoute>
-                  <Direction />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/student_group"
-              element={
-                <ProtectedRoute>
-                  <StudentGroup />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/line-chart"
-              element={
-                <ProtectedRoute>
-                  <LineChart />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/bar-chart"
-              element={
-                <ProtectedRoute>
-                  <BarChart />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/users-all"
-              element={
-                <ProtectedRoute>
-                  <UsersAll />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/roles"
-              element={
-                <ProtectedRoute>
-                  <Roles />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/roles/:id"
-              element={
-                <ProtectedRoute>
-                  <PermissionGroup />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/order"
-              element={
-                <ProtectedRoute>
-                  <Order />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/permission-create"
-              element={
-                <ProtectedRoute>
-                  <Permission />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/black-list"
-              element={
-                <ProtectedRoute>
-                  <History />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/users-build"
-              element={
-                <ProtectedRoute>
-                  <UsersBuild />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/books-detail"
-              element={
-                <ProtectedRoute>
-                  <BookItem />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/decanat"
-              element={
-                <ProtectedRoute>
-                  <BlackList />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/direktor"
-              element={
-                <ProtectedRoute>
-                  <Direktor />
-                </ProtectedRoute>
-              }
-            />
+
+          {/* Protected routes - AppLayout ham himoyalangan */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Home />} />
+            <Route path="admins" element={<Admins />} />
+            <Route path="auther" element={<Auther />} />
+            <Route path="categories" element={<Category />} />
+            <Route path="languages" element={<Languages />} />
+            <Route path="alphabet" element={<Alphabet />} />
+            <Route path="status" element={<Status />} />
+            <Route path="books-all" element={<Books />} />
+            <Route path="book-create" element={<CreateBooks />} />
+            <Route path="kafedra" element={<Kafedra />} />
+            <Route path="direction" element={<Direction />} />
+            <Route path="student_group" element={<StudentGroup />} />
+            <Route path="line-chart" element={<LineChart />} />
+            <Route path="bar-chart" element={<BarChart />} />
+            <Route path="users-all" element={<UsersAll />} />
+            <Route path="roles" element={<Roles />} />
+            <Route path="roles/:id" element={<PermissionGroup />} />
+            <Route path="order" element={<Order />} />
+            <Route path="permission-create" element={<Permission />} />
+            <Route path="black-list" element={<History />} />
+            <Route path="users-build" element={<UsersBuild />} />
+            <Route path="books-detail" element={<BookItem />} />
+            <Route path="decanat" element={<BlackList />} />
+            <Route path="direktor" element={<Direktor />} />
           </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
