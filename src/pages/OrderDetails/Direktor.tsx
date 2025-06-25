@@ -1,5 +1,5 @@
 import axios from "axios"
-import { GraduationCap } from "lucide-react"
+import { GraduationCap, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 
 interface OrderType {
@@ -46,6 +46,7 @@ const Direktor = () => {
 
   // Filter states
   const [selectedKafedra, setSelectedKafedra] = useState<string>("")
+  const [searchValue, setSearchValue] = useState<string>("")
   const [filteredOrders, setFilteredOrders] = useState<FlattenedOrderType[]>([])
 
   const fetchPermissions = async () => {
@@ -112,6 +113,10 @@ const Direktor = () => {
       filtered = filtered.filter((order) => order.kafedra === selectedKafedra)
     }
 
+    if (searchValue.trim()) {
+      filtered = filtered.filter((order) => order.full_name.toLowerCase().includes(searchValue.toLowerCase()))
+    }
+
     setFilteredOrders(filtered)
   }
 
@@ -136,7 +141,7 @@ const Direktor = () => {
 
   useEffect(() => {
     applyFilters()
-  }, [flattenedOrders, selectedKafedra])
+  }, [flattenedOrders, selectedKafedra, searchValue])
 
   const getStatusColor = (status: string) => {
     if (status.includes("arxivga o'tkazildi")) {
@@ -145,8 +150,7 @@ const Direktor = () => {
       return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
     } else if (status.includes("Kitobni olib ketishingiz mumkin")) {
       return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-    } 
-    else {
+    } else {
       return "bg-red-100 text-red-800 dark:bg-orange-900/30 dark:text-orange-400"
     }
   }
@@ -166,14 +170,22 @@ const Direktor = () => {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <GraduationCap className="w-6 h-6 text-blue-500 dark:text-blue-400" />
           <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Kafedra buyurtmalari</h3>
         </div>
-        <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">
-          Jami: {filteredOrders.length} ta buyurtma
-        </h4>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            id="search"
+            name="name"
+            placeholder="Ism bo'yicha qidiruv"
+            className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="space-y-6 mt-15">

@@ -75,7 +75,8 @@ const AppSidebar: React.FC = () => {
         { name: "Xodim qo'shish", permission: "", path: "/admins", pro: false },
         { name: "Huquq qo'shish", permission: "", path: "/permission-create", pro: false },
         { name: "Xodimlarni boshqarish", permission: "", path: "/roles", pro: false },
-        { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false },
+        { name: "Barcha foydalanuvchilar", permission: "", path: "/users-all", pro: false },
+        { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false }
       ],
     },
   ]

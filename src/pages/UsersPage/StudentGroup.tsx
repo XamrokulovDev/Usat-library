@@ -315,12 +315,12 @@ const StudentGroup = () => {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2">
         <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Guruh Qo'shish</h3>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6 mb-8">
+      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6 mb-8 mt-15">
         <div className="w-full md:col-span-2">
           <label htmlFor="group" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
             Guruh nomi

@@ -113,11 +113,9 @@ const History = () => {
       setLoading(true)
       setError(null)
 
-      // Get user roles from localStorage
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
 
-      // Match user groups with roles
       const matchedGroups = userGroups.filter((item) => isRoles.includes(item.group_id))
 
       if (matchedGroups.length === 0) {
@@ -126,7 +124,6 @@ const History = () => {
         return
       }
 
-      // Get permission code from first matched group
       const permissionCode = matchedGroups[0]?.permissionInfo?.code_name
 
       if (!permissionCode) {
@@ -135,7 +132,6 @@ const History = () => {
         return
       }
 
-      // Fetch both order history and orders with the same permission
       await Promise.all([fetchOrderHistory(permissionCode), fetchOrders(permissionCode)])
     } catch (error) {
       console.error("Ma'lumotlarni olishda xatolik:", error)
@@ -161,19 +157,16 @@ const History = () => {
     setOrdersWithHistory(matched)
   }
 
-  // Initial permission fetch
   useEffect(() => {
     fetchPermissions()
   }, [])
 
-  // Fetch data when permissions are loaded
   useEffect(() => {
     if (userGroups.length > 0) {
       fetchDataWithPermissions()
     }
   }, [userGroups])
 
-  // Match orders with history when both are loaded
   useEffect(() => {
     if (orders.length > 0 && orderHistory.length > 0) {
       matchOrdersWithHistory()
@@ -227,7 +220,7 @@ const History = () => {
         <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">Jami: {ordersWithHistory.length} ta</h4>
       </div>
 
-      <div className="space-y-6 mt-6">
+      <div className="space-y-6 mt-15">
         {ordersWithHistory.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />

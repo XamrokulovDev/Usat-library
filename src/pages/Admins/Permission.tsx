@@ -133,11 +133,11 @@ const Permission: React.FC = () => {
 
   return (
     <div className="min-h-[80%] p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-auto">
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2">
         <BookPlus className="w-6 h-6 text-blue-600 dark:text-blue-400" />
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Barcha huquqlar</h3>
       </div>
-    <div className="mt-20 my-10">
+    <div className="mt-15 my-10">
       <div className="flex items-center justify-end mb-6">
         <button
           className="dark:bg-gray-600 bg-gray-500 dark:text-gray-200 text-gray-100 rounded-lg mb-5 px-4 py-2"

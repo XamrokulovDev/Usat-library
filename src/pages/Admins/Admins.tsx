@@ -217,11 +217,11 @@ const Admins = () => {
 
   return (
     <div className="min-h-[80%] p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-auto">
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2">
         <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Xodimlar</h3>
       </div>
-      <div className="flex items-center justify-end mt-20">
+      <div className="flex items-center justify-end mt-15">
         <button
           className="dark:bg-gray-600 bg-gray-500 dark:text-gray-200 text-gray-100 rounded-lg px-4 py-2"
           onClick={handleOpenModal}

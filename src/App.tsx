@@ -35,12 +35,10 @@ import Direktor from "./pages/OrderDetails/Direktor"
 import KafedraDetail from "./pages/OrderDetails/KafedraDetails"
 
 export default function App() {
-  // Dark mode ni yoqish
   useEffect(() => {
     document.documentElement.classList.add("dark")
   }, [])
 
-  // Birinchi marta kirganda refresh qilish
   useEffect(() => {
     const checkFirstVisit = () => {
       try {
@@ -72,7 +70,6 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           <Route path="/signin" element={<SignIn />} />
-
           <Route
             path="/"
             element={
@@ -82,14 +79,12 @@ export default function App() {
             }
           >
             <Route index element={<Home />} />
-
             {/* Admin sahifalari */}
             <Route path="admins" element={<Admins />} />
             <Route path="roles" element={<Roles />} />
             <Route path="roles/:id" element={<PermissionGroup />} />
             <Route path="permission-create" element={<Permission />} />
             <Route path="users-build" element={<UsersBuild />} />
-
             {/* Kitoblar bo'limi */}
             <Route path="books-all" element={<Books />} />
             <Route path="book-create" element={<CreateBooks />} />
@@ -99,25 +94,21 @@ export default function App() {
             <Route path="languages" element={<Languages />} />
             <Route path="alphabet" element={<Alphabet />} />
             <Route path="status" element={<Status />} />
-
             {/* Foydalanuvchilar bo'limi */}
             <Route path="users-all" element={<UsersAll />} />
             <Route path="kafedra" element={<Kafedra />} />
             <Route path="kafedra/:kafedraName" element={<KafedraDetail />} />
             <Route path="direction" element={<Direction />} />
             <Route path="student_group" element={<StudentGroup />} />
-
             {/* Buyurtmalar va tarix */}
             <Route path="order" element={<Order />} />
             <Route path="history" element={<History />} />
             <Route path="black-list" element={<BlackList />} />
             <Route path="direktor" element={<Direktor />} />
-
             {/* Statistika va grafiklar */}
             <Route path="line-chart" element={<LineChart />} />
             <Route path="bar-chart" element={<BarChart />} />
           </Route>
-
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

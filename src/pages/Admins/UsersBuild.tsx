@@ -1,7 +1,7 @@
 "use client"
 
 import axios from "axios"
-import { Users } from "lucide-react"
+import { Users, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 import { message as antdMessage } from "antd"
 
@@ -24,6 +24,8 @@ interface BuildType {
 
 const UsersBuild = () => {
   const [build, setBuild] = useState<BuildType[]>([])
+  const [filteredBuild, setFilteredBuild] = useState<BuildType[]>([])
+  const [searchValue, setSearchValue] = useState<string>("")
   const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [error, setError] = useState<string | null>(null)
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
@@ -76,6 +78,16 @@ const UsersBuild = () => {
       setFetchLoading(false)
     }
   }
+
+  // Search filter effect
+  useEffect(() => {
+    if (searchValue.trim()) {
+      const filtered = build.filter((user) => user.full_name.toLowerCase().includes(searchValue.toLowerCase()))
+      setFilteredBuild(filtered)
+    } else {
+      setFilteredBuild(build)
+    }
+  }, [searchValue, build])
 
   const handleRestore = async (user: BuildType) => {
     setRestoringUsers((prev) => new Set(prev).add(user.id))
@@ -143,10 +155,21 @@ const UsersBuild = () => {
 
   return (
     <div className="min-h-[80%] p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-auto">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 mb-6">
+      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
           <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Foydalanuvchilarni tiklash</h3>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            id="search"
+            name="name"
+            placeholder="Ism bo'yicha qidiruv"
+            className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
         </div>
       </div>
 
@@ -156,10 +179,10 @@ const UsersBuild = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto mt-10">
-        {build.length === 0 ? (
+      <div className="overflow-x-auto mt-15">
+        {filteredBuild.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-400 py-4">
-            O'chirilgan foydalanuvchilar hozircha mavjud emas
+            {searchValue.trim() ? "Qidiruv natijasi topilmadi" : "O'chirilgan foydalanuvchilar hozircha mavjud emas"}
           </p>
         ) : (
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
@@ -183,7 +206,7 @@ const UsersBuild = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-              {build.map((item, index) => {
+              {filteredBuild.map((item, index) => {
                 const isRestoring = restoringUsers.has(item.id)
 
                 return (
@@ -205,9 +228,7 @@ const UsersBuild = () => {
                         onClick={() => handleRestore(item)}
                         disabled={isRestoring}
                         className={`px-3 py-1 rounded-md transition-all duration-300 ${
-                          isRestoring
-                            ? "text-gray-400 cursor-not-allowed"
-                            : "text-blue-500 hover:text-blue-700"
+                          isRestoring ? "text-gray-400 cursor-not-allowed" : "text-blue-500 hover:text-blue-700"
                         }`}
                       >
                         {isRestoring ? "Tiklanmoqda..." : "Tiklash"}

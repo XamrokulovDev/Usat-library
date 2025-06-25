@@ -154,7 +154,7 @@ const Group = () => {
 
   return (
     <>
-      <div className="mt-20 my-10">
+      <div className="mt-15 my-10">
         <div className="flex items-center justify-end mb-6">
           <button
             className="dark:bg-gray-600 bg-gray-500 dark:text-gray-200 text-gray-100 rounded-lg px-4 py-2"

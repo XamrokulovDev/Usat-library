@@ -2,7 +2,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router"
 import axios from "axios"
-import { GraduationCap } from "lucide-react"
+import { GraduationCap, Search } from "lucide-react"
 import type { PermissionType } from "../../types/types"
 
 interface OrderType {
@@ -42,9 +42,9 @@ const KafedraDetail: React.FC = () => {
   const [hasPermission, setHasPermission] = useState<boolean>(false)
   const [permissionLoading, setPermissionLoading] = useState<boolean>(true)
 
-  // Filter states
-  const [selectedYonalish, setSelectedYonalish] = useState<string>("")
-  const [selectedGroup, setSelectedGroup] = useState<string>("")
+  // Filter states - faqat kafedra va search qoldiring
+  const [selectedKafedra, setSelectedKafedra] = useState<string>("")
+  const [searchValue, setSearchValue] = useState<string>("")
   const [filteredOrders, setFilteredOrders] = useState<FlattenedOrderType[]>([])
 
   const decodedKafedraName = kafedraName ? decodeURIComponent(kafedraName).replace(/-/g, " ") : ""
@@ -133,25 +133,20 @@ const KafedraDetail: React.FC = () => {
     setFlattenedOrders(flattened)
   }
 
-  const getUniqueYonalish = () => {
-    const yonalishlar = flattenedOrders.map((order) => order.yonalish)
-    return [...new Set(yonalishlar)].filter((y) => y !== "Noma'lum").sort()
-  }
-
-  const getUniqueGroups = () => {
-    const groups = flattenedOrders.map((order) => order.group)
-    return [...new Set(groups)].filter((g) => g !== "Noma'lum").sort()
+  const getUniqueKafedras = () => {
+    const kafedras = flattenedOrders.map((order) => order.kafedra)
+    return [...new Set(kafedras)].filter((k) => k !== "Noma'lum").sort()
   }
 
   const applyFilters = () => {
     let filtered = flattenedOrders
 
-    if (selectedYonalish) {
-      filtered = filtered.filter((order) => order.yonalish === selectedYonalish)
+    if (selectedKafedra) {
+      filtered = filtered.filter((order) => order.kafedra === selectedKafedra)
     }
 
-    if (selectedGroup) {
-      filtered = filtered.filter((order) => order.group === selectedGroup)
+    if (searchValue.trim()) {
+      filtered = filtered.filter((order) => order.full_name.toLowerCase().includes(searchValue.toLowerCase()))
     }
 
     setFilteredOrders(filtered)
@@ -178,7 +173,7 @@ const KafedraDetail: React.FC = () => {
 
   useEffect(() => {
     applyFilters()
-  }, [flattenedOrders, selectedYonalish, selectedGroup])
+  }, [flattenedOrders, selectedKafedra, searchValue])
 
   const getStatusColor = (status: string) => {
     if (status.includes("arxivga o'tkazildi")) {
@@ -226,12 +221,8 @@ const KafedraDetail: React.FC = () => {
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ruxsat yo'q</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">
-              
-            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-4"></p>
+            <p className="text-sm text-gray-500 dark:text-gray-500"></p>
           </div>
         </div>
       </div>
@@ -253,16 +244,24 @@ const KafedraDetail: React.FC = () => {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <GraduationCap className="w-6 h-6 text-blue-500 dark:text-blue-400" />
           <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
             {decodedKafedraName} Kafedra Buyurtmalari
           </h3>
         </div>
-        <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">
-          Jami: {filteredOrders.length} ta buyurtma
-        </h4>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            id="search"
+            name="name"
+            placeholder="Ism bo'yicha qidiruv"
+            className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="space-y-6 mt-15">
@@ -281,31 +280,23 @@ const KafedraDetail: React.FC = () => {
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                   <select
-                    value={selectedYonalish}
-                    onChange={(e) => setSelectedYonalish(e.target.value)}
+                    value={selectedKafedra}
+                    onChange={(e) => setSelectedKafedra(e.target.value)}
                     className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 text-sm"
                   >
-                    <option value="">Yo'nalish</option>
-                    {getUniqueYonalish().map((yonalish) => (
-                      <option key={yonalish} value={yonalish}>
-                        {yonalish}
+                    <option value="">Kafedra</option>
+                    {getUniqueKafedras().map((kafedra) => (
+                      <option key={kafedra} value={kafedra}>
+                        {kafedra}
                       </option>
                     ))}
                   </select>
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                  <select
-                    value={selectedGroup}
-                    onChange={(e) => setSelectedGroup(e.target.value)}
-                    className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 text-sm"
-                  >
-                    <option value="">Guruh</option>
-                    {getUniqueGroups().map((group) => (
-                      <option key={group} value={group}>
-                        {group}
-                      </option>
-                    ))}
-                  </select>
+                  Yo'nalish
+                </th>
+                <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                  Guruh
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                   Kitob nomi
@@ -345,6 +336,9 @@ const KafedraDetail: React.FC = () => {
                       ) : (
                         "Ma'lumot yo'q"
                       )}
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {item.kafedra}
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.yonalish}
