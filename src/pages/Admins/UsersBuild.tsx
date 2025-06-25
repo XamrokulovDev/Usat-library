@@ -156,7 +156,7 @@ const UsersBuild = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto mt-10">
         {build.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-400 py-4">
             O'chirilgan foydalanuvchilar hozircha mavjud emas
