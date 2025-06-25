@@ -8,50 +8,51 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [authState, setAuthState] = useState<"loading" | "authenticated" | "unauthenticated">("loading")
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuthentication = () => {
       try {
+        // LocalStorage dan token olish
         const token = localStorage.getItem("token")
 
-        if (token) {
-          // Token mavjudligini va haqiqiyligini tekshirish
-          // Agar kerak bo'lsa, bu yerda API chaqiruv ham qilishingiz mumkin
-          setIsAuthenticated(true)
+        if (token && token.trim() !== "" && token !== "null" && token !== "undefined") {
+          console.log("Token topildi, foydalanuvchi autentifikatsiya qilingan")
+          setAuthState("authenticated")
         } else {
-          setIsAuthenticated(false)
+          console.log("Token topilmadi, signin sahifasiga yo'naltirish")
+          setAuthState("unauthenticated")
         }
       } catch (error) {
-        console.error("Auth check error:", error)
-        setIsAuthenticated(false)
-      } finally {
-        setIsLoading(false)
+        console.error("Authentication tekshirishda xatolik:", error)
+        setAuthState("unauthenticated")
       }
     }
 
-    checkAuth()
+    // Kichik kechikish bilan tekshirish
+    const timer = setTimeout(checkAuthentication, 100)
+
+    return () => clearTimeout(timer)
   }, [])
 
   // Loading holatida
-  if (isLoading) {
+  if (authState === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">Sahifa yuklanmoqda...</p>
         </div>
       </div>
     )
   }
 
-  // Agar autentifikatsiya qilinmagan bo'lsa, redirect qilish
-  if (!isAuthenticated) {
+  // Token yo'q bo'lsa - signin sahifasiga yo'naltirish
+  if (authState === "unauthenticated") {
     return <Navigate to="/signin" replace />
   }
 
-  // Agar autentifikatsiya qilingan bo'lsa, children ko'rsatish
+  // Token bor bo'lsa - children komponentlarni ko'rsatish
   return children
 }
 

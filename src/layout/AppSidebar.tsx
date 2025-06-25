@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Bosh sahifa", permission: "", path: "/", pro: false },
       { name: "Buyurtmalar", permission: "", path: "/order", pro: false },
-      { name: "Arxivdagi buyurtmalar", permission: "", path: "/black-list", pro: false }
+      { name: "Arxivdagi buyurtmalar", permission: "", path: "/history", pro: false }
     ],
   },
   {
@@ -42,7 +42,7 @@ const navItems: NavItem[] = [
     name: "Dekanat bo'limi",
     icon: <MdSchool />,
     subItems: [
-      { name: "Qora ro'yxatdagilar", permission: "black_list", path: "/decanat", pro: false },
+      { name: "Qora ro'yxatdagilar", permission: "black_list", path: "/black-list", pro: false },
       { name: "Direktor", permission: "direktor", path: "/direktor", pro: false }
     ]
   },
@@ -153,6 +153,21 @@ const AppSidebar: React.FC = () => {
   }, [location.pathname, navigate])
 
   useEffect(() => {
+    const isRolesStr = localStorage.getItem("isRoles")
+    if (isRolesStr) {
+      try {
+        const roles = JSON.parse(isRolesStr)
+        // Agar foydalanuvchi role 4 yoki 5 ga ega bo'lsa va hozirgi sahifa bosh sahifa bo'lsa
+        if ((roles.includes("4") || roles.includes("5")) && location.pathname === "/") {
+          navigate("/decanat")
+        }
+      } catch (error) {
+        console.error("Error parsing roles for redirect:", error)
+      }
+    }
+  }, [location.pathname, navigate])
+
+  useEffect(() => {
     let submenuMatched = false
     ;["main", "others"].forEach((menuType) => {
       const items = menuType === "main" ? navItems : othersItems
@@ -220,7 +235,7 @@ const AppSidebar: React.FC = () => {
             return null
           }
 
-          if (nav.name === "Dekanat xizmatlari" && !userRoles.includes("1") && !userRoles.includes("4")) {
+          if (nav.name === "Dekanat bo'limi" && !userRoles.includes("1") && !userRoles.includes("4") && !userRoles.includes("5")) {
             return null
           }
 

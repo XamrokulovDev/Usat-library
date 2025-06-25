@@ -34,8 +34,40 @@ import BlackList from "./pages/OrderDetails/BlackList"
 import Direktor from "./pages/OrderDetails/Direktor"
 
 export default function App() {
+  // Dark mode ni yoqish
   useEffect(() => {
     document.documentElement.classList.add("dark")
+  }, [])
+
+  // Birinchi marta kirganda refresh qilish
+  useEffect(() => {
+    const checkFirstVisit = () => {
+      try {
+        // SessionStorage dan tekshirish (tab yopilganda o'chadi)
+        const hasVisitedBefore = sessionStorage.getItem("hasVisitedApp")
+
+        if (!hasVisitedBefore) {
+          // Birinchi marta kirgan deb belgilash
+          sessionStorage.setItem("hasVisitedApp", "true")
+
+          // Kichik kechikish bilan refresh qilish
+          setTimeout(() => {
+            console.log("Birinchi marta kirildi, sahifa yangilanmoqda...")
+            window.location.reload()
+          }, 150)
+        }
+      } catch (error) {
+        console.error("First visit check error:", error)
+      }
+    }
+
+    // DOM to'liq yuklangandan keyin tekshirish
+    if (document.readyState === "complete") {
+      checkFirstVisit()
+    } else {
+      window.addEventListener("load", checkFirstVisit)
+      return () => window.removeEventListener("load", checkFirstVisit)
+    }
   }, [])
 
   return (
@@ -43,43 +75,56 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
+          {/* Public route - Login sahifasi */}
           <Route path="/signin" element={<SignIn />} />
 
-          {/* Protected routes - AppLayout ham himoyalangan */}
+          {/* Protected routes - Barcha himoyalangan sahifalar */}
           <Route
-            path="/*"
+            path="/"
             element={
               <ProtectedRoute>
                 <AppLayout />
               </ProtectedRoute>
             }
           >
+            {/* Dashboard - Asosiy sahifa */}
             <Route index element={<Home />} />
+
+            {/* Admin sahifalari */}
             <Route path="admins" element={<Admins />} />
+            <Route path="roles" element={<Roles />} />
+            <Route path="roles/:id" element={<PermissionGroup />} />
+            <Route path="permission-create" element={<Permission />} />
+            <Route path="users-build" element={<UsersBuild />} />
+
+            {/* Kitoblar bo'limi */}
+            <Route path="books-all" element={<Books />} />
+            <Route path="book-create" element={<CreateBooks />} />
+            <Route path="books-detail" element={<BookItem />} />
             <Route path="auther" element={<Auther />} />
             <Route path="categories" element={<Category />} />
             <Route path="languages" element={<Languages />} />
             <Route path="alphabet" element={<Alphabet />} />
             <Route path="status" element={<Status />} />
-            <Route path="books-all" element={<Books />} />
-            <Route path="book-create" element={<CreateBooks />} />
+
+            {/* Foydalanuvchilar bo'limi */}
+            <Route path="users-all" element={<UsersAll />} />
             <Route path="kafedra" element={<Kafedra />} />
             <Route path="direction" element={<Direction />} />
             <Route path="student_group" element={<StudentGroup />} />
+
+            {/* Buyurtmalar va tarix */}
+            <Route path="order" element={<Order />} />
+            <Route path="history" element={<History />} />
+            <Route path="black-list" element={<BlackList />} />
+            <Route path="direktor" element={<Direktor />} />
+
+            {/* Statistika va grafiklar */}
             <Route path="line-chart" element={<LineChart />} />
             <Route path="bar-chart" element={<BarChart />} />
-            <Route path="users-all" element={<UsersAll />} />
-            <Route path="roles" element={<Roles />} />
-            <Route path="roles/:id" element={<PermissionGroup />} />
-            <Route path="order" element={<Order />} />
-            <Route path="permission-create" element={<Permission />} />
-            <Route path="black-list" element={<History />} />
-            <Route path="users-build" element={<UsersBuild />} />
-            <Route path="books-detail" element={<BookItem />} />
-            <Route path="decanat" element={<BlackList />} />
-            <Route path="direktor" element={<Direktor />} />
           </Route>
 
+          {/* 404 sahifasi - topilmagan sahifalar uchun */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

@@ -181,7 +181,7 @@ const Group = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-              {group?.filter((item) => item.id !== "1").map((item) => (
+              {group?.map((item) => (
                 <tr key={item.id}>
                   <td className="text-center text-gray-700 dark:text-gray-300 dark:border-gray-500 border-b px-10 py-4">
                     <NavLink to={`/roles/${item.id}`} className="hover:text-blue-500 hover:underline">{item.name}</NavLink>

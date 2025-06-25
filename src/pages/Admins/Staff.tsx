@@ -94,13 +94,12 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
     }
   }, [userGroup])
 
-  // Real-time polling - har 10 soniyada yangilanadi
   useEffect(() => {
     if (userGroup.length === 0) return
 
     const interval = setInterval(() => {
       fetchStaff()
-    }, 10000) // 10 soniya
+    }, 10000)
 
     return () => clearInterval(interval)
   }, [userGroup])
@@ -113,7 +112,7 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
       user.full_name &&
       user.phone &&
       user.passport_id &&
-      (groupName === "admin" || groupName === "kutubxonachi")
+      (groupName === "admin" || groupName === "kutubxonachi" || groupName === "direktor" || groupName === "dekanat")
     )
   })
 
