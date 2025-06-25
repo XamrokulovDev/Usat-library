@@ -2,7 +2,7 @@
 
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { Calendar } from 'lucide-react'
+import { Calendar } from "lucide-react"
 import { message as antdMessage, Modal, Input } from "antd"
 
 interface PermissionType {
@@ -240,20 +240,12 @@ const Order = () => {
     } catch (error) {
       console.error("Kitobni qabul qilishda xatolik:", error)
 
-      let errorMessage = "Kitobni qabul qilishda xatolik yuz berdi"
+      let errorMessage = "Kitobni qabul qilishda xatolik yuz berdi";
 
-      if (error instanceof Error) {
-        errorMessage = error.message
-      } else if (typeof error === "object" && error !== null && "response" in error) {
-        const axiosError = error as { response?: { data?: { message?: string }; status?: number } }
-        if (axiosError.response?.status === 400) {
-          errorMessage = "Kitob kodi to'g'ri"
-        } else {
-          errorMessage = axiosError.response?.data?.message || errorMessage
-        }
+      if (error) {
+        errorMessage = "Kitob kodi noto'g'ri";
       }
-
-      antdMessage.error(errorMessage)
+      antdMessage.warning(errorMessage);
     } finally {
       setAcceptSubmitting(false)
     }
@@ -300,13 +292,11 @@ const Order = () => {
       } else if (typeof error === "object" && error !== null && "response" in error) {
         const axiosError = error as { response?: { data?: { message?: string }; status?: number } }
         if (axiosError.response?.status === 400) {
-          errorMessage = "Kitob kodi to'g'ri"
-        } else {
-          errorMessage = axiosError.response?.data?.message || errorMessage
+          errorMessage = "Kitob kodi noto'g'ri"
         }
       }
 
-      antdMessage.error(errorMessage)
+      antdMessage.error(errorMessage);
     } finally {
       setSubmitting(false)
     }

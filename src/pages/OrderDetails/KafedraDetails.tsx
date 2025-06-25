@@ -42,11 +42,11 @@ const KafedraDetail: React.FC = () => {
   const [hasPermission, setHasPermission] = useState<boolean>(false)
   const [permissionLoading, setPermissionLoading] = useState<boolean>(true)
 
-  // Filter states - faqat kafedra va search qoldiring
-  const [selectedKafedra, setSelectedKafedra] = useState<string>("")
+  const [selectedYonalish, setSelectedYonalish] = useState<string>("")
+  const [selectedGroup, setSelectedGroup] = useState<string>("")
+  const [selectedStatus, setSelectedStatus] = useState<string>("")
   const [searchValue, setSearchValue] = useState<string>("")
   const [filteredOrders, setFilteredOrders] = useState<FlattenedOrderType[]>([])
-
   const decodedKafedraName = kafedraName ? decodeURIComponent(kafedraName).replace(/-/g, " ") : ""
 
   const fetchPermission = async () => {
@@ -133,16 +133,34 @@ const KafedraDetail: React.FC = () => {
     setFlattenedOrders(flattened)
   }
 
-  const getUniqueKafedras = () => {
-    const kafedras = flattenedOrders.map((order) => order.kafedra)
-    return [...new Set(kafedras)].filter((k) => k !== "Noma'lum").sort()
+  const getUniqueYonalishlar = () => {
+    const yonalishlar = flattenedOrders.map((order) => order.yonalish)
+    return [...new Set(yonalishlar)].filter((y) => y !== "Noma'lum").sort()
+  }
+
+  const getUniqueGroups = () => {
+    const groups = flattenedOrders.map((order) => order.group)
+    return [...new Set(groups)].filter((g) => g !== "Noma'lum").sort()
+  }
+
+  const getUniqueStatuses = () => {
+    const statuses = flattenedOrders.map((order) => order.order_status)
+    return [...new Set(statuses)].filter((s) => s !== "Noma'lum").sort()
   }
 
   const applyFilters = () => {
     let filtered = flattenedOrders
 
-    if (selectedKafedra) {
-      filtered = filtered.filter((order) => order.kafedra === selectedKafedra)
+    if (selectedYonalish) {
+      filtered = filtered.filter((order) => order.yonalish === selectedYonalish)
+    }
+
+    if (selectedGroup) {
+      filtered = filtered.filter((order) => order.group === selectedGroup)
+    }
+
+    if (selectedStatus) {
+      filtered = filtered.filter((order) => order.order_status === selectedStatus)
     }
 
     if (searchValue.trim()) {
@@ -173,17 +191,27 @@ const KafedraDetail: React.FC = () => {
 
   useEffect(() => {
     applyFilters()
-  }, [flattenedOrders, selectedKafedra, searchValue])
+  }, [flattenedOrders, selectedYonalish, selectedGroup, selectedStatus, searchValue])
 
   const getStatusColor = (status: string) => {
-    if (status.includes("arxivga o'tkazildi")) {
-      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-    } else if (status.includes("bekor qilindi")) {
-      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-    } else if (status.includes("Kitobni olib ketishingiz mumkin")) {
+    if (status.includes("Buyurtma berildi")) {
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+    } else if (status.includes("Olib ketilgan")) {
       return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+    } else if (status.includes("O'qilmoqda")) {
+      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+    } else if (status.includes("Topshirish vaqti keldi")) {
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+    } else if (status.includes("Topshirilishi kutilmoqda")) {
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+    } else if (status.includes("Bekor qilindi")) {
+      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+    } else if (status.includes("Qora ro'yxatda")) {
+      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+    } else if (status.includes("Arxiv")) {
+      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
     } else {
-      return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
     }
   }
 
@@ -279,30 +307,52 @@ const KafedraDetail: React.FC = () => {
                   Telefon
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                  Kafedra
+                </th>
+                <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                   <select
-                    value={selectedKafedra}
-                    onChange={(e) => setSelectedKafedra(e.target.value)}
+                    value={selectedYonalish}
+                    onChange={(e) => setSelectedYonalish(e.target.value)}
                     className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 text-sm"
                   >
-                    <option value="">Kafedra</option>
-                    {getUniqueKafedras().map((kafedra) => (
-                      <option key={kafedra} value={kafedra}>
-                        {kafedra}
+                    <option value="">Yo'nalish</option>
+                    {getUniqueYonalishlar().map((yonalish) => (
+                      <option key={yonalish} value={yonalish}>
+                        {yonalish}
                       </option>
                     ))}
                   </select>
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                  Yo'nalish
-                </th>
-                <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                  Guruh
+                  <select
+                    value={selectedGroup}
+                    onChange={(e) => setSelectedGroup(e.target.value)}
+                    className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    <option value="">Guruh</option>
+                    {getUniqueGroups().map((group) => (
+                      <option key={group} value={group}>
+                        {group}
+                      </option>
+                    ))}
+                  </select>
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                   Kitob nomi
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                  Holati
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    <option value="">Holat</option>
+                    {getUniqueStatuses().map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
                 </th>
               </tr>
             </thead>
