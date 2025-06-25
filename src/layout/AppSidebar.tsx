@@ -6,96 +6,18 @@ import { useSidebar } from "../context/SidebarContext"
 import { GoBook } from "react-icons/go"
 import { MdSchool } from "react-icons/md"
 import axios from "axios"
-
-type NavItem = {
-  name: string
-  icon: React.ReactNode
-  path?: string
-  subItems?: { name: string; permission: string; path: string; pro?: boolean; new?: boolean }[]
-}
-
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    subItems: [
-      { name: "Bosh sahifa", permission: "", path: "/", pro: false },
-      { name: "Buyurtmalar", permission: "", path: "/order", pro: false },
-      { name: "Arxivdagi buyurtmalar", permission: "", path: "/history", pro: false }
-    ],
-  },
-  {
-    name: "Kitoblar",
-    icon: <GoBook />,
-    subItems: [
-      { name: "Kitob mualliflari", permission: "kitob_muallif", path: "/auther", pro: false },
-      { name: "Kitob kategoriyalari", permission: "kategoriya", path: "/categories", pro: false },
-      { name: "Kitob tillari", permission: "kitob_tili", path: "/languages", pro: false },
-      { name: "Kitob alifbolari", permission: "kitob_alifbo", path: "/alphabet", pro: false },
-      { name: "Kitob statuslari", permission: "kitob_status", path: "/status", pro: false },
-      { name: "Kitob qo'shish", permission: "kitob_qo'shish", path: "/book-create", pro: false },
-      { name: "Barcha Kitoblar", permission: "kitob_ko'rish", path: "/books-all", pro: false },
-      { name: "Kitob detallarini bog'lash", permission: "kitob_detal", path: "/books-detail", pro: false }
-    ],
-  },
-  {
-    name: "Dekanat bo'limi",
-    icon: <MdSchool />,
-    subItems: [
-      { name: "Qora ro'yxatdagilar", permission: "black_list", path: "/black-list", pro: false },
-      { name: "Direktor", permission: "direktor", path: "/direktor", pro: false }
-    ]
-  },
-  {
-    name: "Talabalar",
-    icon: <GroupIcon />,
-    subItems: [
-      { name: "Kafedralar", permission: "kafedralar", path: "/kafedra", pro: false },
-      { name: "Yo'nalish", permission: "yo'nalish", path: "/direction", pro: false },
-      { name: "Talaba Guruhlari", permission: "guruhlar", path: "/student_group", pro: false },
-      { name: "Barcha foydalanuvchilar", permission: "admin", path: "/users-all", pro: false },
-    ],
-  },
-  {
-    name: "Admin",
-    icon: <GroupIcon />,
-    subItems: [
-      { name: "Xodim qo'shish", permission: "", path: "/admins", pro: false },
-      { name: "Huquq qo'shish", permission: "", path: "/permission-create", pro: false },
-      { name: "Xodimlarni boshqarish", permission: "", path: "/roles", pro: false },
-      { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false },
-    ],
-  },
-]
-
-const othersItems: NavItem[] = [
-  {
-    icon: <PieChartIcon />,
-    name: "Statistika",
-    subItems: [
-      // { name: "Line Charts", permission: "", path: "/line-chart", pro: false },
-      { name: "Yillik Statistika", permission: "", path: "/bar-chart", pro: false },
-    ],
-  },
-]
-
-interface PermissionType {
-  id: string
-  group_id: string
-  permission_id: string
-  permissionInfo: {
-    id: string
-    code_name: string
-    table: string
-  }
-}
+import type { NavItem, PermissionType, KafedraData } from "../types/types"
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar()
   const [permissionIds, setPermissionIds] = useState<string[]>([])
   const [userRoles, setUserRoles] = useState<string[]>([])
+  const [kafedraList, setKafedraList] = useState<string[]>([])
+  const [navItems, setNavItems] = useState<NavItem[]>([])
   const location = useLocation()
   const navigate = useNavigate()
+  const [userGroups, setUserGroups] = useState<PermissionType[]>([])
+  const [hasNavigatedToDefaultKafedra, setHasNavigatedToDefaultKafedra] = useState<boolean>(false)
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others"
@@ -103,6 +25,68 @@ const AppSidebar: React.FC = () => {
   } | null>(null)
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({})
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  const baseNavItems: NavItem[] = [
+    {
+      icon: <GridIcon />,
+      name: "Dashboard",
+      subItems: [
+        { name: "Bosh sahifa", permission: "", path: "/", pro: false },
+        { name: "Buyurtmalar", permission: "", path: "/order", pro: false },
+        { name: "Arxivdagi buyurtmalar", permission: "", path: "/history", pro: false },
+      ],
+    },
+    {
+      name: "Kitoblar",
+      icon: <GoBook />,
+      subItems: [
+        { name: "Kitob mualliflari", permission: "kitob_muallif", path: "/auther", pro: false },
+        { name: "Kitob kategoriyalari", permission: "kategoriya", path: "/categories", pro: false },
+        { name: "Kitob tillari", permission: "kitob_tili", path: "/languages", pro: false },
+        { name: "Kitob alifbolari", permission: "kitob_alifbo", path: "/alphabet", pro: false },
+        { name: "Kitob statuslari", permission: "kitob_status", path: "/status", pro: false },
+        { name: "Kitob qo'shish", permission: "kitob_qo'shish", path: "/book-create", pro: false },
+        { name: "Barcha Kitoblar", permission: "kitob_ko'rish", path: "/books-all", pro: false },
+        { name: "Kitob detallarini bog'lash", permission: "kitob_detal", path: "/books-detail", pro: false },
+      ],
+    },
+    {
+      name: "Dekanat bo'limi",
+      icon: <MdSchool />,
+      subItems: [
+        { name: "Qora ro'yxatdagilar", permission: "black_list", path: "/black-list", pro: false },
+        { name: "Direktor", permission: "direktor", path: "/direktor", pro: false },
+      ],
+    },
+    {
+      name: "Talabalar",
+      icon: <GroupIcon />,
+      subItems: [
+        { name: "Kafedralar", permission: "kafedralar", path: "/kafedra", pro: false },
+        { name: "Yo'nalish", permission: "yo'nalish", path: "/direction", pro: false },
+        { name: "Talaba Guruhlari", permission: "guruhlar", path: "/student_group", pro: false },
+        { name: "Barcha foydalanuvchilar", permission: "admin", path: "/users-all", pro: false },
+      ],
+    },
+    {
+      name: "Admin",
+      icon: <GroupIcon />,
+      subItems: [
+        { name: "Xodim qo'shish", permission: "", path: "/admins", pro: false },
+        { name: "Huquq qo'shish", permission: "", path: "/permission-create", pro: false },
+        { name: "Xodimlarni boshqarish", permission: "", path: "/roles", pro: false },
+        { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false },
+      ],
+    },
+  ]
+
+  const othersItems: NavItem[] = [
+    {
+      icon: <PieChartIcon />,
+      name: "Statistika",
+      subItems: [{ name: "Yillik Statistika", permission: "", path: "/bar-chart", pro: false }],
+    },
+  ]
 
   useEffect(() => {
     const isRolesStr = localStorage.getItem("isRoles")
@@ -119,6 +103,45 @@ const AppSidebar: React.FC = () => {
 
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname])
 
+  const fetchKafedraData = async (): Promise<void> => {
+    const token = localStorage.getItem("token")
+    try {
+      const rolesStr = localStorage.getItem("isRoles") || "[]"
+      const roles: string[] = JSON.parse(rolesStr)
+      const matched = userGroups.filter((g) => roles.includes(g.group_id))
+      const permissionCode = matched[0]?.permissionInfo.code_name || ""
+
+      const response = await axios.get(`${import.meta.env.VITE_API}/api/all-orders-kafedra`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-permission": permissionCode,
+        },
+      })
+
+      if (response.data.status === "success" && Array.isArray(response.data.data)) {
+        const kafedraNames: string[] = response.data.data
+          .map((item: KafedraData) => {
+            if (typeof item.kafedra === "string") {
+              return item.kafedra
+            }
+            return null
+          })
+          .filter(
+            (kafedra: string | null): kafedra is string =>
+              kafedra !== null && kafedra !== "Noma'lum" && kafedra.trim() !== "",
+          )
+
+        const uniqueKafedras: string[] = Array.from(new Set(kafedraNames))
+        setKafedraList(uniqueKafedras)
+      } else {
+        setKafedraList([])
+      }
+    } catch (err) {
+      console.error("Kafedra ma'lumotlarini olishda xatolik:", err)
+      setKafedraList([])
+    }
+  }
+
   const fetchPermission = async () => {
     const token = localStorage.getItem("token")
     try {
@@ -131,17 +154,74 @@ const AppSidebar: React.FC = () => {
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = response.data.data.filter((item: PermissionType) => isRoles.includes(item.group_id))
+      setUserGroups(matchedGroups)
       const permissionIds = matchedGroups.map((item: PermissionType) => item.permissionInfo.table)
 
       setPermissionIds(permissionIds)
     } catch (err) {
-      console.error("Muallifni olishda xatolik:", err)
+      console.error("Permission olishda xatolik:", err)
     }
   }
 
   useEffect(() => {
-    fetchPermission()
+    const loadData = async () => {
+      await fetchPermission()
+      if (userGroups.length > 0) {
+        await fetchKafedraData()
+      }
+    }
+    loadData()
   }, [])
+
+  useEffect(() => {
+    if (userGroups.length > 0) {
+      fetchKafedraData()
+    }
+  }, [userGroups])
+
+  useEffect(() => {
+    const updatedNavItems: NavItem[] = baseNavItems.map((item) => {
+      if (item.name === "Dekanat bo'limi") {
+        const kafedraSubItems = kafedraList.map((kafedra: string) => ({
+          name: kafedra,
+          permission: "dekanat",
+          path: `/kafedra/${encodeURIComponent(kafedra.toLowerCase().replace(/\s+/g, "-"))}`,
+          pro: false,
+        }))
+
+        const staticItems = [
+          { name: "Qora ro'yxatdagilar", permission: "black_list", path: "/black-list", pro: false },
+          { name: "Direktor", permission: "direktor", path: "/direktor", pro: false },
+        ]
+
+        return {
+          ...item,
+          subItems: [...staticItems, ...kafedraSubItems],
+        }
+      }
+      return item
+    })
+
+    setNavItems(updatedNavItems)
+  }, [kafedraList])
+
+  useEffect(() => {
+    const isRolesStr = localStorage.getItem("isRoles")
+    const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+
+    if (isRoles.includes("4") && kafedraList.length > 0 && !hasNavigatedToDefaultKafedra && location.pathname === "/") {
+      const firstKafedra = kafedraList[0]
+      const kafedraPath = `/kafedra/${encodeURIComponent(firstKafedra.toLowerCase().replace(/\s+/g, "-"))}`
+
+      const dekanatIndex = navItems.findIndex((item) => item.name === "Dekanat bo'limi")
+      if (dekanatIndex !== -1) {
+        setOpenSubmenu({ type: "main", index: dekanatIndex })
+      }
+
+      navigate(kafedraPath)
+      setHasNavigatedToDefaultKafedra(true)
+    }
+  }, [kafedraList, navItems, location.pathname, navigate, hasNavigatedToDefaultKafedra])
 
   useEffect(() => {
     const isRolesStr = localStorage.getItem("isRoles")
@@ -157,9 +237,10 @@ const AppSidebar: React.FC = () => {
     if (isRolesStr) {
       try {
         const roles = JSON.parse(isRolesStr)
-        // Agar foydalanuvchi role 4 yoki 5 ga ega bo'lsa va hozirgi sahifa bosh sahifa bo'lsa
         if ((roles.includes("4") || roles.includes("5")) && location.pathname === "/") {
-          navigate("/decanat")
+          if (!roles.includes("4")) {
+            navigate("/black-list")
+          }
         }
       } catch (error) {
         console.error("Error parsing roles for redirect:", error)
@@ -176,6 +257,7 @@ const AppSidebar: React.FC = () => {
           const filteredSubItems = nav.subItems.filter(
             (subItem) => !subItem.permission || permissionIds.includes(subItem.permission),
           )
+
           filteredSubItems.forEach((subItem) => {
             if (isActive(subItem.path)) {
               setOpenSubmenu({
@@ -190,9 +272,19 @@ const AppSidebar: React.FC = () => {
     })
 
     if (!submenuMatched) {
-      setOpenSubmenu(null)
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+
+      if (isRoles.includes("4") && kafedraList.length > 0) {
+        const dekanatIndex = navItems.findIndex((item) => item.name === "Dekanat bo'limi")
+        if (dekanatIndex !== -1) {
+          setOpenSubmenu({ type: "main", index: dekanatIndex })
+        }
+      } else {
+        setOpenSubmenu(null)
+      }
     }
-  }, [location, isActive, permissionIds])
+  }, [location, isActive, permissionIds, navItems, kafedraList])
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -227,15 +319,17 @@ const AppSidebar: React.FC = () => {
             return null
           }
 
-          if (
-            nav.name === "Dashboard" &&
-            !userRoles.includes("1") &&
-            !userRoles.includes("2")
-          ) {
+          if (nav.name === "Dashboard" && !userRoles.includes("1") && !userRoles.includes("2")) {
             return null
           }
 
-          if (nav.name === "Dekanat bo'limi" && !userRoles.includes("1") && !userRoles.includes("4") && !userRoles.includes("5")) {
+          if (
+            nav.name === "Dekanat bo'limi" &&
+            !userRoles.includes("1") &&
+            !userRoles.includes("4") &&
+            !userRoles.includes("5") &&
+            !userRoles.includes("6")
+          ) {
             return null
           }
 

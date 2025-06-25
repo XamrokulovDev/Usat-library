@@ -1,6 +1,9 @@
+import type React from "react"
+import { useEffect, useState } from "react"
+import { useParams, useNavigate } from "react-router"
 import axios from "axios"
 import { GraduationCap } from "lucide-react"
-import { useEffect, useState } from "react"
+import type { PermissionType } from "../../types/types"
 
 interface OrderType {
   name: string
@@ -28,48 +31,80 @@ interface FlattenedOrderType {
   order_created_at: string
 }
 
-interface PermissionType {
-  id: string
-  group_id: string
-  permission_id: string
-  permissionInfo: {
-    id: string
-    code_name: string
-  }
-}
-
-const Direktor = () => {
+const KafedraDetail: React.FC = () => {
+  const { kafedraName } = useParams<{ kafedraName: string }>()
   const [userGroups, setUserGroups] = useState<PermissionType[]>([])
   const [kafedraData, setKafedraData] = useState<KafedraUserType[]>([])
   const [flattenedOrders, setFlattenedOrders] = useState<FlattenedOrderType[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
+  const navigate = useNavigate()
+  const [hasPermission, setHasPermission] = useState<boolean>(false)
+  const [permissionLoading, setPermissionLoading] = useState<boolean>(true)
+
   // Filter states
-  const [selectedKafedra, setSelectedKafedra] = useState<string>("")
+  const [selectedYonalish, setSelectedYonalish] = useState<string>("")
+  const [selectedGroup, setSelectedGroup] = useState<string>("")
   const [filteredOrders, setFilteredOrders] = useState<FlattenedOrderType[]>([])
 
-  const fetchPermissions = async () => {
+  const decodedKafedraName = kafedraName ? decodeURIComponent(kafedraName).replace(/-/g, " ") : ""
+
+  const fetchPermission = async () => {
+    const token = localStorage.getItem("token")
+    setPermissionLoading(true)
+
     try {
-      const token = localStorage.getItem("token")
-      const { data } = await axios.get(`${import.meta.env.VITE_API}/api/group-permissions`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.get(`${import.meta.env.VITE_API}/api/group-permissions`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
-      setUserGroups(data.data)
-    } catch (error) {
-      console.error("Permissionni olishda xatolik:", error)
+
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+
+      if (isRoles.includes("1")) {
+        setHasPermission(true)
+      } else if (isRoles.includes("4") || isRoles.includes("5")) {
+        setHasPermission(true)
+      } else {
+        const matchedGroups = response.data.data.filter((item: PermissionType) => isRoles.includes(item.group_id))
+        const permissionIds = matchedGroups?.map((item: PermissionType) => item.permissionInfo.code_name)
+
+        if (permissionIds.includes("kafedralar") || permissionIds.includes("kafedra_detail")) {
+          setHasPermission(true)
+        } else {
+          setHasPermission(false)
+          setTimeout(() => {
+            navigate("/")
+          }, 2000)
+        }
+      }
+
+      setUserGroups(response.data.data)
+    } catch (err) {
+      console.error("Permission tekshirishda xatolik:", err)
+      setHasPermission(false)
+    } finally {
+      setPermissionLoading(false)
     }
   }
 
   const fetchKafedraOrders = async (permissionHeader: string) => {
     try {
       const token = localStorage.getItem("token")
-      const { data } = await axios.get(`${import.meta.env.VITE_API}/api/all-orders-kafedra?`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API}/api/all-orders-kafedra`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "X-permission": permissionHeader,
         },
       })
-      setKafedraData(data.data)
+
+      const filteredData = data.data.filter(
+        (item: KafedraUserType) => item.kafedra.toLowerCase() === decodedKafedraName.toLowerCase(),
+      )
+
+      setKafedraData(filteredData)
     } catch (error) {
       console.error("Kafedra ma'lumotlarini olishda xatolik:", error)
     }
@@ -98,35 +133,42 @@ const Direktor = () => {
     setFlattenedOrders(flattened)
   }
 
-  // Get unique values for filters
-  const getUniqueKafedras = () => {
-    const kafedras = flattenedOrders.map((order) => order.kafedra)
-    return [...new Set(kafedras)].filter((k) => k !== "Noma'lum").sort()
+  const getUniqueYonalish = () => {
+    const yonalishlar = flattenedOrders.map((order) => order.yonalish)
+    return [...new Set(yonalishlar)].filter((y) => y !== "Noma'lum").sort()
   }
 
-  // Filter function
+  const getUniqueGroups = () => {
+    const groups = flattenedOrders.map((order) => order.group)
+    return [...new Set(groups)].filter((g) => g !== "Noma'lum").sort()
+  }
+
   const applyFilters = () => {
     let filtered = flattenedOrders
 
-    if (selectedKafedra) {
-      filtered = filtered.filter((order) => order.kafedra === selectedKafedra)
+    if (selectedYonalish) {
+      filtered = filtered.filter((order) => order.yonalish === selectedYonalish)
+    }
+
+    if (selectedGroup) {
+      filtered = filtered.filter((order) => order.group === selectedGroup)
     }
 
     setFilteredOrders(filtered)
   }
 
   useEffect(() => {
-    fetchPermissions()
+    fetchPermission()
   }, [])
 
   useEffect(() => {
-    if (userGroups.length === 0) return
+    if (userGroups.length === 0 || !hasPermission) return
     const rolesStr = localStorage.getItem("isRoles") || "[]"
     const roles: string[] = JSON.parse(rolesStr)
     const matched = userGroups.filter((g) => roles.includes(g.group_id))
     const permissionCode = matched[0]?.permissionInfo.code_name || ""
     fetchKafedraOrders(permissionCode).finally(() => setLoading(false))
-  }, [userGroups])
+  }, [userGroups, hasPermission])
 
   useEffect(() => {
     if (kafedraData.length > 0) {
@@ -136,7 +178,7 @@ const Direktor = () => {
 
   useEffect(() => {
     applyFilters()
-  }, [flattenedOrders, selectedKafedra])
+  }, [flattenedOrders, selectedYonalish, selectedGroup])
 
   const getStatusColor = (status: string) => {
     if (status.includes("arxivga o'tkazildi")) {
@@ -145,13 +187,12 @@ const Direktor = () => {
       return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
     } else if (status.includes("Kitobni olib ketishingiz mumkin")) {
       return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-    } 
-    else {
-      return "bg-red-100 text-red-800 dark:bg-orange-900/30 dark:text-orange-400"
+    } else {
+      return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
     }
   }
 
-  if (loading) {
+  if (permissionLoading) {
     return (
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
         <div className="flex items-center justify-center py-12">
@@ -164,12 +205,60 @@ const Direktor = () => {
     )
   }
 
+  if (!hasPermission) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-8 h-8 text-red-600 dark:text-red-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ruxsat yo'q</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500">
+              
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400 text-lg"></p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <GraduationCap className="w-6 h-6 text-blue-500 dark:text-blue-400" />
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Kafedra buyurtmalari</h3>
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
+            {decodedKafedraName} Kafedra Buyurtmalari
+          </h3>
         </div>
         <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">
           Jami: {filteredOrders.length} ta buyurtma
@@ -192,23 +281,31 @@ const Direktor = () => {
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                   <select
-                    value={selectedKafedra}
-                    onChange={(e) => setSelectedKafedra(e.target.value)}
+                    value={selectedYonalish}
+                    onChange={(e) => setSelectedYonalish(e.target.value)}
                     className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 text-sm"
                   >
-                    <option value="">Kafedra</option>
-                    {getUniqueKafedras().map((kafedra) => (
-                      <option key={kafedra} value={kafedra}>
-                        {kafedra}
+                    <option value="">Yo'nalish</option>
+                    {getUniqueYonalish().map((yonalish) => (
+                      <option key={yonalish} value={yonalish}>
+                        {yonalish}
                       </option>
                     ))}
                   </select>
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                  Yo'nalishi
-                </th>
-                <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                  Guruhi
+                  <select
+                    value={selectedGroup}
+                    onChange={(e) => setSelectedGroup(e.target.value)}
+                    className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    <option value="">Guruh</option>
+                    {getUniqueGroups().map((group) => (
+                      <option key={group} value={group}>
+                        {group}
+                      </option>
+                    ))}
+                  </select>
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                   Kitob nomi
@@ -221,9 +318,11 @@ const Direktor = () => {
             <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center">
+                  <td colSpan={8} className="px-6 py-12 text-center">
                     <GraduationCap className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400 text-lg">Bu filterga mos ma'lumot mavjud emas!</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-lg">
+                      {decodedKafedraName} kafedra uchun ma'lumot topilmadi!
+                    </p>
                   </td>
                 </tr>
               ) : (
@@ -239,16 +338,13 @@ const Direktor = () => {
                       {item.phone ? (
                         <a
                           href={`tel:${item.phone}`}
-                          className="px-6 py-3 whitespace-nowrap text-center text-[13px] font-medium text-gray-600 dark:text-gray-400 underline"
+                          className="text-[13px] font-medium text-gray-600 dark:text-gray-400 underline"
                         >
                           {item.phone}
                         </a>
                       ) : (
                         "Ma'lumot yo'q"
                       )}
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {item.kafedra}
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.yonalish}
@@ -277,4 +373,4 @@ const Direktor = () => {
   )
 }
 
-export default Direktor;
+export default KafedraDetail;

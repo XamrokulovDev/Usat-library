@@ -1,5 +1,3 @@
-"use client"
-
 import { type JSX, useState, useEffect } from "react"
 import { Navigate } from "react-router-dom"
 
@@ -13,11 +11,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     const checkAuthentication = () => {
       try {
-        // LocalStorage dan token olish
         const token = localStorage.getItem("token")
 
         if (token && token.trim() !== "" && token !== "null" && token !== "undefined") {
-          console.log("Token topildi, foydalanuvchi autentifikatsiya qilingan")
           setAuthState("authenticated")
         } else {
           console.log("Token topilmadi, signin sahifasiga yo'naltirish")
@@ -29,13 +25,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
     }
 
-    // Kichik kechikish bilan tekshirish
     const timer = setTimeout(checkAuthentication, 100)
 
     return () => clearTimeout(timer)
   }, [])
 
-  // Loading holatida
   if (authState === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
@@ -47,12 +41,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     )
   }
 
-  // Token yo'q bo'lsa - signin sahifasiga yo'naltirish
   if (authState === "unauthenticated") {
     return <Navigate to="/signin" replace />
   }
 
-  // Token bor bo'lsa - children komponentlarni ko'rsatish
   return children
 }
 

@@ -32,6 +32,7 @@ import UsersBuild from "./pages/Admins/UsersBuild"
 import BookItem from "./pages/BooksPage/BookItem"
 import BlackList from "./pages/OrderDetails/BlackList"
 import Direktor from "./pages/OrderDetails/Direktor"
+import KafedraDetail from "./pages/OrderDetails/KafedraDetails"
 
 export default function App() {
   // Dark mode ni yoqish
@@ -43,16 +44,12 @@ export default function App() {
   useEffect(() => {
     const checkFirstVisit = () => {
       try {
-        // SessionStorage dan tekshirish (tab yopilganda o'chadi)
         const hasVisitedBefore = sessionStorage.getItem("hasVisitedApp")
 
         if (!hasVisitedBefore) {
-          // Birinchi marta kirgan deb belgilash
           sessionStorage.setItem("hasVisitedApp", "true")
 
-          // Kichik kechikish bilan refresh qilish
           setTimeout(() => {
-            console.log("Birinchi marta kirildi, sahifa yangilanmoqda...")
             window.location.reload()
           }, 150)
         }
@@ -61,7 +58,6 @@ export default function App() {
       }
     }
 
-    // DOM to'liq yuklangandan keyin tekshirish
     if (document.readyState === "complete") {
       checkFirstVisit()
     } else {
@@ -75,10 +71,8 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* Public route - Login sahifasi */}
           <Route path="/signin" element={<SignIn />} />
 
-          {/* Protected routes - Barcha himoyalangan sahifalar */}
           <Route
             path="/"
             element={
@@ -87,7 +81,6 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            {/* Dashboard - Asosiy sahifa */}
             <Route index element={<Home />} />
 
             {/* Admin sahifalari */}
@@ -110,6 +103,7 @@ export default function App() {
             {/* Foydalanuvchilar bo'limi */}
             <Route path="users-all" element={<UsersAll />} />
             <Route path="kafedra" element={<Kafedra />} />
+            <Route path="kafedra/:kafedraName" element={<KafedraDetail />} />
             <Route path="direction" element={<Direction />} />
             <Route path="student_group" element={<StudentGroup />} />
 
@@ -124,7 +118,6 @@ export default function App() {
             <Route path="bar-chart" element={<BarChart />} />
           </Route>
 
-          {/* 404 sahifasi - topilmagan sahifalar uchun */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

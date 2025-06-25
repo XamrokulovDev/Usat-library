@@ -59,6 +59,7 @@ const History = () => {
   const [userGroups, setUserGroups] = useState<PermissionType[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [ordersWithHistory, setOrdersWithHistory] = useState<OrderWithHistory[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   const fetchPermissions = async () => {
     try {
@@ -69,33 +70,78 @@ const History = () => {
       setUserGroups(data.data)
     } catch (error) {
       console.error("Permissionni olishda xatolik:", error)
+      setError("Permission ma'lumotlarini olishda xatolik yuz berdi.")
     }
   }
 
-  const fetchOrderHistory = async () => {
+  const fetchOrderHistory = async (permissionCode: string) => {
     try {
       const token = localStorage.getItem("token")
       const { data } = await axios.get(`${import.meta.env.VITE_API}/api/order-history`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-permission": permissionCode,
+        },
       })
       setOrderHistory(data.data)
     } catch (error) {
       console.error("Order history olishda xatolik:", error)
+      setError("Buyurtmalar tarixini olishda xatolik yuz berdi.")
     }
   }
 
-  const fetchOrders = async (permissionHeader: string) => {
+  const fetchOrders = async (permissionCode: string) => {
     try {
       const token = localStorage.getItem("token")
       const { data } = await axios.get(`${import.meta.env.VITE_API}/api/user-order`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-permission": permissionHeader,
+          "X-permission": permissionCode,
         },
       })
       setOrders(data.data)
     } catch (error) {
       console.error("Buyurtmalarni olishda xatolik:", error)
+      setError("Buyurtmalarni olishda xatolik yuz berdi.")
+    }
+  }
+
+  const fetchDataWithPermissions = async () => {
+    if (userGroups.length === 0) return
+
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Get user roles from localStorage
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+
+      // Match user groups with roles
+      const matchedGroups = userGroups.filter((item) => isRoles.includes(item.group_id))
+
+      if (matchedGroups.length === 0) {
+        setError("Sizda ushbu sahifaga kirish huquqi yo'q.")
+        setLoading(false)
+        return
+      }
+
+      // Get permission code from first matched group
+      const permissionCode = matchedGroups[0]?.permissionInfo?.code_name
+
+      if (!permissionCode) {
+        setError("Permission kodi topilmadi.")
+        setLoading(false)
+        return
+      }
+
+      // Fetch both order history and orders with the same permission
+      await Promise.all([fetchOrderHistory(permissionCode), fetchOrders(permissionCode)])
+    } catch (error) {
+      console.error("Ma'lumotlarni olishda xatolik:", error)
+      setError("Ma'lumotlarni olishda xatolik yuz berdi.")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -115,20 +161,19 @@ const History = () => {
     setOrdersWithHistory(matched)
   }
 
+  // Initial permission fetch
   useEffect(() => {
     fetchPermissions()
-    fetchOrderHistory()
   }, [])
 
+  // Fetch data when permissions are loaded
   useEffect(() => {
-    if (userGroups.length === 0) return
-    const rolesStr = localStorage.getItem("isRoles") || "[]"
-    const roles: string[] = JSON.parse(rolesStr)
-    const matched = userGroups.filter((g) => roles.includes(g.group_id))
-    const permissionCode = matched[0]?.permissionInfo.code_name || ""
-    fetchOrders(permissionCode).finally(() => setLoading(false))
+    if (userGroups.length > 0) {
+      fetchDataWithPermissions()
+    }
   }, [userGroups])
 
+  // Match orders with history when both are loaded
   useEffect(() => {
     if (orders.length > 0 && orderHistory.length > 0) {
       matchOrdersWithHistory()
@@ -159,6 +204,19 @@ const History = () => {
     )
   }
 
+  if (error) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <Calendar className="w-12 h-12 text-red-300 dark:text-red-600 mx-auto mb-4" />
+            <p className="text-red-600 dark:text-red-400 text-lg">{error}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex items-center justify-between">
@@ -169,7 +227,7 @@ const History = () => {
         <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">Jami: {ordersWithHistory.length} ta</h4>
       </div>
 
-      <div className="space-y-6 mt-15">
+      <div className="space-y-6 mt-6">
         {ordersWithHistory.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />

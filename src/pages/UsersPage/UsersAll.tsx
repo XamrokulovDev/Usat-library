@@ -209,7 +209,7 @@ const UsersAll: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 mt-15">
         {finalFilteredData.length === 0 ? (
           <div className="text-center py-12">
             <Users className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
