@@ -99,7 +99,6 @@ const KafedraDetail: React.FC = () => {
   }
 
   const fetchKafedraOrders = useCallback(async (permissionHeader: string, currentKafedraName: string) => {
-    console.log("Ma'lumotlar yuklanmoqda:", currentKafedraName)
     setLoading(true)
     
     try {
@@ -119,7 +118,6 @@ const KafedraDetail: React.FC = () => {
         }
       )
 
-      console.log("Filterlangan ma'lumotlar:", filteredData)
       setKafedraData(filteredData)
     } catch (error) {
       console.error("Kafedra ma'lumotlarini olishda xatolik:", error)
@@ -197,9 +195,6 @@ const KafedraDetail: React.FC = () => {
 
   useEffect(() => {
     if (userGroups.length === 0 || !hasPermission || !kafedraName) return
-    
-    console.log("URL parametri o'zgardi:", kafedraName)
-    console.log("Decoded kafedra nomi:", decodedKafedraName)
     
     resetFilters()
     

@@ -248,7 +248,7 @@ const AppSidebar: React.FC = () => {
     if (isRolesStr) {
       try {
         const roles = JSON.parse(isRolesStr)
-        if ((roles.includes("4") || roles.includes("5")) && location.pathname === "/") {
+        if ((roles.includes("4") || roles.includes("5") ||roles.includes("6")) && location.pathname === "/") {
           if (!roles.includes("4")) {
             navigate("/black-list")
           }
