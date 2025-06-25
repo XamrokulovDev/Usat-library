@@ -133,7 +133,7 @@ const AppSidebar: React.FC = () => {
           )
 
         const uniqueKafedras: string[] = Array.from(new Set(kafedraNames))
-        setKafedraList(uniqueKafedras)
+        setKafedraList(uniqueKafedras);
       } else {
         setKafedraList([])
       }
@@ -142,6 +142,16 @@ const AppSidebar: React.FC = () => {
       setKafedraList([])
     }
   }
+
+  useEffect(() => {
+    if (userGroups.length === 0) return
+
+    const interval = setInterval(() => {
+      fetchKafedraData()
+    }, 100000)
+
+    return () => clearInterval(interval)
+  }, [userGroups])
 
   const fetchPermission = async () => {
     const token = localStorage.getItem("token")

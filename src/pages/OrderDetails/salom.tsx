@@ -1,8 +1,8 @@
 import type React from "react"
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router"
 import axios from "axios"
-import { GraduationCap, Search } from 'lucide-react'
+import { GraduationCap, Search } from "lucide-react"
 import type { PermissionType } from "../../types/types"
 
 interface OrderType {
@@ -47,15 +47,7 @@ const KafedraDetail: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>("")
   const [searchValue, setSearchValue] = useState<string>("")
   const [filteredOrders, setFilteredOrders] = useState<FlattenedOrderType[]>([])
-  
   const decodedKafedraName = kafedraName ? decodeURIComponent(kafedraName).replace(/-/g, " ") : ""
-
-  const resetFilters = useCallback(() => {
-    setSelectedYonalish("")
-    setSelectedGroup("")
-    setSelectedStatus("")
-    setSearchValue("")
-  }, [])
 
   const fetchPermission = async () => {
     const token = localStorage.getItem("token")
@@ -85,7 +77,7 @@ const KafedraDetail: React.FC = () => {
           setHasPermission(false)
           setTimeout(() => {
             navigate("/")
-          }, 2000)
+          }, 1000)
         }
       }
 
@@ -98,10 +90,7 @@ const KafedraDetail: React.FC = () => {
     }
   }
 
-  const fetchKafedraOrders = useCallback(async (permissionHeader: string, currentKafedraName: string) => {
-    console.log("Ma'lumotlar yuklanmoqda:", currentKafedraName)
-    setLoading(true)
-    
+  const fetchKafedraOrders = async (permissionHeader: string) => {
     try {
       const token = localStorage.getItem("token")
       const { data } = await axios.get(`${import.meta.env.VITE_API}/api/all-orders-kafedra`, {
@@ -112,24 +101,16 @@ const KafedraDetail: React.FC = () => {
       })
 
       const filteredData = data.data.filter(
-        (item: KafedraUserType) => {
-          const itemKafedra = item.kafedra?.toLowerCase().trim()
-          const searchKafedra = currentKafedraName?.toLowerCase().trim()
-          return itemKafedra === searchKafedra
-        }
+        (item: KafedraUserType) => item.kafedra.toLowerCase() === decodedKafedraName.toLowerCase(),
       )
 
-      console.log("Filterlangan ma'lumotlar:", filteredData)
       setKafedraData(filteredData)
     } catch (error) {
       console.error("Kafedra ma'lumotlarini olishda xatolik:", error)
-      setKafedraData([])
-    } finally {
-      setLoading(false)
     }
-  }, [])
+  }
 
-  const flattenOrdersData = useCallback(() => {
+  const flattenOrdersData = () => {
     const flattened: FlattenedOrderType[] = []
 
     kafedraData.forEach((user) => {
@@ -150,25 +131,25 @@ const KafedraDetail: React.FC = () => {
     })
 
     setFlattenedOrders(flattened)
-  }, [kafedraData])
+  }
 
-  const getUniqueYonalishlar = useCallback(() => {
+  const getUniqueYonalishlar = () => {
     const yonalishlar = flattenedOrders.map((order) => order.yonalish)
-    return [...new Set(yonalishlar)].filter((y) => y && y !== "Noma'lum").sort()
-  }, [flattenedOrders])
+    return [...new Set(yonalishlar)].filter((y) => y !== "Noma'lum").sort()
+  }
 
-  const getUniqueGroups = useCallback(() => {
+  const getUniqueGroups = () => {
     const groups = flattenedOrders.map((order) => order.group)
-    return [...new Set(groups)].filter((g) => g && g !== "Noma'lum").sort()
-  }, [flattenedOrders])
+    return [...new Set(groups)].filter((g) => g !== "Noma'lum").sort()
+  }
 
-  const getUniqueStatuses = useCallback(() => {
+  const getUniqueStatuses = () => {
     const statuses = flattenedOrders.map((order) => order.order_status)
-    return [...new Set(statuses)].filter((s) => s && s !== "Noma'lum").sort()
-  }, [flattenedOrders])
+    return [...new Set(statuses)].filter((s) => s !== "Noma'lum").sort()
+  }
 
-  const applyFilters = useCallback(() => {
-    let filtered = [...flattenedOrders]
+  const applyFilters = () => {
+    let filtered = flattenedOrders
 
     if (selectedYonalish) {
       filtered = filtered.filter((order) => order.yonalish === selectedYonalish)
@@ -183,45 +164,34 @@ const KafedraDetail: React.FC = () => {
     }
 
     if (searchValue.trim()) {
-      filtered = filtered.filter((order) => 
-        order.full_name.toLowerCase().includes(searchValue.toLowerCase().trim())
-      )
+      filtered = filtered.filter((order) => order.full_name.toLowerCase().includes(searchValue.toLowerCase()))
     }
 
     setFilteredOrders(filtered)
-  }, [flattenedOrders, selectedYonalish, selectedGroup, selectedStatus, searchValue])
+  }
 
   useEffect(() => {
     fetchPermission()
   }, [])
 
   useEffect(() => {
-    if (userGroups.length === 0 || !hasPermission || !kafedraName) return
-    
-    console.log("URL parametri o'zgardi:", kafedraName)
-    console.log("Decoded kafedra nomi:", decodedKafedraName)
-    
-    resetFilters()
-    
+    if (userGroups.length === 0 || !hasPermission) return
     const rolesStr = localStorage.getItem("isRoles") || "[]"
     const roles: string[] = JSON.parse(rolesStr)
     const matched = userGroups.filter((g) => roles.includes(g.group_id))
     const permissionCode = matched[0]?.permissionInfo.code_name || ""
-    
-    fetchKafedraOrders(permissionCode, decodedKafedraName)
-  }, [kafedraName, decodedKafedraName, userGroups, hasPermission, fetchKafedraOrders, resetFilters])
+    fetchKafedraOrders(permissionCode).finally(() => setLoading(false))
+  }, [userGroups, hasPermission])
 
   useEffect(() => {
     if (kafedraData.length > 0) {
       flattenOrdersData()
-    } else {
-      setFlattenedOrders([])
     }
-  }, [kafedraData, flattenOrdersData])
+  }, [kafedraData])
 
   useEffect(() => {
     applyFilters()
-  }, [applyFilters])
+  }, [flattenedOrders, selectedYonalish, selectedGroup, selectedStatus, searchValue])
 
   const getStatusColor = (status: string) => {
     if (status.includes("Buyurtma berildi")) {
@@ -279,7 +249,8 @@ const KafedraDetail: React.FC = () => {
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ruxsat yo'q</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">Bu sahifaga kirish uchun ruxsatingiz yo'q</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-4"></p>
+            <p className="text-sm text-gray-500 dark:text-gray-500"></p>
           </div>
         </div>
       </div>
@@ -292,7 +263,7 @@ const KafedraDetail: React.FC = () => {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">Ma'lumotlar yuklanmoqda...</p>
+            <p className="text-gray-600 dark:text-gray-400 text-lg"></p>
           </div>
         </div>
       </div>
@@ -308,18 +279,16 @@ const KafedraDetail: React.FC = () => {
             {decodedKafedraName} Kafedra Buyurtmalari
           </h3>
         </div>
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              id="search"
-              name="name"
-              placeholder="Ism bo'yicha qidiruv"
-              className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-            />
-          </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            id="search"
+            name="name"
+            placeholder="Ism bo'yicha qidiruv"
+            className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
         </div>
       </div>
 
@@ -393,16 +362,13 @@ const KafedraDetail: React.FC = () => {
                   <td colSpan={8} className="px-6 py-12 text-center">
                     <GraduationCap className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400 text-lg">
-                      {flattenedOrders.length === 0 
-                        ? `${decodedKafedraName} kafedra uchun ma'lumot topilmadi!`
-                        : "Filter bo'yicha ma'lumot topilmadi!"
-                      }
+                      {decodedKafedraName} kafedra uchun ma'lumot topilmadi!
                     </p>
                   </td>
                 </tr>
               ) : (
                 filteredOrders.map((item, index) => (
-                  <tr key={`${item.full_name}-${item.order_name}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <tr key={`${item.full_name}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {index + 1}
                     </td>
