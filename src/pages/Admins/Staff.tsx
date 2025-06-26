@@ -29,7 +29,6 @@ export interface StaffRef {
 
 const Staff = forwardRef<StaffRef>((_, ref) => {
   const [staff, setStaff] = useState<StaffType[]>([])
-  const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
   const [deleteLoadingId, setDeleteLoadingId] = useState<number | null>(null)
   const [permissionCode, setPermissionCode] = useState<string | null>(null)
@@ -45,7 +44,6 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
       })
 
       const allPermissions: PermissionType[] = response.data.data
-      setUserGroup(allPermissions)
 
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
