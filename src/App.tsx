@@ -1,11 +1,8 @@
-"use client"
-
 import { BrowserRouter as Router, Routes, Route } from "react-router"
 import { useEffect } from "react"
 import { ThemeProvider } from "./context/ThemeContext"
 import { ScrollToTop } from "./components/common/ScrollToTop"
 import SignIn from "./pages/AuthPages/SignIn"
-import LineChart from "./pages/Charts/LineChart"
 import BarChart from "./pages/Charts/MonthlyOrderStatistics"
 import AppLayout from "./layout/AppLayout"
 import Home from "./pages/Dashboard/Home"
@@ -106,7 +103,6 @@ export default function App() {
             <Route path="black-list" element={<BlackList />} />
             <Route path="direktor" element={<Direktor />} />
             {/* Statistika va grafiklar */}
-            <Route path="line-chart" element={<LineChart />} />
             <Route path="bar-chart" element={<BarChart />} />
           </Route>
           <Route path="*" element={<NotFound />} />
