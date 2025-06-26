@@ -1,7 +1,8 @@
 import { Modal, Select, message as antdMessage } from "antd"
 import axios from "axios"
+import { Users } from "lucide-react"
 import { useEffect, useState } from "react"
-import { useParams } from "react-router"
+import { NavLink, useParams } from "react-router"
 
 const { Option } = Select
 
@@ -200,21 +201,27 @@ const PermissionGroup = () => {
 
   return (
     <div className="min-h-[80%] p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-auto">
-      <div className="flex items-center justify-start mt-5">
-        {
-          id ? (
-            <div className="text-2xl font-bold mb-6 text-gray-800 dark:text-white capitalize flex items-center">
-              {group.find((item) => item.id === id)?.name || "Guruh mavjud emas!"} <p className="lowercase">ning Barcha huquqlari</p>
-            </div>
-          )
-          : (
-            <div className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-              {group.find((item) => item.id === id)?.name || "Guruh mavjud emas!"} <p className="lowercase">ning Barcha huquqlari</p>
-            </div>
-          )
-        }
+      <div className="flex items-center justify-between">
+        <div className="flex items-center justify-start gap-2">
+          <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          {
+            id ? (
+              <div className="text-xl font-semibold text-gray-800 dark:text-white/90 capitalize flex items-center">
+                {group.find((item) => item.id === id)?.name || "Guruh mavjud emas!"} <p className="lowercase">ning Barcha huquqlari</p>
+              </div>
+            )
+            : (
+              <div className="text-2xl font-bold text-gray-800 dark:text-white">
+                {group.find((item) => item.id === id)?.name || "Guruh mavjud emas!"} <p className="lowercase">ning Barcha huquqlari</p>
+              </div>
+            )
+          }
+        </div>
+        <div className="flex">
+          <NavLink to="/roles" className="text-gray-800 dark:text-white/90 underline">Xodimlarni boshqarish</NavLink>
+        </div>
       </div>
-      <div className="flex items-center justify-end my-10">
+      <div className="flex items-center justify-end my-10 mt-15">
         <button
           onClick={() => setOpen(true)}
           className="dark:bg-gray-600 bg-gray-500 dark:text-gray-200 text-gray-100 rounded-lg px-4 py-2"

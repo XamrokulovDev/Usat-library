@@ -1,5 +1,5 @@
 import axios from "axios"
-import { Calendar } from "lucide-react"
+import { Calendar, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 
 interface OrderType {
@@ -60,6 +60,7 @@ const History = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [ordersWithHistory, setOrdersWithHistory] = useState<OrderWithHistory[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState<string>("")
 
   const fetchPermissions = async () => {
     try {
@@ -184,6 +185,19 @@ const History = () => {
     })
   }
 
+  const filteredOrdersWithHistory = ordersWithHistory.filter((item) => {
+    const fullName = item.order.User?.full_name?.toLowerCase() || ""
+    const phone = item.order.User?.phone?.toLowerCase() || ""
+    const bookName = item.order.Book?.name?.toLowerCase() || ""
+    const search = searchTerm.toLowerCase()
+
+    return (
+      fullName.includes(search) ||
+      phone.includes(search) ||
+      bookName.includes(search)
+    )
+  })
+
   if (loading) {
     return (
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
@@ -217,11 +231,20 @@ const History = () => {
           <Calendar className="w-6 h-6 text-blue-400 dark:text-blue-400" />
           <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Buyurtmalar tarixi</h3>
         </div>
-        <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">Arxivdagi buyurtmalar soni: {ordersWithHistory.length}</h4>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            id="search"
+            name="name"
+            placeholder="Qidiruv..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-55 pl-10 pr-4 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
       </div>
-
       <div className="space-y-6 mt-15">
-        {ordersWithHistory.length === 0 ? (
+        {filteredOrdersWithHistory.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 text-lg">Buyurtmalar tarixi yo'q!</p>
@@ -255,7 +278,7 @@ const History = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                {ordersWithHistory.map((item, index) => (
+                {filteredOrdersWithHistory.map((item, index) => (
                   <tr key={item.history.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {index + 1}
