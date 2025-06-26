@@ -46,8 +46,8 @@ const AppSidebar: React.FC = () => {
         { name: "Kitob alifbolari", permission: "kitob_alifbo", path: "/alphabet", pro: false },
         { name: "Kitob statuslari", permission: "kitob_status", path: "/status", pro: false },
         { name: "Kitob qo'shish", permission: "kitob_qo'shish", path: "/book-create", pro: false },
-        { name: "Barcha Kitoblar", permission: "kitob_ko'rish", path: "/books-all", pro: false },
         { name: "Kitob detallarini bog'lash", permission: "kitob_detal", path: "/books-detail", pro: false },
+        { name: "Barcha Kitoblar", permission: "kitob_ko'rish", path: "/books-all", pro: false },
       ],
     },
     {
@@ -55,7 +55,7 @@ const AppSidebar: React.FC = () => {
       icon: <MdSchool />,
       subItems: [
         { name: "Qora ro'yxatdagilar", permission: "black_list", path: "/black-list", pro: false },
-        { name: "Direktor", permission: "direktor", path: "/direktor", pro: false },
+        { name: "Barcha kafedralar", permission: "direktor", path: "/direktor", pro: false },
       ],
     },
     {
@@ -75,7 +75,6 @@ const AppSidebar: React.FC = () => {
         { name: "Xodim qo'shish", permission: "", path: "/admins", pro: false },
         { name: "Huquq qo'shish", permission: "", path: "/permission-create", pro: false },
         { name: "Xodimlarni boshqarish", permission: "", path: "/roles", pro: false },
-        { name: "Barcha foydalanuvchilar", permission: "", path: "/users-all", pro: false },
         { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false }
       ],
     },
@@ -148,7 +147,7 @@ const AppSidebar: React.FC = () => {
 
     const interval = setInterval(() => {
       fetchKafedraData()
-    }, 100000)
+    }, 1000000)
 
     return () => clearInterval(interval)
   }, [userGroups])
@@ -202,7 +201,7 @@ const AppSidebar: React.FC = () => {
 
         const staticItems = [
           { name: "Qora ro'yxatdagilar", permission: "black_list", path: "/black-list", pro: false },
-          { name: "Direktor", permission: "direktor", path: "/direktor", pro: false },
+          { name: "Barcha kafedralar", permission: "direktor", path: "/direktor", pro: false },
         ]
 
         return {

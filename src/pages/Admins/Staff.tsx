@@ -1,5 +1,3 @@
-"use client"
-
 import axios from "axios"
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react"
 
@@ -75,7 +73,6 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
     }
   }
 
-  // Refresh funksiyasini parent componentga expose qilamiz
   useImperativeHandle(ref, () => ({
     refreshStaff: () => {
       if (userGroup.length > 0) {
@@ -92,16 +89,6 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
     if (userGroup.length > 0) {
       fetchStaff()
     }
-  }, [userGroup])
-
-  useEffect(() => {
-    if (userGroup.length === 0) return
-
-    const interval = setInterval(() => {
-      fetchStaff()
-    }, 10000)
-
-    return () => clearInterval(interval)
   }, [userGroup])
 
   const validStaff = staff.filter((item) => {

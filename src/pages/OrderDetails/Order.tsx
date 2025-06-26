@@ -2,7 +2,7 @@
 
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { Calendar } from "lucide-react"
+import { Calendar, Search } from "lucide-react"
 import { message as antdMessage, Modal, Input } from "antd"
 
 interface PermissionType {
@@ -21,6 +21,7 @@ interface OrderType {
   status_message: string
   user_id: string
   book_id: string
+  book_code?: string
   created_at: string
   finished_at?: string
   Book: {
@@ -54,6 +55,7 @@ const Order = () => {
   const [selectedAcceptOrder, setSelectedAcceptOrder] = useState<OrderType | null>(null)
   const [acceptBookCode, setAcceptBookCode] = useState<string>("")
   const [acceptSubmitting, setAcceptSubmitting] = useState<boolean>(false)
+  const [searchTerm, setSearchTerm] = useState<string>("")
 
   const statusOptions = [
     { value: "all", label: "Barcha buyurtmalar" },
@@ -103,7 +105,7 @@ const Order = () => {
           "X-permission": permissionHeader,
         },
       })
-      setOrders(data.data)
+      setOrders(data.data);
     } catch (error) {
       console.error("Buyurtmalarni olishda xatolik:", error)
     }
@@ -240,12 +242,12 @@ const Order = () => {
     } catch (error) {
       console.error("Kitobni qabul qilishda xatolik:", error)
 
-      let errorMessage = "Kitobni qabul qilishda xatolik yuz berdi";
+      let errorMessage = "Kitobni qabul qilishda xatolik yuz berdi"
 
       if (error) {
-        errorMessage = "Kitob kodi noto'g'ri";
+        errorMessage = "Kitob kodi noto'g'ri"
       }
-      antdMessage.warning(errorMessage);
+      antdMessage.warning(errorMessage)
     } finally {
       setAcceptSubmitting(false)
     }
@@ -296,7 +298,7 @@ const Order = () => {
         }
       }
 
-      antdMessage.error(errorMessage);
+      antdMessage.error(errorMessage)
     } finally {
       setSubmitting(false)
     }
@@ -415,10 +417,25 @@ const Order = () => {
     return () => clearInterval(interval)
   }, [userGroups])
 
-  const filteredOrders =
-    selectedStatus === "all"
-      ? orders.filter((order) => order.status_id !== 8 && order.status_id !== 6)
-      : orders.filter((order) => order.status_id === selectedStatus && order.status_id !== 8 && order.status_id !== 6)
+  const filteredOrders = (() => {
+    let filtered =
+      selectedStatus === "all"
+        ? orders.filter((order) => order.status_id !== 8 && order.status_id !== 6)
+        : orders.filter((order) => order.status_id === selectedStatus && order.status_id !== 8 && order.status_id !== 6)
+
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim()
+      filtered = filtered.filter((order) => {
+        const bookName = order.Book?.name?.toLowerCase() || ""
+        const customerName = order.User?.full_name?.toLowerCase() || ""
+        const bookCode = (order.book_code || order.Book?.book_code || "").toLowerCase()
+
+        return bookName.includes(searchLower) || customerName.includes(searchLower) || bookCode.includes(searchLower)
+      })
+    }
+
+    return filtered
+  })()
 
   if (loading) {
     return (
@@ -452,6 +469,17 @@ const Order = () => {
               </option>
             ))}
           </select>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              id="search"
+              name="name"
+              placeholder="Qidiruv..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-55 pl-10 pr-4 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
         </div>
       </div>
 
@@ -487,6 +515,9 @@ const Order = () => {
                     Topshirish vaqti
                   </th>
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Kitob kodi
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Amallar
                   </th>
                 </tr>
@@ -498,10 +529,10 @@ const Order = () => {
                       {index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {order.Book?.name || "Kitob ma'lumoti yo'q"}
+                      {order.Book?.name || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {order.User?.full_name || "Foydalanuvchi ma'lumoti yo'q"}
+                      {order.User?.full_name || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {order.User?.phone ? (
@@ -512,7 +543,7 @@ const Order = () => {
                           {order.User.phone}
                         </a>
                       ) : (
-                        "Ma'lumot yo'q"
+                        "-"
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -546,6 +577,9 @@ const Order = () => {
                       ) : (
                         "-"
                       )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {order?.book_code || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       {renderActionButtons(order)}

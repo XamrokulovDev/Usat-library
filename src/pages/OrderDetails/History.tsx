@@ -83,7 +83,7 @@ const History = () => {
           "X-permission": permissionCode,
         },
       })
-      setOrderHistory(data.data)
+      setOrderHistory(data.data);
     } catch (error) {
       console.error("Order history olishda xatolik:", error)
       setError("Buyurtmalar tarixini olishda xatolik yuz berdi.")
@@ -217,7 +217,7 @@ const History = () => {
           <Calendar className="w-6 h-6 text-blue-400 dark:text-blue-400" />
           <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Buyurtmalar tarixi</h3>
         </div>
-        <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">Jami: {ordersWithHistory.length} ta</h4>
+        <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">Arxivdagi buyurtmalar soni: {ordersWithHistory.length}</h4>
       </div>
 
       <div className="space-y-6 mt-15">
@@ -246,6 +246,9 @@ const History = () => {
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Qabul qilgan xodim
                   </th>
+                  {/* <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Kitob kodi
+                  </th> */}
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Qabul qilingan vaqt
                   </th>
@@ -258,7 +261,7 @@ const History = () => {
                       {index + 1}
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {item.order.User?.full_name || "Foydalanuvchi ma'lumoti yo'q"}
+                      {item.order.User?.full_name || "-"}
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.order.User?.phone ? (
@@ -269,15 +272,18 @@ const History = () => {
                           {item.order.User.phone}
                         </a>
                       ) : (
-                        "Ma'lumot yo'q"
+                        "-"
                       )}
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {item.order.Book?.name || "Kitob ma'lumoti yo'q"}
+                      {item.order.Book?.name || "-"}
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.history.AdminUser.full_name}
                     </td>
+                    {/* <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {item.order?.book_code || "-"}
+                    </td> */}
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-600 dark:text-gray-400">
                       {formatDate(item.history.created_at)}
                     </td>
