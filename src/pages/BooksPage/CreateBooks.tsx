@@ -310,7 +310,7 @@ const CreateBooks: React.FC = () => {
               type="text"
               value={books}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBooks(e.target.value)}
-              placeholder="100 ta"
+              placeholder="100"
               className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
             />
           </div>
