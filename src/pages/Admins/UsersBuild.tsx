@@ -1,5 +1,3 @@
-"use client"
-
 import axios from "axios"
 import { Users, Search } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -79,7 +77,6 @@ const UsersBuild = () => {
     }
   }
 
-  // Search filter effect
   useEffect(() => {
     if (searchValue.trim()) {
       const filtered = build.filter((user) => user.full_name.toLowerCase().includes(searchValue.toLowerCase()))

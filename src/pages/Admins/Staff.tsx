@@ -31,6 +31,8 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
   const [staff, setStaff] = useState<StaffType[]>([])
   const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
+  const [deleteLoadingId, setDeleteLoadingId] = useState<number | null>(null)
+  const [permissionCode, setPermissionCode] = useState<string | null>(null)
 
   const fetchPermission = async () => {
     const token = localStorage.getItem("token")
@@ -41,7 +43,21 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
           Authorization: `Bearer ${token}`,
         },
       })
-      setUserGroup(response.data.data)
+
+      const allPermissions: PermissionType[] = response.data.data
+      setUserGroup(allPermissions)
+
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+
+      const matchedGroups = allPermissions.filter((item) =>
+        isRoles.includes(item.group_id)
+      )
+
+      const codes = matchedGroups.map((item) => item.permissionInfo.code_name)
+      if (codes.length > 0) {
+        setPermissionCode(codes[0])
+      }
     } catch (err) {
       console.error("Muallifni olishda xatolik:", err)
     } finally {
@@ -50,32 +66,51 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
   }
 
   const fetchStaff = async () => {
+    if (!permissionCode) return
     setFetchLoading(true)
     try {
       const token = localStorage.getItem("token")
 
-      const isRolesStr = localStorage.getItem("isRoles")
-      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
-      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
-      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
-
       const response = await axios.get(`${import.meta.env.VITE_API}/api/admin/all-users`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-permission": permissionIds[0],
+          "X-permission": permissionCode,
         },
       })
       setStaff(response.data.data)
     } catch (err) {
-      console.error("Yo'nalishlarni olishda xatolik:", err)
+      console.error("Xodimlarni olishda xatolik:", err)
     } finally {
       setFetchLoading(false)
     }
   }
 
+  const handleDelete = async (id: number) => {
+    if (!permissionCode) {
+      console.error("Permission code mavjud emas")
+      return
+    }
+
+    const token = localStorage.getItem("token")
+    setDeleteLoadingId(id)
+    try {
+      await axios.delete(`${import.meta.env.VITE_API}/api/admin/user/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-permission": permissionCode,
+        },
+      })
+      fetchStaff()
+    } catch (err) {
+      console.error("Xodimni o'chirishda xatolik:", err)
+    } finally {
+      setDeleteLoadingId(null)
+    }
+  }
+
   useImperativeHandle(ref, () => ({
     refreshStaff: () => {
-      if (userGroup.length > 0) {
+      if (permissionCode) {
         fetchStaff()
       }
     },
@@ -86,10 +121,10 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
   }, [])
 
   useEffect(() => {
-    if (userGroup.length > 0) {
+    if (permissionCode) {
       fetchStaff()
     }
-  }, [userGroup])
+  }, [permissionCode])
 
   const validStaff = staff.filter((item) => {
     const user = item.user
@@ -118,40 +153,33 @@ const Staff = forwardRef<StaffRef>((_, ref) => {
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
           <thead className="bg-gray-100 dark:bg-gray-700">
             <tr>
-              <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                #
-              </th>
-              <th className="w-1/4 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                Ism familiyasi
-              </th>
-              <th className="w-1/4 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                Telefon nomeri
-              </th>
-              <th className="w-1/4 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                Passport ID
-              </th>
-              <th className="w-1/4 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                Lavozimi
-              </th>
+              <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">#</th>
+              <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">Ism familiyasi</th>
+              <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">Telefon nomeri</th>
+              <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">Passport ID</th>
+              <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">Lavozimi</th>
+              <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">O'chirish</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
             {validStaff.map((item, index) => (
               <tr key={item.id}>
-                <td className="text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                  {index + 1}
-                </td>
-                <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                  {item?.user!.full_name}
-                </td>
-                <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                  {item?.user!.phone}
-                </td>
-                <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                  {item?.user!.passport_id}
-                </td>
-                <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                  {item?.groupInfo!.name}
+                <td className="text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{index + 1}</td>
+                <td className="text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{item?.user!.full_name}</td>
+                <td className="text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{item?.user!.phone}</td>
+                <td className="text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{item?.user!.passport_id}</td>
+                <td className="text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{item?.groupInfo!.name}</td>
+                <td className="text-center px-6 py-4 whitespace-nowrap text-sm">
+                  {deleteLoadingId === item.id ? (
+                    <span className="text-gray-500 dark:text-gray-400">O‘chirilmoqda...</span>
+                  ) : (
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
+                    >
+                      O‘chirish
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
