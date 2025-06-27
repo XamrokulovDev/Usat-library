@@ -30,6 +30,7 @@ import BookItem from "./pages/BooksPage/BookItem"
 import BlackList from "./pages/OrderDetails/BlackList"
 import Direktor from "./pages/OrderDetails/Direktor"
 import KafedraDetail from "./pages/OrderDetails/KafedraDetails"
+import CategoryItem from "./pages/BooksPage/CategoryItem"
 
 export default function App() {
   useEffect(() => {
@@ -102,6 +103,7 @@ export default function App() {
             <Route path="history" element={<History />} />
             <Route path="black-list" element={<BlackList />} />
             <Route path="direktor" element={<Direktor />} />
+            <Route path="category-faculty" element={<CategoryItem />} />
             {/* Statistika va grafiklar */}
             <Route path="bar-chart" element={<BarChart />} />
           </Route>

@@ -1,23 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
-
 import { ChevronDownIcon, GridIcon, GroupIcon, HorizontaLDots, PieChartIcon } from "../icons"
 import { useSidebar } from "../context/SidebarContext"
 import { GoBook } from "react-icons/go"
 import { MdSchool } from "react-icons/md"
 import axios from "axios"
-import type { NavItem, PermissionType, KafedraData } from "../types/types"
+import type { NavItem, PermissionType } from "../types/types"
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar()
   const [permissionIds, setPermissionIds] = useState<string[]>([])
   const [userRoles, setUserRoles] = useState<string[]>([])
-  const [kafedraList, setKafedraList] = useState<string[]>([])
   const [navItems, setNavItems] = useState<NavItem[]>([])
   const location = useLocation()
   const navigate = useNavigate()
-  const [userGroups, setUserGroups] = useState<PermissionType[]>([])
-  const [hasNavigatedToDefaultKafedra, setHasNavigatedToDefaultKafedra] = useState<boolean>(false)
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others"
@@ -42,6 +38,8 @@ const AppSidebar: React.FC = () => {
       subItems: [
         { name: "Kitob mualliflari", permission: "kitob_muallif", path: "/auther", pro: false },
         { name: "Kitob kategoriyalari", permission: "kategoriya", path: "/categories", pro: false },
+        { name: "Kafedralar", permission: "kafedralar", path: "/kafedra", pro: false },
+        { name: "Kategory bog'lash", permission: "", path: "/category-faculty", pro: false },
         { name: "Kitob tillari", permission: "kitob_tili", path: "/languages", pro: false },
         { name: "Kitob alifbolari", permission: "kitob_alifbo", path: "/alphabet", pro: false },
         { name: "Kitob statuslari", permission: "kitob_status", path: "/status", pro: false },
@@ -62,7 +60,6 @@ const AppSidebar: React.FC = () => {
       name: "Talabalar",
       icon: <GroupIcon />,
       subItems: [
-        { name: "Kafedralar", permission: "kafedralar", path: "/kafedra", pro: false },
         { name: "Yo'nalish", permission: "yo'nalish", path: "/direction", pro: false },
         { name: "Talaba Guruhlari", permission: "guruhlar", path: "/student_group", pro: false },
         { name: "Barcha foydalanuvchilar", permission: "admin", path: "/users-all", pro: false },
@@ -75,7 +72,7 @@ const AppSidebar: React.FC = () => {
         { name: "Xodim qo'shish", permission: "", path: "/admins", pro: false },
         { name: "Huquq qo'shish", permission: "", path: "/permission-create", pro: false },
         { name: "Xodimlarni boshqarish", permission: "", path: "/roles", pro: false },
-        { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false }
+        { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false },
       ],
     },
   ]
@@ -92,7 +89,7 @@ const AppSidebar: React.FC = () => {
     const isRolesStr = localStorage.getItem("isRoles")
     if (isRolesStr) {
       try {
-        const roles = JSON.parse(isRolesStr)
+        const roles: string[] = JSON.parse(isRolesStr)
         setUserRoles(roles)
       } catch (error) {
         console.error("Error parsing roles from localStorage:", error)
@@ -103,56 +100,7 @@ const AppSidebar: React.FC = () => {
 
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname])
 
-  const fetchKafedraData = async (): Promise<void> => {
-    const token = localStorage.getItem("token")
-    try {
-      const rolesStr = localStorage.getItem("isRoles") || "[]"
-      const roles: string[] = JSON.parse(rolesStr)
-      const matched = userGroups.filter((g) => roles.includes(g.group_id))
-      const permissionCode = matched[0]?.permissionInfo.code_name || ""
-
-      const response = await axios.get(`${import.meta.env.VITE_API}/api/all-orders-kafedra`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "X-permission": permissionCode,
-        },
-      })
-
-      if (response.data.status === "success" && Array.isArray(response.data.data)) {
-        const kafedraNames: string[] = response.data.data
-          .map((item: KafedraData) => {
-            if (typeof item.kafedra === "string") {
-              return item.kafedra
-            }
-            return null
-          })
-          .filter(
-            (kafedra: string | null): kafedra is string =>
-              kafedra !== null && kafedra !== "Noma'lum" && kafedra.trim() !== "",
-          )
-
-        const uniqueKafedras: string[] = Array.from(new Set(kafedraNames))
-        setKafedraList(uniqueKafedras);
-      } else {
-        setKafedraList([])
-      }
-    } catch (err) {
-      console.error("Kafedra ma'lumotlarini olishda xatolik:", err)
-      setKafedraList([])
-    }
-  }
-
-  useEffect(() => {
-    if (userGroups.length === 0) return
-
-    const interval = setInterval(() => {
-      fetchKafedraData()
-    }, 1000000)
-
-    return () => clearInterval(interval)
-  }, [userGroups])
-
-  const fetchPermission = async () => {
+  const fetchPermission = async (): Promise<void> => {
     const token = localStorage.getItem("token")
     try {
       const response = await axios.get(`${import.meta.env.VITE_API}/api/group-permissions`, {
@@ -162,10 +110,11 @@ const AppSidebar: React.FC = () => {
       })
 
       const isRolesStr = localStorage.getItem("isRoles")
-      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
-      const matchedGroups = response.data.data.filter((item: PermissionType) => isRoles.includes(item.group_id))
-      setUserGroups(matchedGroups)
-      const permissionIds = matchedGroups.map((item: PermissionType) => item.permissionInfo.table)
+      const isRoles: string[] = isRolesStr ? JSON.parse(isRolesStr) : []
+      const matchedGroups: PermissionType[] = response.data.data.filter((item: PermissionType) =>
+        isRoles.includes(item.group_id),
+      )
+      const permissionIds: string[] = matchedGroups.map((item: PermissionType) => item.permissionInfo.table)
 
       setPermissionIds(permissionIds)
     } catch (err) {
@@ -174,64 +123,12 @@ const AppSidebar: React.FC = () => {
   }
 
   useEffect(() => {
-    const loadData = async () => {
-      await fetchPermission()
-      if (userGroups.length > 0) {
-        await fetchKafedraData()
-      }
-    }
-    loadData()
+    fetchPermission()
   }, [])
 
   useEffect(() => {
-    if (userGroups.length > 0) {
-      fetchKafedraData()
-    }
-  }, [userGroups])
-
-  useEffect(() => {
-    const updatedNavItems: NavItem[] = baseNavItems.map((item) => {
-      if (item.name === "Dekanat bo'limi") {
-        const kafedraSubItems = kafedraList.map((kafedra: string) => ({
-          name: kafedra,
-          permission: "dekanat",
-          path: `/kafedra/${encodeURIComponent(kafedra.toLowerCase().replace(/\s+/g, "-"))}`,
-          pro: false,
-        }))
-
-        const staticItems = [
-          { name: "Qora ro'yxatdagilar", permission: "black_list", path: "/black-list", pro: false },
-          { name: "Barcha kafedralar", permission: "direktor", path: "/direktor", pro: false },
-        ]
-
-        return {
-          ...item,
-          subItems: [...staticItems, ...kafedraSubItems],
-        }
-      }
-      return item
-    })
-
-    setNavItems(updatedNavItems)
-  }, [kafedraList])
-
-  useEffect(() => {
-    const isRolesStr = localStorage.getItem("isRoles")
-    const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
-
-    if (isRoles.includes("4") && kafedraList.length > 0 && !hasNavigatedToDefaultKafedra && location.pathname === "/") {
-      const firstKafedra = kafedraList[0]
-      const kafedraPath = `/kafedra/${encodeURIComponent(firstKafedra.toLowerCase().replace(/\s+/g, "-"))}`
-
-      const dekanatIndex = navItems.findIndex((item) => item.name === "Dekanat bo'limi")
-      if (dekanatIndex !== -1) {
-        setOpenSubmenu({ type: "main", index: dekanatIndex })
-      }
-
-      navigate(kafedraPath)
-      setHasNavigatedToDefaultKafedra(true)
-    }
-  }, [kafedraList, navItems, location.pathname, navigate, hasNavigatedToDefaultKafedra])
+    setNavItems(baseNavItems)
+  }, [])
 
   useEffect(() => {
     const isRolesStr = localStorage.getItem("isRoles")
@@ -247,7 +144,7 @@ const AppSidebar: React.FC = () => {
     if (isRolesStr) {
       try {
         const roles = JSON.parse(isRolesStr)
-        if ((roles.includes("4") || roles.includes("5") ||roles.includes("6")) && location.pathname === "/") {
+        if ((roles.includes("4") || roles.includes("5") || roles.includes("6")) && location.pathname === "/") {
           if (!roles.includes("4")) {
             navigate("/black-list")
           }
@@ -282,19 +179,9 @@ const AppSidebar: React.FC = () => {
     })
 
     if (!submenuMatched) {
-      const isRolesStr = localStorage.getItem("isRoles")
-      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
-
-      if (isRoles.includes("4") && kafedraList.length > 0) {
-        const dekanatIndex = navItems.findIndex((item) => item.name === "Dekanat bo'limi")
-        if (dekanatIndex !== -1) {
-          setOpenSubmenu({ type: "main", index: dekanatIndex })
-        }
-      } else {
-        setOpenSubmenu(null)
-      }
+      setOpenSubmenu(null)
     }
-  }, [location, isActive, permissionIds, navItems, kafedraList])
+  }, [location, isActive, permissionIds, navItems])
 
   useEffect(() => {
     if (openSubmenu !== null) {

@@ -1,15 +1,10 @@
 import type React from "react"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import axios from "axios"
 import { Modal, Input, message as antdMessage } from "antd"
-import { Navigation, ChevronDown } from 'lucide-react'
+import { Navigation } from "lucide-react"
 
 interface FacultyType {
-  id: string
-  name: string
-}
-
-interface KafedraType {
   id: string
   name: string
 }
@@ -33,22 +28,11 @@ const Direction = () => {
   const [updateLoading, setUpdateLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [kafedras, setKafedras] = useState<KafedraType[]>([])
-  const [selectedKafedraId, setSelectedKafedraId] = useState<string | null>(null)
-  const [kafedraSearchTerm, setKafedraSearchTerm] = useState<string>("")
-  const [isKafedraDropdownOpen, setIsKafedraDropdownOpen] = useState<boolean>(false)
-
   const [selectedFaculty, setSelectedFaculty] = useState<FacultyType | null>(null)
-  const [editedKafedraId, setEditedKafedraId] = useState<string | null>(null)
   const [editedTitle, setEditedTitle] = useState<string>("")
-  const [editKafedraSearchTerm, setEditKafedraSearchTerm] = useState<string>("")
-  const [isEditKafedraDropdownOpen, setIsEditKafedraDropdownOpen] = useState<boolean>(false)
 
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
-
-  const kafedraDropdownRef = useRef<HTMLDivElement>(null)
-  const editKafedraDropdownRef = useRef<HTMLDivElement>(null)
 
   const fetchPermission = async () => {
     const token = localStorage.getItem("token")
@@ -98,80 +82,17 @@ const Direction = () => {
     }
   }
 
-  const fetchKafedras = async () => {
-    try {
-      const token = localStorage.getItem("token")
-
-      const isRolesStr = localStorage.getItem("isRoles")
-      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
-      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
-      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
-
-      const response = await axios.get(`${import.meta.env.VITE_API}/api/kafedra`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "X-permission": permissionIds[0],
-        },
-      })
-      setKafedras(response.data.data)
-    } catch (err) {
-      console.error("Kafedralarni olishda xatolik:", err)
-    }
-  }
-
   useEffect(() => {
     if (userGroup.length > 0) {
       fetchFaculties()
-      fetchKafedras()
     }
   }, [userGroup])
-  
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (kafedraDropdownRef.current && !kafedraDropdownRef.current.contains(event.target as Node)) {
-        setIsKafedraDropdownOpen(false)
-      }
-      if (editKafedraDropdownRef.current && !editKafedraDropdownRef.current.contains(event.target as Node)) {
-        setIsEditKafedraDropdownOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
-
-  const filteredKafedras = kafedras.filter((kafedra) =>
-    kafedra.name.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
-  )
-
-  const filteredEditKafedras = kafedras.filter((kafedra) =>
-    kafedra.name.toLowerCase().includes(editKafedraSearchTerm.toLowerCase()),
-  )
-
-  const handleKafedraSelect = (kafedra: KafedraType) => {
-    setSelectedKafedraId(kafedra.id)
-    setKafedraSearchTerm(kafedra.name)
-    setIsKafedraDropdownOpen(false)
-  }
-
-  const handleEditKafedraSelect = (kafedra: KafedraType) => {
-    setEditedKafedraId(kafedra.id)
-    setEditKafedraSearchTerm(kafedra.name)
-    setIsEditKafedraDropdownOpen(false)
-  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (!selectedKafedraId) {
-      antdMessage.warning("Kafedrani tanlang!")
-      return
-    }
-
-    if (!name.trim() || !selectedKafedraId) {
-      antdMessage.warning("Iltimos, yo'nalish nomini va kafedrani to'liq to'ldiring!")
+    if (!name.trim()) {
+      antdMessage.warning("Iltimos, yo'nalish nomini to'ldiring!")
       return
     }
 
@@ -188,7 +109,6 @@ const Direction = () => {
         `${import.meta.env.VITE_API}/api/yonalish`,
         {
           name: name,
-          kafedra_id: Number(selectedKafedraId),
         },
         {
           headers: {
@@ -199,8 +119,6 @@ const Direction = () => {
       )
       antdMessage.success("Yo'nalish muvaffaqiyatli qo'shildi!")
       setName("")
-      setSelectedKafedraId(null)
-      setKafedraSearchTerm("")
       fetchFaculties()
     } catch (error) {
       console.error("Xatolik yuz berdi:", error)
@@ -213,15 +131,12 @@ const Direction = () => {
   const showUpdateModal = (faculty: FacultyType) => {
     setSelectedFaculty(faculty)
     setEditedTitle(faculty.name)
-    const matched = kafedras.find((k) => k.name === faculty.name)
-    setEditedKafedraId(matched?.id || null)
-    setEditKafedraSearchTerm(matched?.name || "")
     setIsUpdateModalVisible(true)
   }
 
   const handleUpdateOk = async () => {
-    if (!editedTitle.trim() && !editedKafedraId) {
-      antdMessage.warning("Iltimos, yo'nalish nomi va kafedrani tanlang!")
+    if (!editedTitle.trim()) {
+      antdMessage.warning("Iltimos, yo'nalish nomini kiriting!")
       return
     }
 
@@ -238,7 +153,6 @@ const Direction = () => {
         `${import.meta.env.VITE_API}/api/yonalish/${selectedFaculty?.id}`,
         {
           name: editedTitle,
-          kafedra_id: Number(editedKafedraId),
         },
         {
           headers: {
@@ -319,8 +233,8 @@ const Direction = () => {
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Yo'nalish Qo'shish</h3>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6 mb-8 mt-15">
-        <div className="w-full md:col-span-2">
+      <form onSubmit={handleSubmit} className="grid gap-6 mb-8 mt-6">
+        <div className="w-full">
           <label htmlFor="direction" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
             Yo'nalish nomi
           </label>
@@ -334,63 +248,7 @@ const Direction = () => {
           />
         </div>
 
-        {/* Searchable Kafedra Select */}
-        <div className="w-full md:col-span-2" ref={kafedraDropdownRef}>
-          <label htmlFor="kafedra" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Kafedrani tanlang!
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              value={kafedraSearchTerm}
-              onChange={(e) => {
-                setKafedraSearchTerm(e.target.value)
-                setIsKafedraDropdownOpen(true)
-                if (!e.target.value) {
-                  setSelectedKafedraId(null)
-                }
-              }}
-              onFocus={() => setIsKafedraDropdownOpen(true)}
-              placeholder="Kafedrani tanlang!"
-              className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white cursor-pointer"
-              autoComplete="off"
-            />
-
-            <div
-              className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-              onClick={() => setIsKafedraDropdownOpen(!isKafedraDropdownOpen)}
-            >
-              <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform ${isKafedraDropdownOpen ? "rotate-180" : ""}`}
-              />
-            </div>
-
-            {isKafedraDropdownOpen && (
-              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {filteredKafedras.length > 0 ? (
-                  filteredKafedras.map((kafedra) => (
-                    <div
-                      key={kafedra.id}
-                      onClick={() => handleKafedraSelect(kafedra)}
-                      className={`px-4 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white transition-colors ${
-                        selectedKafedraId === kafedra.id
-                          ? "bg-blue-50 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100"
-                          : ""
-                      }`}
-                    >
-                      {kafedra.name}
-                      {selectedKafedraId === kafedra.id && <span className="float-right">✓</span>}
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 text-gray-500 dark:text-gray-400">Kafedra topilmadi</div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="md:col-span-2">
+        <div>
           <button
             type="submit"
             disabled={submitLoading}
@@ -492,57 +350,6 @@ const Direction = () => {
             onChange={(e) => setEditedTitle(e.target.value)}
             placeholder="Yangi yo'nalish nomi"
           />
-          {/* Edit Kafedra Searchable Select */}
-          <div ref={editKafedraDropdownRef}>
-            <div className="relative">
-              <input
-                type="text"
-                value={editKafedraSearchTerm}
-                onChange={(e) => {
-                  setEditKafedraSearchTerm(e.target.value)
-                  setIsEditKafedraDropdownOpen(true)
-                  if (!e.target.value) {
-                    setEditedKafedraId(null)
-                  }
-                }}
-                onFocus={() => setIsEditKafedraDropdownOpen(true)}
-                placeholder="Kafedrani tanlang!"
-                className="w-full px-4 py-1 border border-gray-300 dark:border-gray-300 rounded-md shadow-sm focus:ring-1 focus:ring-blue-500 focus:outline-none dark:bg-white dark:text-gray-600"
-                autoComplete="off"
-              />
-
-              <div
-                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                onClick={() => setIsEditKafedraDropdownOpen(!isEditKafedraDropdownOpen)}
-              >
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${
-                    isEditKafedraDropdownOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </div>
-              {isEditKafedraDropdownOpen && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                  {filteredEditKafedras.length > 0 ? (
-                    filteredEditKafedras.map((kafedra) => (
-                      <div
-                        key={kafedra.id}
-                        onClick={() => handleEditKafedraSelect(kafedra)}
-                        className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-                          editedKafedraId === kafedra.id ? "bg-blue-100 text-blue-900" : ""
-                        }`}
-                      >
-                        {kafedra.name}
-                        {editedKafedraId === kafedra.id && <span className="float-right">✓</span>}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-gray-500">Kafedra topilmadi</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </Modal>
 

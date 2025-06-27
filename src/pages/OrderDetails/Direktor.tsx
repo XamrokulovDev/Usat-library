@@ -44,8 +44,6 @@ const Direktor = () => {
   const [flattenedOrders, setFlattenedOrders] = useState<FlattenedOrderType[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
-  // Filter states
-  const [selectedKafedra, setSelectedKafedra] = useState<string>("")
   const [selectedYonalish, setSelectedYonalish] = useState<string>("")
   const [selectedGroup, setSelectedGroup] = useState<string>("")
   const [selectedStatus, setSelectedStatus] = useState<string>("")
@@ -102,13 +100,6 @@ const Direktor = () => {
     setFlattenedOrders(flattened)
   }
 
-  // Get unique values for filters
-  const getUniqueKafedras = () => {
-    const kafedras = flattenedOrders.map((order) => order.kafedra)
-    return [...new Set(kafedras)].filter((k) => k !== "Noma'lum").sort()
-  }
-
-  // Get unique values for filters
   const getUniqueYonalishlar = () => {
     const yonalishlar = flattenedOrders.map((order) => order.yonalish)
     return [...new Set(yonalishlar)].filter((y) => y !== "Noma'lum").sort()
@@ -126,10 +117,6 @@ const Direktor = () => {
 
   const applyFilters = () => {
     let filtered = flattenedOrders
-
-    if (selectedKafedra) {
-      filtered = filtered.filter((order) => order.kafedra === selectedKafedra)
-    }
 
     if (selectedYonalish) {
       filtered = filtered.filter((order) => order.yonalish === selectedYonalish)
@@ -171,7 +158,7 @@ const Direktor = () => {
 
   useEffect(() => {
     applyFilters()
-  }, [flattenedOrders, selectedKafedra, selectedYonalish, selectedGroup, selectedStatus, searchValue])
+  }, [flattenedOrders, selectedYonalish, selectedGroup, selectedStatus, searchValue])
 
   const getStatusColor = (status: string) => {
     if (status.includes("Buyurtma berildi")) {
@@ -189,7 +176,7 @@ const Direktor = () => {
     } else if (status.includes("Qora ro'yxatda")) {
       return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
     } else if (status.includes("Arxiv")) {
-      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
     } else {
       return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
     }
@@ -241,20 +228,6 @@ const Direktor = () => {
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                   Telefon
-                </th>
-                <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                  <select
-                    value={selectedKafedra}
-                    onChange={(e) => setSelectedKafedra(e.target.value)}
-                    className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 text-sm"
-                  >
-                    <option value="">Kafedra</option>
-                    {getUniqueKafedras().map((kafedra) => (
-                      <option key={kafedra} value={kafedra}>
-                        {kafedra}
-                      </option>
-                    ))}
-                  </select>
                 </th>
                 <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                   <select
@@ -331,9 +304,6 @@ const Direktor = () => {
                       ) : (
                         "Ma'lumot yo'q"
                       )}
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {item.kafedra}
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.yonalish}
