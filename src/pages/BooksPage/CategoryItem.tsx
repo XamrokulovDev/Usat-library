@@ -1,7 +1,11 @@
+"use client"
+
+import type React from "react"
+
 import axios from "axios"
 import { BookOpen, ChevronDown } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
-import { message as antdMessage } from "antd"
+import { Modal, message as antdMessage } from "antd"
 
 interface PermissionType {
   id: string
@@ -23,20 +27,41 @@ interface KafedraType {
   name: string
 }
 
-const CategoryItem = () => {
+interface CategoryKafedraType {
+  id: string
+  category_id: string
+  kafedra_id: string
+  Category: {
+    id: string
+    name: string
+  }
+  Kafedra: {
+    id: string
+    name: string
+  }
+}
+
+const CategoryKafedraItem = () => {
   const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [categories, setCategories] = useState<CategoryType[]>([])
   const [kafedras, setKafedras] = useState<KafedraType[]>([])
+  const [categoryKafedras, setCategoryKafedras] = useState<CategoryKafedraType[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [submitLoading, setSubmitLoading] = useState<boolean>(false)
+  const [fetchLoading, setFetchLoading] = useState<boolean>(false)
+  const [updateLoading, setUpdateLoading] = useState<boolean>(false)
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("")
   const [selectedKafedraId, setSelectedKafedraId] = useState<string>("")
-
   const [categorySearchTerm, setCategorySearchTerm] = useState<string>("")
   const [kafedraSearchTerm, setKafedraSearchTerm] = useState<string>("")
-
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState<boolean>(false)
   const [isKafedraDropdownOpen, setIsKafedraDropdownOpen] = useState<boolean>(false)
+  const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false)
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
+  const [selectedCategoryKafedra, setSelectedCategoryKafedra] = useState<CategoryKafedraType | null>(null)
+  const [editedCategoryId, setEditedCategoryId] = useState<string>("")
+  const [editedKafedraId, setEditedKafedraId] = useState<string>("")
+  const [error, setError] = useState<string | null>(null)
 
   const categoryDropdownRef = useRef<HTMLDivElement>(null)
   const kafedraDropdownRef = useRef<HTMLDivElement>(null)
@@ -53,6 +78,7 @@ const CategoryItem = () => {
       setUserGroup(response.data.data)
     } catch (err) {
       console.error("❌ Permission olishda xatolik:", err)
+      setError("Permission olishda xatolik yuz berdi.")
     } finally {
       setLoading(false)
     }
@@ -98,6 +124,31 @@ const CategoryItem = () => {
     }
   }
 
+  const fetchCategoryKafedras = async () => {
+    setFetchLoading(true)
+    setError(null)
+    try {
+      const token = localStorage.getItem("token")
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
+      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
+      const response = await axios.get(`${import.meta.env.VITE_API}/api/category-kafedra`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-permission": permissionIds[0],
+        },
+      })
+      setCategoryKafedras(response.data.data)
+    } catch (err) {
+      console.error("❌ Kategoriya-kafedra bog'lanishlarini olishda xatolik:", err)
+      setError("Kategoriya-kafedra bog'lanishlarini olishda xatolik yuz berdi.")
+    } finally {
+      setFetchLoading(false)
+    }
+  }
+
   useEffect(() => {
     fetchPermission()
   }, [])
@@ -106,6 +157,7 @@ const CategoryItem = () => {
     if (userGroup.length > 0) {
       fetchCategories()
       fetchKafedras()
+      fetchCategoryKafedras()
     }
   }, [userGroup])
 
@@ -147,7 +199,6 @@ const CategoryItem = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-
     if (!selectedCategoryId || !selectedKafedraId) {
       antdMessage.warning("Barcha maydonlarni to'ldiring!")
       return
@@ -174,17 +225,104 @@ const CategoryItem = () => {
       })
 
       antdMessage.success("Kategoriya va kafedra muvaffaqiyatli bog'landi!")
-
       setSelectedCategoryId("")
       setSelectedKafedraId("")
       setCategorySearchTerm("")
       setKafedraSearchTerm("")
+      await fetchCategoryKafedras()
     } catch (error) {
       console.error("Xatolik yuz berdi:", error)
       antdMessage.error("Kategoriya va kafedra bog'lanmadi!")
     } finally {
       setSubmitLoading(false)
     }
+  }
+
+  const showUpdateModal = (categoryKafedra: CategoryKafedraType) => {
+    setSelectedCategoryKafedra(categoryKafedra)
+    setEditedCategoryId(categoryKafedra.category_id)
+    setEditedKafedraId(categoryKafedra.kafedra_id)
+    setIsUpdateModalVisible(true)
+  }
+
+  const handleUpdateOk = async () => {
+    if (!editedCategoryId || !editedKafedraId) {
+      antdMessage.warning("Barcha maydonlarni to'ldiring!")
+      return
+    }
+
+    setUpdateLoading(true)
+    try {
+      const token = localStorage.getItem("token")
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
+      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
+      await axios.put(
+        `${import.meta.env.VITE_API}/api/category-kafedra/${selectedCategoryKafedra?.id}`,
+        {
+          category_id: editedCategoryId,
+          kafedra_id: editedKafedraId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-permission": permissionIds[0],
+          },
+        },
+      )
+
+      setIsUpdateModalVisible(false)
+      setSelectedCategoryKafedra(null)
+      fetchCategoryKafedras()
+      antdMessage.success("Bog'lanish muvaffaqiyatli yangilandi!")
+    } catch (error) {
+      console.error("Yangilashda xatolik yuz berdi:", error)
+      antdMessage.error("Yangilashda xatolik yuz berdi!")
+    } finally {
+      setUpdateLoading(false)
+    }
+  }
+
+  const handleUpdateCancel = () => {
+    setIsUpdateModalVisible(false)
+    setSelectedCategoryKafedra(null)
+  }
+
+  const showDeleteModal = (categoryKafedra: CategoryKafedraType) => {
+    setSelectedCategoryKafedra(categoryKafedra)
+    setIsDeleteModalVisible(true)
+  }
+
+  const handleDeleteOk = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
+      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
+      await axios.delete(`${import.meta.env.VITE_API}/api/category-kafedra/${selectedCategoryKafedra?.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-permission": permissionIds[0],
+        },
+      })
+
+      setIsDeleteModalVisible(false)
+      setSelectedCategoryKafedra(null)
+      fetchCategoryKafedras()
+      antdMessage.success("Bog'lanish muvaffaqiyatli o'chirildi!")
+    } catch (error) {
+      console.error("O'chirishda xatolik yuz berdi:", error)
+      antdMessage.error("O'chirishda xatolik yuz berdi!")
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalVisible(false)
+    setSelectedCategoryKafedra(null)
   }
 
   if (loading && userGroup.length === 0) {
@@ -201,13 +339,13 @@ const CategoryItem = () => {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex items-center gap-2">
         <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Kategoriya va Kafedrani bog'lash</h3>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5 mt-15">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6 mb-8 mt-15">
         {/* Category Select */}
         <div className="w-full" ref={categoryDropdownRef}>
           <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">Kategoriyani tanlang!</label>
@@ -313,7 +451,7 @@ const CategoryItem = () => {
         </div>
 
         {/* Submit Button */}
-        <div className="md:col-span-2 mt-3">
+        <div className="md:col-span-2 mt-4">
           <button
             type="submit"
             disabled={submitLoading}
@@ -323,8 +461,150 @@ const CategoryItem = () => {
           </button>
         </div>
       </form>
+
+      {/* Table Section */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300">
+            {categoryKafedras.length === 0 ? "Bog'lanishlar yo'q!" : "Barcha bog'lanishlar"}
+          </h4>
+        </div>
+
+        {fetchLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : categoryKafedras.length === 0 ? (
+          <div className="text-center py-12">
+            <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Ma'lumotlar mavjud emas!</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-200 dark:border-gray-700 rounded-lg">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-left text-gray-800 dark:text-white">
+                    #
+                  </th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-left text-gray-800 dark:text-white">
+                    Kategoriya
+                  </th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-left text-gray-800 dark:text-white">
+                    Kafedra
+                  </th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center text-gray-800 dark:text-white">
+                    Yangilash
+                  </th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center text-gray-800 dark:text-white">
+                    O'chirish
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {categoryKafedras.map((item, index) => (
+                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {index + 1}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {item.Category.name}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {item.Kafedra.name}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
+                      <button
+                        className="text-blue-500 hover:text-blue-600 px-3 py-1 rounded-md transition-all duration-300"
+                        onClick={() => showUpdateModal(item)}
+                      >
+                        Yangilash
+                      </button>
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
+                      <button
+                        className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
+                        onClick={() => showDeleteModal(item)}
+                      >
+                        O'chirish
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* UPDATE MODAL */}
+      <Modal
+        title="Bog'lanishni Tahrirlash"
+        open={isUpdateModalVisible}
+        onOk={handleUpdateOk}
+        onCancel={handleUpdateCancel}
+        okText={updateLoading ? "Yangilanmoqda..." : "Yangilash"}
+        cancelText="Bekor qilish"
+        confirmLoading={updateLoading}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Kategoriya</label>
+            <select
+              value={editedCategoryId}
+              onChange={(e) => setEditedCategoryId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Kategoriyani tanlang</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Kafedra</label>
+            <select
+              value={editedKafedraId}
+              onChange={(e) => setEditedKafedraId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Kafedrani tanlang</option>
+              {kafedras.map((kafedra) => (
+                <option key={kafedra.id} value={kafedra.id}>
+                  {kafedra.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </Modal>
+
+      {/* DELETE MODAL */}
+      <Modal
+        title="Bog'lanishni o'chirish"
+        open={isDeleteModalVisible}
+        onOk={handleDeleteOk}
+        onCancel={handleDeleteCancel}
+        okText="O'chirish"
+        cancelText="Yo'q"
+      >
+        <p>
+          {selectedCategoryKafedra
+            ? `"${selectedCategoryKafedra.Category.name}" va "${selectedCategoryKafedra.Kafedra.name}" bog'lanishini o'chirmoqchimisiz?`
+            : ""}
+        </p>
+      </Modal>
     </div>
   )
 }
 
-export default CategoryItem;
+export default CategoryKafedraItem;

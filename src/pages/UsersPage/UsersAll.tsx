@@ -14,10 +14,6 @@ export interface UsersType {
     Yonalish: {
       id: string
       name: string
-      Kafedra: {
-        id: string
-        name: string
-      }
     }
   }
 }
@@ -34,7 +30,6 @@ interface PermissionType {
 
 const UsersAll: React.FC = () => {
   const [data, setData] = useState<UsersType[]>([])
-  const [selectedKafedra, setSelectedKafedra] = useState<string>("")
   const [selectedYonalish, setSelectedYonalish] = useState<string>("")
   const [selectedGuruh, setSelectedGuruh] = useState<string>("")
   const [searchValue, setSearchValue] = useState<string>("")
@@ -63,33 +58,15 @@ const UsersAll: React.FC = () => {
     fetchPermission()
   }, [])
 
-  const getUniqueKafedralar = (): { id: string; name: string }[] => {
-    const validData = data.filter((u) => u.StudentGroup && u.StudentGroup.Yonalish && u.StudentGroup.Yonalish.Kafedra)
-
-    const kafedralar = validData.map((u) => u.StudentGroup.Yonalish.Kafedra)
-    return Array.from(new Map(kafedralar.map((k) => [k.id, k])).values())
-  }
-
   const getUniqueYonalishlar = (): { id: string; name: string }[] => {
     const validData = data.filter((u) => u.StudentGroup && u.StudentGroup.Yonalish)
-
-    let yonalishlar = validData.map((u) => u.StudentGroup.Yonalish)
-
-    if (selectedKafedra) {
-      yonalishlar = yonalishlar.filter((y) => y.Kafedra && y.Kafedra.id === selectedKafedra)
-    }
-
+    const yonalishlar = validData.map((u) => u.StudentGroup.Yonalish)
     return Array.from(new Map(yonalishlar.map((y) => [y.id, y])).values())
   }
 
   const getUniqueGuruhlar = (): { id: string; name: string }[] => {
     const validData = data.filter((u) => u.StudentGroup)
-
     let guruhlar = validData.map((u) => u.StudentGroup)
-
-    if (selectedKafedra) {
-      guruhlar = guruhlar.filter((g) => g.Yonalish && g.Yonalish.Kafedra && g.Yonalish.Kafedra.id === selectedKafedra)
-    }
 
     if (selectedYonalish) {
       guruhlar = guruhlar.filter((g) => g.Yonalish && g.Yonalish.id === selectedYonalish)
@@ -131,16 +108,6 @@ const UsersAll: React.FC = () => {
   useEffect(() => {
     let filtered = data
 
-    if (selectedKafedra) {
-      filtered = filtered.filter(
-        (u) =>
-          u.StudentGroup &&
-          u.StudentGroup.Yonalish &&
-          u.StudentGroup.Yonalish.Kafedra &&
-          u.StudentGroup.Yonalish.Kafedra.id === selectedKafedra,
-      )
-    }
-
     if (selectedYonalish) {
       filtered = filtered.filter(
         (u) => u.StudentGroup && u.StudentGroup.Yonalish && u.StudentGroup.Yonalish.id === selectedYonalish,
@@ -155,17 +122,9 @@ const UsersAll: React.FC = () => {
       filtered = filtered.filter((u) => u.full_name.toLowerCase().includes(searchValue.toLowerCase()))
     }
 
-    const validFilteredData = filtered.filter(
-      (u) => u.StudentGroup && u.StudentGroup.Yonalish && u.StudentGroup.Yonalish.Kafedra,
-    )
+    const validFilteredData = filtered.filter((u) => u.StudentGroup && u.StudentGroup.Yonalish)
     setFinalFilteredData(validFilteredData)
-  }, [selectedKafedra, selectedYonalish, selectedGuruh, searchValue, data])
-
-  const handleKafedraChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedKafedra(e.target.value)
-    setSelectedYonalish("")
-    setSelectedGuruh("")
-  }
+  }, [selectedYonalish, selectedGuruh, searchValue, data])
 
   const handleYonalishChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYonalish(e.target.value)
@@ -202,7 +161,7 @@ const UsersAll: React.FC = () => {
             id="search"
             name="name"
             placeholder="Qidiruv"
-            className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-55 pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
@@ -223,27 +182,13 @@ const UsersAll: React.FC = () => {
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 dark:text-white uppercase tracking-wider">
                     #
                   </th>
-                  <th className="w-1/5 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                  <th className="w-1/4 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Ism familiya
                   </th>
-                  <th className="w-1/5 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                  <th className="w-1/4 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Passport
                   </th>
-                  <th className="w-1/5 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white uppercase tracking-wider">
-                    <select
-                      className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                      value={selectedKafedra}
-                      onChange={handleKafedraChange}
-                    >
-                      <option value="">Kafedra</option>
-                      {getUniqueKafedralar().map((k) => (
-                        <option key={k.id} value={k.id}>
-                          {k.name}
-                        </option>
-                      ))}
-                    </select>
-                  </th>
-                  <th className="w-1/5 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white uppercase tracking-wider">
+                  <th className="w-1/4 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white uppercase tracking-wider">
                     <select
                       className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                       value={selectedYonalish}
@@ -257,7 +202,7 @@ const UsersAll: React.FC = () => {
                       ))}
                     </select>
                   </th>
-                  <th className="w-1/5 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white uppercase tracking-wider">
+                  <th className="w-1/4 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white uppercase tracking-wider">
                     <select
                       className="mt-1 w-full border border-gray-200 dark:border-gray-600 outline-none rounded px-2 py-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                       value={selectedGuruh}
@@ -279,19 +224,16 @@ const UsersAll: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-white">
                       {index + 1}
                     </td>
-                    <td className="w-1/5 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item.full_name}
                     </td>
-                    <td className="w-1/5 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item.passport_id}
                     </td>
-                    <td className="w-1/5 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item.StudentGroup.Yonalish.Kafedra.name}
-                    </td>
-                    <td className="w-1/5 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item.StudentGroup.Yonalish.name}
                     </td>
-                    <td className="w-1/5 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item.StudentGroup.name}
                     </td>
                   </tr>
@@ -305,4 +247,4 @@ const UsersAll: React.FC = () => {
   )
 }
 
-export default UsersAll;
+export default UsersAll
