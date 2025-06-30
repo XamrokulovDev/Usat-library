@@ -1,6 +1,3 @@
-"use client"
-
-import type React from "react"
 import axios from "axios"
 import { BookOpen, ChevronDown, Upload, X } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
@@ -51,7 +48,10 @@ interface BookItemType {
   alphabet_id: number
   status_id: number
   kafedra_id: number
-  pdf_url: string
+  PDFFile: {
+    file_url: string
+    original_name?: string
+  }
   createdAt: string
   updatedAt: string
   book?: {
@@ -203,7 +203,7 @@ const BookItem = () => {
           "X-permission": permissionIds[0],
         },
       })
-      const rawBookItems = response.data.data
+      const rawBookItems = response.data.data;
       if (
         books.length > 0 &&
         languages.length > 0 &&
@@ -462,7 +462,6 @@ const BookItem = () => {
         return
       }
       if (file.size > 10 * 1024 * 1024) {
-        // 10MB limit
         antdMessage.error("Fayl hajmi 10MB dan oshmasligi kerak!")
         e.target.value = ""
         return
@@ -480,7 +479,6 @@ const BookItem = () => {
         return
       }
       if (file.size > 10 * 1024 * 1024) {
-        // 10MB limit
         antdMessage.error("Fayl hajmi 10MB dan oshmasligi kerak!")
         e.target.value = ""
         return
@@ -511,7 +509,7 @@ const BookItem = () => {
     }
 
     if (isPdfAvailable && !selectedPdfFile) {
-      antdMessage.warning("PDF mavjud deb belgilangani uchun PDF faylni yuklang!")
+      antdMessage.warning("PDF faylni yuklang!")
       return
     }
 
@@ -532,6 +530,9 @@ const BookItem = () => {
 
       if (isPdfAvailable && selectedPdfFile) {
         formData.append("pdf", selectedPdfFile)
+      } else {
+        const dummyFile = new File([""], "salom.pdf", { type: "application/pdf" })
+        formData.append("pdf", dummyFile)
       }
 
       await axios.post(`${import.meta.env.VITE_API}/api/book-items`, formData, {
@@ -595,7 +596,7 @@ const BookItem = () => {
     setEditStatusSearchTerm(bookItem.status?.name || "")
     setEditKafedraSearchTerm(bookItem.kafedra?.name || "")
     setEditPdfFile(null)
-    setIsEditPdfAvailable(!!bookItem.pdf_url) // PDF mavjud bo'lsa true, aks holda false
+    setIsEditPdfAvailable(!!bookItem.PDFFile)
     setIsUpdateModalVisible(true)
   }
 
@@ -608,7 +609,6 @@ const BookItem = () => {
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
       const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
 
-      // FormData yaratish
       const formData = new FormData()
       formData.append("book_id", editBookId)
       formData.append("language_id", editLanguageId)
@@ -616,12 +616,10 @@ const BookItem = () => {
       formData.append("status_id", editStatusId)
       formData.append("kafedra_id", editKafedraId)
 
-      // PDF fayl mavjud bo'lsa qo'shish
       if (isEditPdfAvailable && editPdfFile) {
         formData.append("pdf", editPdfFile)
       }
 
-      // PDF mavjud emas deb belgilangan bo'lsa, null yuborish uchun
       if (!isEditPdfAvailable) {
         formData.append("pdf_remove", "true")
       }
@@ -997,7 +995,6 @@ const BookItem = () => {
             </label>
           </div>
         </div>
-
         {/* PDF Upload - Only show if checkbox is checked */}
         {isPdfAvailable && (
           <div className="w-full md:col-span-2">
@@ -1044,7 +1041,6 @@ const BookItem = () => {
             </p>
           </div>
         )}
-
         {/* Submit Button */}
         <div className="md:col-span-2">
           <button
@@ -1056,7 +1052,6 @@ const BookItem = () => {
           </button>
         </div>
       </form>
-
       {/* Book Items List */}
       <div className="space-y-6 mt-15 my-4">
         <div className="flex items-center gap-2">
@@ -1064,7 +1059,6 @@ const BookItem = () => {
             {bookItems.length === 0 ? "Kitob detallari yo'q!" : "Barcha kitob detallari"}
           </h4>
         </div>
-
         {fetchLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
@@ -1122,33 +1116,32 @@ const BookItem = () => {
                       {index + 1}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.book?.name || "N/A"}
+                      {bookItem.book?.name || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.language?.name || "N/A"}
+                      {bookItem.language?.name || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.alphabet?.name || "N/A"}
+                      {bookItem.alphabet?.name || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.status?.name || "N/A"}
+                      {bookItem.status?.name || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.kafedra?.name || "N/A"}
+                      {bookItem.kafedra?.name || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.pdf_url ? (
+                      {bookItem.PDFFile && bookItem.PDFFile.original_name !== "salom.pdf" ? (
                         <a
-                          href={bookItem.pdf_url}
+                          href={bookItem.PDFFile.file_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:text-blue-600 underline flex items-center gap-1"
                         >
-                          <BookOpen className="w-4 h-4" />
                           Ko'rish
                         </a>
                       ) : (
-                        <span className="text-gray-400 dark:text-gray-500">PDF yo'q</span>
+                        <span className="text-gray-400 dark:text-gray-500">pdf yo'q</span>
                       )}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
@@ -1174,7 +1167,6 @@ const BookItem = () => {
           </div>
         )}
       </div>
-
       {/* UPDATE MODAL */}
       <Modal
         title="Kitob detallarni tahrirlash"
@@ -1235,7 +1227,6 @@ const BookItem = () => {
               )}
             </div>
           </div>
-
           {/* Edit Language Select */}
           <div className="w-full" ref={editLanguageDropdownRef}>
             <label className="block font-medium text-gray-700 mb-2">Tilni tanlang! *</label>
@@ -1285,7 +1276,6 @@ const BookItem = () => {
               )}
             </div>
           </div>
-
           {/* Edit Alphabet Select */}
           <div className="w-full" ref={editAlphabetDropdownRef}>
             <label className="block font-medium text-gray-700 mb-2">Alifboni tanlang! *</label>
@@ -1335,7 +1325,6 @@ const BookItem = () => {
               )}
             </div>
           </div>
-
           {/* Edit Status Select */}
           <div className="w-full" ref={editStatusDropdownRef}>
             <label className="block font-medium text-gray-700 mb-2">Statusni tanlang! *</label>
@@ -1385,7 +1374,6 @@ const BookItem = () => {
               )}
             </div>
           </div>
-
           {/* Edit Kafedra Select */}
           <div className="w-full md:col-span-2" ref={editKafedraDropdownRef}>
             <label className="block font-medium text-gray-700 mb-2">Kafedralarni tanlang!</label>
@@ -1435,7 +1423,6 @@ const BookItem = () => {
               )}
             </div>
           </div>
-
           {/* Edit PDF Availability Checkbox */}
           <div className="w-full md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
@@ -1459,12 +1446,11 @@ const BookItem = () => {
               </label>
             </div>
           </div>
-
           {/* Edit PDF Upload - Only show if checkbox is checked */}
           {isEditPdfAvailable && (
             <div className="w-full md:col-span-2">
               <label className="block font-medium text-gray-700 mb-2">
-                {selectedBookItem?.pdf_url ? "Yangi PDF faylni yuklang (ixtiyoriy)" : "PDF faylni yuklang! *"}
+                {selectedBookItem?.PDFFile ? "Yangi PDF faylni yuklang (ixtiyoriy)" : "PDF faylni yuklang! *"}
               </label>
               <div className="relative">
                 <input
@@ -1483,7 +1469,7 @@ const BookItem = () => {
                   <span className="text-gray-600">
                     {editPdfFile
                       ? editPdfFile.name
-                      : selectedBookItem?.pdf_url
+                      : selectedBookItem?.PDFFile
                         ? "Yangi PDF faylni tanlang (ixtiyoriy)"
                         : "PDF faylni tanlang"}
                   </span>
@@ -1504,13 +1490,13 @@ const BookItem = () => {
                     </button>
                   </div>
                 )}
-                {selectedBookItem?.pdf_url && !editPdfFile && (
+                {selectedBookItem?.PDFFile && !editPdfFile && (
                   <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-center gap-2">
                       <BookOpen className="w-4 h-4 text-green-600" />
                       <span className="text-sm text-green-800">Hozirgi PDF mavjud</span>
                       <a
-                        href={selectedBookItem.pdf_url}
+                        href={selectedBookItem.PDFFile.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:text-blue-600 underline text-xs"
@@ -1522,7 +1508,7 @@ const BookItem = () => {
                 )}
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                {selectedBookItem?.pdf_url
+                {selectedBookItem?.PDFFile
                   ? "Agar yangi PDF yuklasangiz, eski fayl almashtiriladi. Maksimal hajm: 10MB"
                   : "Faqat PDF fayllar qabul qilinadi. Maksimal hajm: 10MB"}
               </p>
