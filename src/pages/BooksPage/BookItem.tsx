@@ -1131,19 +1131,22 @@ const BookItem = () => {
                       {bookItem.kafedra?.name || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.PDFFile && bookItem.PDFFile.original_name !== "salom.pdf" ? (
-                        <a
-                          href={bookItem.PDFFile.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-600 underline flex items-center gap-1"
-                        >
-                          Ko'rish
-                        </a>
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-500">pdf yo'q</span>
-                      )}
-                    </td>
+  {bookItem.PDFFile && 
+   bookItem.PDFFile.file_url && 
+   bookItem.PDFFile.original_name && 
+   bookItem.PDFFile.original_name !== "salom.pdf" ? (
+    <a
+      href={bookItem.PDFFile.file_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-500 hover:text-blue-600 underline flex items-center gap-1"
+    >
+      Ko'rish
+    </a>
+  ) : (
+    <span className="text-gray-400 dark:text-gray-500">pdf yo'q</span>
+  )}
+</td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
                       <button
                         className="text-blue-500 hover:text-blue-600 px-3 py-1 rounded-md transition-all duration-300"
