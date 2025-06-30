@@ -6,7 +6,8 @@ import { Tag } from 'lucide-react'
 
 interface GroupType {
   id: string
-  name: string
+  name_uz: string
+  name_ru: string
 }
 
 interface PermissionType {
@@ -20,7 +21,8 @@ interface PermissionType {
 }
 
 const Category = () => {
-  const [name, setName] = useState<string>("")
+  const [nameUz, setNameUz] = useState<string>("")
+  const [nameRu, setNameRu] = useState<string>("")
   const [groups, setGroups] = useState<GroupType[]>([])
   const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
@@ -29,10 +31,20 @@ const Category = () => {
   const [error, setError] = useState<string | null>(null)
 
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
-  const [editedTitle, setEditedTitle] = useState<string>("")
+  const [editedTitleUz, setEditedTitleUz] = useState<string>("")
+  const [editedTitleRu, setEditedTitleRu] = useState<string>("")
 
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
+
+  const generateCode = (text: string): string => {
+    return text
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_]/g, '')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '')
+  }
 
   const fetchPermission = async () => {
     const token = localStorage.getItem("token")
@@ -90,8 +102,8 @@ const Category = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!name.trim()) {
-      antdMessage.warning("Kategoriya kiritish shart!")
+    if (!nameUz.trim() || !nameRu.trim()) {
+      antdMessage.warning("Barcha maydonlarni to'ldirish shart!")
       return
     }
     setSubmitLoading(true)
@@ -103,9 +115,15 @@ const Category = () => {
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
       const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
 
+      const generatedCode = generateCode(nameUz)
+
       await axios.post(
         `${import.meta.env.VITE_API}/api/categories`,
-        { name: name },
+        { 
+          name_uz: nameUz,
+          name_ru: nameRu,
+          code: generatedCode
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -114,7 +132,8 @@ const Category = () => {
         },
       )
       antdMessage.success("Kategoriya muvaffaqiyatli qo'shildi!")
-      setName("")
+      setNameUz("")
+      setNameRu("")
       await fetchGroups()
     } catch (error) {
       console.error("Xatolik yuz berdi:", error)
@@ -126,11 +145,17 @@ const Category = () => {
 
   const showUpdateModal = (group: GroupType) => {
     setSelectedGroup(group)
-    setEditedTitle(group.name)
+    setEditedTitleUz(group.name_uz)
+    setEditedTitleRu(group.name_ru)
     setIsUpdateModalVisible(true)
   }
 
   const handleUpdateOk = async () => {
+    if (!editedTitleUz.trim() || !editedTitleRu.trim()) {
+      antdMessage.warning("Barcha maydonlarni to'ldirish shart!")
+      return
+    }
+    
     setUpdateLoading(true)
     try {
       const token = localStorage.getItem("token")
@@ -140,9 +165,15 @@ const Category = () => {
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
       const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
 
+      const generatedCode = generateCode(editedTitleUz)
+
       await axios.put(
         `${import.meta.env.VITE_API}/api/categories/${selectedGroup?.id}`,
-        { name: editedTitle },
+        { 
+          name_uz: editedTitleUz,
+          name_ru: editedTitleRu,
+          code: generatedCode
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -190,6 +221,7 @@ const Category = () => {
       setIsDeleteModalVisible(false)
       setSelectedGroup(null)
       fetchGroups()
+      antdMessage.success("Kategoriya muvaffaqiyatli o'chirildi!")
     } catch (error) {
       console.error("O'chirishda xatolik yuz berdi:", error)
       antdMessage.error("O'chirishda xatolik yuz berdi!")
@@ -221,21 +253,34 @@ const Category = () => {
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Kategoriya qo'shish</h3>
       </div>
       
-      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6 mb-8 mt-15">
-        <div className="w-full md:col-span-2">
-          <label htmlFor="category" className="block font-medium text-gray-700 dark:text-gray-300 cursor-pointer mb-2">
-            Kategoriya nomi
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6 mb-8 mt-15">
+        <div className="w-full">
+          <label htmlFor="categoryUz" className="block font-medium text-gray-700 dark:text-gray-300 cursor-pointer mb-2">
+            Kategoriya nomi (O'zbekcha)
           </label>
           <input
-            id="category"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            id="categoryUz"
+            name="name_uz"
+            value={nameUz}
+            onChange={(e) => setNameUz(e.target.value)}
             placeholder="Masalan: Badiiy adabiyot"
             className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
           />
         </div>
-        <div className="md:col-span-2">
+        <div className="w-full">
+          <label htmlFor="categoryRu" className="block font-medium text-gray-700 dark:text-gray-300 cursor-pointer mb-2">
+            Название категории (Русский)
+          </label>
+          <input
+            id="categoryRu"
+            name="name_ru"
+            value={nameRu}
+            onChange={(e) => setNameRu(e.target.value)}
+            placeholder="Например: Художественная литература"
+            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
+          />
+        </div>
+        <div className="md:col-span-2 mt-4">
           <button
             type="submit"
             disabled={submitLoading}
@@ -278,7 +323,10 @@ const Category = () => {
                     #
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
-                    Kategoriya nomi
+                    Kategoriya nomi (O'zbekcha)
+                  </th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                    Название категории (Русский)
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     Yangilash
@@ -295,7 +343,10 @@ const Category = () => {
                       {index + 1}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {group.name}
+                      {group.name_uz}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {group.name_ru}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
                       <button
@@ -320,7 +371,6 @@ const Category = () => {
           </div>
         )}
       </div>
-
       {/* UPDATE MODAL */}
       <Modal
         title="Kategoriyani Tahrirlash"
@@ -330,12 +380,30 @@ const Category = () => {
         okText={updateLoading ? "Yangilanmoqda..." : "Yangilash"}
         cancelText="Bekor qilish"
         confirmLoading={updateLoading}
+        width={600}
       >
-        <Input
-          value={editedTitle}
-          onChange={(e) => setEditedTitle(e.target.value)}
-          placeholder="Yangi Kategoriya nomi"
-        />
+        <div className="space-y-4">
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">
+              Kategoriya nomi (O'zbekcha)
+            </label>
+            <Input
+              value={editedTitleUz}
+              onChange={(e) => setEditedTitleUz(e.target.value)}
+              placeholder="Yangi kategoriya nomi (O'zbekcha)"
+            />
+          </div>
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">
+              Название категории (Русский)
+            </label>
+            <Input
+              value={editedTitleRu}
+              onChange={(e) => setEditedTitleRu(e.target.value)}
+              placeholder="Новое название категории (Русский)"
+            />
+          </div>
+        </div>
       </Modal>
       {/* DELETE MODAL */}
       <Modal
@@ -346,7 +414,12 @@ const Category = () => {
         okText="O'chirish"
         cancelText="Yo'q"
       >
-        <p>{selectedGroup ? `"${selectedGroup.name}" Kategoriyani o'chirmoqchimisiz?` : ""}</p>
+        <p>
+          {selectedGroup 
+            ? `"${selectedGroup.name_uz}" / "${selectedGroup.name_ru}" kategoriyani o'chirmoqchimisiz?` 
+            : ""
+          }
+        </p>
       </Modal>
     </div>
   )

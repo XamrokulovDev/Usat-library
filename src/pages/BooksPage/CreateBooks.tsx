@@ -11,6 +11,7 @@ interface BookType {
   page: number
   books: string
   auther_id?: number
+  book_count: string
 }
 
 interface AutherType {
@@ -224,6 +225,7 @@ const CreateBooks: React.FC = () => {
       year: Number(year),
       page: Number(page),
       books: books,
+      book_count: books,
     }
 
     setSubmitLoading(true)
@@ -480,6 +482,9 @@ const CreateBooks: React.FC = () => {
                       Kitob soni
                     </th>
                     <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Qolgan kitoblar
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Yangilash
                     </th>
                   </tr>
@@ -501,6 +506,9 @@ const CreateBooks: React.FC = () => {
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                         {item.books}
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                        {item.book_count}
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center">
                         <button

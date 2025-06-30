@@ -1,7 +1,3 @@
-"use client"
-
-import type React from "react"
-
 import axios from "axios"
 import { BookOpen, ChevronDown } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
@@ -19,12 +15,12 @@ interface PermissionType {
 
 interface CategoryType {
   id: string
-  name: string
+  name_uz: string
 }
 
 interface KafedraType {
   id: string
-  name: string
+  name_uz: string
 }
 
 interface CategoryKafedraType {
@@ -33,11 +29,11 @@ interface CategoryKafedraType {
   kafedra_id: string
   Category: {
     id: string
-    name: string
+    name_uz: string
   }
   Kafedra: {
     id: string
-    name: string
+    name_uz: string
   }
 }
 
@@ -140,10 +136,10 @@ const CategoryKafedraItem = () => {
           "X-permission": permissionIds[0],
         },
       })
-      setCategoryKafedras(response.data.data)
+      setCategoryKafedras(response.data.data);
     } catch (err) {
-      console.error("❌ Kategoriya-kafedra bog'lanishlarini olishda xatolik:", err)
-      setError("Kategoriya-kafedra bog'lanishlarini olishda xatolik yuz berdi.")
+      console.error("Kategoriya kafedra bog'lanishlarini olishda xatolik:", err)
+      setError("Ma'lumotlarni olishda xatolik yuz berdi.")
     } finally {
       setFetchLoading(false)
     }
@@ -178,22 +174,22 @@ const CategoryKafedraItem = () => {
   }, [])
 
   const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(categorySearchTerm.toLowerCase()),
+    category.name_uz.toLowerCase().includes(categorySearchTerm.toLowerCase()),
   )
 
   const filteredKafedras = kafedras.filter((kafedra) =>
-    kafedra.name.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
+    kafedra.name_uz.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
   )
 
   const handleCategorySelect = (category: CategoryType) => {
     setSelectedCategoryId(category.id)
-    setCategorySearchTerm(category.name)
+    setCategorySearchTerm(category.name_uz)
     setIsCategoryDropdownOpen(false)
   }
 
   const handleKafedraSelect = (kafedra: KafedraType) => {
     setSelectedKafedraId(kafedra.id)
-    setKafedraSearchTerm(kafedra.name)
+    setKafedraSearchTerm(kafedra.name_uz)
     setIsKafedraDropdownOpen(false)
   }
 
@@ -386,7 +382,7 @@ const CategoryKafedraItem = () => {
                           : ""
                       }`}
                     >
-                      {category.name}
+                      {category.name_uz}
                       {selectedCategoryId === category.id && <span className="float-right">✓</span>}
                     </div>
                   ))
@@ -438,7 +434,7 @@ const CategoryKafedraItem = () => {
                           : ""
                       }`}
                     >
-                      {kafedra.name}
+                      {kafedra.name_uz}
                       {selectedKafedraId === kafedra.id && <span className="float-right">✓</span>}
                     </div>
                   ))
@@ -515,10 +511,10 @@ const CategoryKafedraItem = () => {
                       {index + 1}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {item.Category.name}
+                      {item.Category.name_uz}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {item.Kafedra.name}
+                      {item.Kafedra.name_uz}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
                       <button
@@ -565,7 +561,7 @@ const CategoryKafedraItem = () => {
               <option value="">Kategoriyani tanlang</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
-                  {category.name}
+                  {category.name_uz}
                 </option>
               ))}
             </select>
@@ -580,7 +576,7 @@ const CategoryKafedraItem = () => {
               <option value="">Kafedrani tanlang</option>
               {kafedras.map((kafedra) => (
                 <option key={kafedra.id} value={kafedra.id}>
-                  {kafedra.name}
+                  {kafedra.name_uz}
                 </option>
               ))}
             </select>
@@ -599,7 +595,7 @@ const CategoryKafedraItem = () => {
       >
         <p>
           {selectedCategoryKafedra
-            ? `"${selectedCategoryKafedra.Category.name}" va "${selectedCategoryKafedra.Kafedra.name}" bog'lanishini o'chirmoqchimisiz?`
+            ? `"${selectedCategoryKafedra.Category.name_uz}" va "${selectedCategoryKafedra.Kafedra.name_uz}" bog'lanishini o'chirmoqchimisiz?`
             : ""}
         </p>
       </Modal>

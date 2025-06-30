@@ -38,7 +38,7 @@ interface StatusType {
 
 interface KafedraType {
   id: string
-  name: string
+  name_uz: string
 }
 
 interface BookItemType {
@@ -72,7 +72,7 @@ interface BookItemType {
   }
   kafedra?: {
     id: string
-    name: string
+    name_uz: string
   }
 }
 
@@ -181,7 +181,7 @@ const BookItem = () => {
         },
       })
 
-      const rawBookItems = response.data.data
+      const rawBookItems = response.data.data;
 
       if (
         books.length > 0 &&
@@ -344,7 +344,7 @@ const BookItem = () => {
     status.name.toLowerCase().includes(statusSearchTerm.toLowerCase()),
   )
   const filteredKafedras = kafedras.filter((kafedra) =>
-    kafedra.name.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
+    kafedra.name_uz.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
   )
 
   const handleBookSelect = (book: BookType) => {
@@ -373,7 +373,7 @@ const BookItem = () => {
 
   const handleKafedraSelect = (kafedra: KafedraType) => {
     setSelectedKafedraId(kafedra.id)
-    setKafedraSearchTerm(kafedra.name)
+    setKafedraSearchTerm(kafedra.name_uz)
     setIsKafedraDropdownOpen(false)
   }
 
@@ -781,7 +781,7 @@ const BookItem = () => {
                           : ""
                       }`}
                     >
-                      {kafedra.name}
+                      {kafedra.name_uz}
                       {selectedKafedraId === kafedra.id && <span className="float-right">✓</span>}
                     </div>
                   ))
@@ -949,7 +949,7 @@ const BookItem = () => {
                       {bookItem.status?.name || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.kafedra?.name || "-"}
+                      {bookItem.kafedra?.name_uz || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
                       {bookItem.PDFFile &&

@@ -6,7 +6,8 @@ import { Building2 } from 'lucide-react'
 
 interface FacultyType {
   id: string
-  name: string
+  name_uz: string
+  name_ru: string
 }
 
 interface PermissionType {
@@ -20,7 +21,8 @@ interface PermissionType {
 }
 
 const Kafedra = () => {
-  const [name, setName] = useState<string>("")
+  const [nameUz, setNameUz] = useState<string>("")
+  const [nameRu, setNameRu] = useState<string>("")
   const [faculties, setFaculties] = useState<FacultyType[]>([])
   const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
@@ -29,7 +31,8 @@ const Kafedra = () => {
   const [error, setError] = useState<string | null>(null)
 
   const [selectedFaculty, setSelectedFaculty] = useState<FacultyType | null>(null)
-  const [editedTitle, setEditedTitle] = useState<string>("")
+  const [editedTitleUz, setEditedTitleUz] = useState<string>("")
+  const [editedTitleRu, setEditedTitleRu] = useState<string>("")
 
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
@@ -90,8 +93,8 @@ const Kafedra = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!name.trim()) {
-      antdMessage.warning("Kafedra kiritish shart!")
+    if (!nameUz.trim() || !nameRu.trim()) {
+      antdMessage.warning("Kafedra nomlarini kiritish shart!")
       return
     }
     setSubmitLoading(true)
@@ -105,7 +108,7 @@ const Kafedra = () => {
 
       await axios.post(
         `${import.meta.env.VITE_API}/api/kafedra`,
-        { name: name },
+        { name_uz: nameUz, name_ru: nameRu },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -114,7 +117,8 @@ const Kafedra = () => {
         },
       )
       antdMessage.success("Kafedra muvaffaqiyatli qo'shildi!")
-      setName("")
+      setNameUz("")
+      setNameRu("")
       fetchFaculties()
     } catch (error) {
       console.error("Xatolik yuz berdi:", error)
@@ -126,7 +130,8 @@ const Kafedra = () => {
 
   const showUpdateModal = (faculty: FacultyType) => {
     setSelectedFaculty(faculty)
-    setEditedTitle(faculty.name)
+    setEditedTitleUz(faculty.name_uz)
+    setEditedTitleRu(faculty.name_ru)
     setIsUpdateModalVisible(true)
   }
 
@@ -142,7 +147,7 @@ const Kafedra = () => {
 
       await axios.put(
         `${import.meta.env.VITE_API}/api/kafedra/${selectedFaculty?.id}`,
-        { name: editedTitle },
+        { name_uz: editedTitleUz, name_ru: editedTitleRu },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -223,16 +228,29 @@ const Kafedra = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6 mb-8 mt-15">
-        <div className="w-full md:col-span-2">
-          <label htmlFor="kafedra" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Kafedra nomi
+        <div className="w-full">
+          <label htmlFor="kafedra_uz" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Kafedra nomi (O'zbekcha)
           </label>
           <input
-            id="kafedra"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            id="kafedra_uz"
+            name="name_uz"
+            value={nameUz}
+            onChange={(e) => setNameUz(e.target.value)}
             placeholder="Masalan: Iqtisodiyot"
+            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
+          />
+        </div>
+        <div className="w-full">
+          <label htmlFor="kafedra_ru" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Название кафедры (Русский)
+          </label>
+          <input
+            id="kafedra_ru"
+            name="name_ru"
+            value={nameRu}
+            onChange={(e) => setNameRu(e.target.value)}
+            placeholder="Например: Экономика"
             className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
           />
         </div>
@@ -279,7 +297,10 @@ const Kafedra = () => {
                     #
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
-                    Kafedra nomi
+                    Kafedra nomi (O'zbekcha)
+                  </th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                    Название кафедры (Русский)
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     Yangilash
@@ -296,7 +317,10 @@ const Kafedra = () => {
                       {index + 1}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {faculty.name}
+                      {faculty.name_uz}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {faculty.name_ru}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
                       <button
@@ -321,7 +345,6 @@ const Kafedra = () => {
           </div>
         )}
       </div>
-
       {/* UPDATE MODAL */}
       <Modal
         title="Kafedrani Tahrirlash"
@@ -332,9 +355,25 @@ const Kafedra = () => {
         cancelText="Bekor qilish"
         confirmLoading={updateLoading}
       >
-        <Input value={editedTitle} onChange={(e) => setEditedTitle(e.target.value)} placeholder="Yangi kafedra nomi" />
+        <div className="space-y-4">
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">Kafedra nomi (O'zbekcha)</label>
+            <Input 
+              value={editedTitleUz} 
+              onChange={(e) => setEditedTitleUz(e.target.value)} 
+              placeholder="O'zbek tilida kafedra nomi" 
+            />
+          </div>
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">Название кафедры (Русский)</label>
+            <Input 
+              value={editedTitleRu} 
+              onChange={(e) => setEditedTitleRu(e.target.value)} 
+              placeholder="Название кафедры на русском языке" 
+            />
+          </div>
+        </div>
       </Modal>
-
       {/* DELETE MODAL */}
       <Modal
         title="Kafedrani o'chirish"
@@ -344,7 +383,7 @@ const Kafedra = () => {
         okText="O'chirish"
         cancelText="Yo'q"
       >
-        <p>{selectedFaculty ? `"${selectedFaculty.name}" Kafedrani o'chirmoqchimisiz?` : ""}</p>
+        <p>{selectedFaculty ? `"${selectedFaculty.name_uz}" / "${selectedFaculty.name_ru}" Kafedrani o'chirmoqchimisiz?` : ""}</p>
       </Modal>
     </div>
   )

@@ -9,6 +9,7 @@ interface BookType {
   year: number
   page: number
   books: string
+  book_count: string
 }
 
 interface PermissionType {
@@ -30,12 +31,19 @@ const Books = () => {
   const [selectedBook, setSelectedBook] = useState<BookType | null>(null)
 
   const fetchPermission = async () => {
-    const token = localStorage.getItem("token")
     setLoading(true)
     try {
+      const token = localStorage.getItem("token")
+
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id));
+      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name);
+
       const response = await axios.get(`${import.meta.env.VITE_API}/api/group-permissions`, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "X-permission": permissionIds[0],
         },
       })
       setUserGroup(response.data.data)
@@ -67,7 +75,6 @@ const Books = () => {
         },
       })
       setData(response.data.data);
-      console.log(response.data.data);
     } catch (error) {
       console.error("Foydalanuvchilarni olishda xatolik:", error)
     } finally {
@@ -180,6 +187,9 @@ const Books = () => {
                     Kitob soni
                   </th>
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Qolgan kitoblar
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     O'chirish
                   </th>
                 </tr>
@@ -201,6 +211,9 @@ const Books = () => {
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.books}
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {item.book_count}
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-center">
                       <button

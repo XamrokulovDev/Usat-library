@@ -88,7 +88,9 @@ const Order = () => {
     try {
       const token = localStorage.getItem("token")
       const { data } = await axios.get(`${import.meta.env.VITE_API}/api/group-permissions`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        },
       })
       setUserGroups(data.data)
     } catch (error) {

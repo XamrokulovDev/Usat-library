@@ -8,7 +8,7 @@ import AppLayout from "./layout/AppLayout"
 import Home from "./pages/Dashboard/Home"
 import Books from "./pages/BooksPage/Books"
 import Auther from "./pages/BooksPage/Auther"
-import Kafedra from "./pages/UsersPage/Kafedra"
+import Kafedra from "./pages/BooksPage/Kafedra"
 import Direction from "./pages/UsersPage/Direction"
 import StudentGroup from "./pages/UsersPage/StudentGroup"
 import UsersAll from "./pages/UsersPage/UsersAll"
@@ -29,8 +29,8 @@ import UsersBuild from "./pages/Admins/UsersBuild"
 import BookItem from "./pages/BooksPage/BookItem"
 import BlackList from "./pages/OrderDetails/BlackList"
 import Direktor from "./pages/OrderDetails/Direktor"
-import KafedraDetail from "./pages/OrderDetails/KafedraDetails"
 import CategoryItem from "./pages/BooksPage/CategoryItem"
+// import KafedraDetail from "./pages/OrderDetails/KafedraDetails"
 
 export default function App() {
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function App() {
             {/* Foydalanuvchilar bo'limi */}
             <Route path="users-all" element={<UsersAll />} />
             <Route path="kafedra" element={<Kafedra />} />
-            <Route path="kafedra/:kafedraName" element={<KafedraDetail />} />
+            {/* <Route path="kafedra/:kafedraName" element={<KafedraDetail />} /> */}
             <Route path="direction" element={<Direction />} />
             <Route path="student_group" element={<StudentGroup />} />
             {/* Buyurtmalar va tarix */}
