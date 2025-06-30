@@ -87,7 +87,6 @@ const BookItem = () => {
   const [loading, setLoading] = useState<boolean>(false)
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
   const [submitLoading, setSubmitLoading] = useState<boolean>(false)
-  const [updateLoading, setUpdateLoading] = useState<boolean>(false)
   const [selectedBookId, setSelectedBookId] = useState<string>("")
   const [selectedLanguageId, setSelectedLanguageId] = useState<string>("")
   const [selectedAlphabetId, setSelectedAlphabetId] = useState<string>("")
@@ -107,39 +106,15 @@ const BookItem = () => {
   const [isKafedraDropdownOpen, setIsKafedraDropdownOpen] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedBookItem, setSelectedBookItem] = useState<BookItemType | null>(null)
-  const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
-  const [editBookId, setEditBookId] = useState<string>("")
-  const [editLanguageId, setEditLanguageId] = useState<string>("")
-  const [editAlphabetId, setEditAlphabetId] = useState<string>("")
-  const [editStatusId, setEditStatusId] = useState<string>("")
-  const [editKafedraId, setEditKafedraId] = useState<string>("")
-  const [editPdfFile, setEditPdfFile] = useState<File | null>(null)
-  const [editBookSearchTerm, setEditBookSearchTerm] = useState<string>("")
-  const [editLanguageSearchTerm, setEditLanguageSearchTerm] = useState<string>("")
-  const [editAlphabetSearchTerm, setEditAlphabetSearchTerm] = useState<string>("")
-  const [editStatusSearchTerm, setEditStatusSearchTerm] = useState<string>("")
-  const [editKafedraSearchTerm, setEditKafedraSearchTerm] = useState<string>("")
-  const [isEditBookDropdownOpen, setIsEditBookDropdownOpen] = useState<boolean>(false)
-  const [isEditLanguageDropdownOpen, setIsEditLanguageDropdownOpen] = useState<boolean>(false)
-  const [isEditAlphabetDropdownOpen, setIsEditAlphabetDropdownOpen] = useState<boolean>(false)
-  const [isEditStatusDropdownOpen, setIsEditStatusDropdownOpen] = useState<boolean>(false)
-  const [isEditKafedraDropdownOpen, setIsEditKafedraDropdownOpen] = useState<boolean>(false)
   const [isPdfAvailable, setIsPdfAvailable] = useState<boolean>(false)
-  const [isEditPdfAvailable, setIsEditPdfAvailable] = useState<boolean>(false)
 
   const bookDropdownRef = useRef<HTMLDivElement>(null)
   const languageDropdownRef = useRef<HTMLDivElement>(null)
   const alphabetDropdownRef = useRef<HTMLDivElement>(null)
   const statusDropdownRef = useRef<HTMLDivElement>(null)
   const kafedraDropdownRef = useRef<HTMLDivElement>(null)
-  const editBookDropdownRef = useRef<HTMLDivElement>(null)
-  const editLanguageDropdownRef = useRef<HTMLDivElement>(null)
-  const editAlphabetDropdownRef = useRef<HTMLDivElement>(null)
-  const editStatusDropdownRef = useRef<HTMLDivElement>(null)
-  const editKafedraDropdownRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const editFileInputRef = useRef<HTMLInputElement>(null)
 
   const populateBookItems = (items: BookItemType[]): BookItemType[] => {
     return items.map((item) => ({
@@ -176,6 +151,7 @@ const BookItem = () => {
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
       const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
       const response = await axios.get<{ data: BookType[] }>(`${import.meta.env.VITE_API}/api/books`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -197,13 +173,16 @@ const BookItem = () => {
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
       const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
       const response = await axios.get(`${import.meta.env.VITE_API}/api/book-items`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "X-permission": permissionIds[0],
         },
       })
-      const rawBookItems = response.data.data;
+
+      const rawBookItems = response.data.data
+
       if (
         books.length > 0 &&
         languages.length > 0 &&
@@ -231,6 +210,7 @@ const BookItem = () => {
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
       const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
       const response = await axios.get(`${import.meta.env.VITE_API}/api/languages`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -250,6 +230,7 @@ const BookItem = () => {
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
       const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
       const response = await axios.get(`${import.meta.env.VITE_API}/api/alphabet`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -269,6 +250,7 @@ const BookItem = () => {
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
       const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
       const response = await axios.get(`${import.meta.env.VITE_API}/api/status`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -288,6 +270,7 @@ const BookItem = () => {
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
       const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
       const response = await axios.get(`${import.meta.env.VITE_API}/api/kafedra`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -342,21 +325,6 @@ const BookItem = () => {
       if (kafedraDropdownRef.current && !kafedraDropdownRef.current.contains(event.target as Node)) {
         setIsKafedraDropdownOpen(false)
       }
-      if (editBookDropdownRef.current && !editBookDropdownRef.current.contains(event.target as Node)) {
-        setIsEditBookDropdownOpen(false)
-      }
-      if (editLanguageDropdownRef.current && !editLanguageDropdownRef.current.contains(event.target as Node)) {
-        setIsEditLanguageDropdownOpen(false)
-      }
-      if (editAlphabetDropdownRef.current && !editAlphabetDropdownRef.current.contains(event.target as Node)) {
-        setIsEditAlphabetDropdownOpen(false)
-      }
-      if (editStatusDropdownRef.current && !editStatusDropdownRef.current.contains(event.target as Node)) {
-        setIsEditStatusDropdownOpen(false)
-      }
-      if (editKafedraDropdownRef.current && !editKafedraDropdownRef.current.contains(event.target as Node)) {
-        setIsEditKafedraDropdownOpen(false)
-      }
     }
 
     document.addEventListener("mousedown", handleClickOutside)
@@ -377,20 +345,6 @@ const BookItem = () => {
   )
   const filteredKafedras = kafedras.filter((kafedra) =>
     kafedra.name.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
-  )
-
-  const editFilteredBooks = books.filter((book) => book.name.toLowerCase().includes(editBookSearchTerm.toLowerCase()))
-  const editFilteredLanguages = languages.filter((language) =>
-    language.name.toLowerCase().includes(editLanguageSearchTerm.toLowerCase()),
-  )
-  const editFilteredAlphabets = alphabets.filter((alphabet) =>
-    alphabet.name.toLowerCase().includes(editAlphabetSearchTerm.toLowerCase()),
-  )
-  const editFilteredStatuses = statuses.filter((status) =>
-    status.name.toLowerCase().includes(editStatusSearchTerm.toLowerCase()),
-  )
-  const editFilteredKafedras = kafedras.filter((kafedra) =>
-    kafedra.name.toLowerCase().includes(editKafedraSearchTerm.toLowerCase()),
   )
 
   const handleBookSelect = (book: BookType) => {
@@ -423,36 +377,6 @@ const BookItem = () => {
     setIsKafedraDropdownOpen(false)
   }
 
-  const handleEditBookSelect = (book: BookType) => {
-    setEditBookId(book.id)
-    setEditBookSearchTerm(book.name)
-    setIsEditBookDropdownOpen(false)
-  }
-
-  const handleEditLanguageSelect = (language: LanguageType) => {
-    setEditLanguageId(language.id)
-    setEditLanguageSearchTerm(language.name)
-    setIsEditLanguageDropdownOpen(false)
-  }
-
-  const handleEditAlphabetSelect = (alphabet: AlphabetType) => {
-    setEditAlphabetId(alphabet.id)
-    setEditAlphabetSearchTerm(alphabet.name)
-    setIsEditAlphabetDropdownOpen(false)
-  }
-
-  const handleEditStatusSelect = (status: StatusType) => {
-    setEditStatusId(status.id)
-    setEditStatusSearchTerm(status.name)
-    setIsEditStatusDropdownOpen(false)
-  }
-
-  const handleEditKafedraSelect = (kafedra: KafedraType) => {
-    setEditKafedraId(kafedra.id)
-    setEditKafedraSearchTerm(kafedra.name)
-    setIsEditKafedraDropdownOpen(false)
-  }
-
   const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -470,34 +394,10 @@ const BookItem = () => {
     }
   }
 
-  const handleEditPdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      if (file.type !== "application/pdf") {
-        antdMessage.error("Faqat PDF fayllar qabul qilinadi!")
-        e.target.value = ""
-        return
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        antdMessage.error("Fayl hajmi 10MB dan oshmasligi kerak!")
-        e.target.value = ""
-        return
-      }
-      setEditPdfFile(file)
-    }
-  }
-
   const removePdfFile = () => {
     setSelectedPdfFile(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
-    }
-  }
-
-  const removeEditPdfFile = () => {
-    setEditPdfFile(null)
-    if (editFileInputRef.current) {
-      editFileInputRef.current.value = ""
     }
   }
 
@@ -507,7 +407,6 @@ const BookItem = () => {
       antdMessage.warning("Barcha majburiy maydonlarni to'ldiring!")
       return
     }
-
     if (isPdfAvailable && !selectedPdfFile) {
       antdMessage.warning("PDF faylni yuklang!")
       return
@@ -583,76 +482,6 @@ const BookItem = () => {
     }
   }
 
-  const showUpdateModal = (bookItem: BookItemType) => {
-    setSelectedBookItem(bookItem)
-    setEditBookId(bookItem.book_id.toString())
-    setEditLanguageId(bookItem.language_id.toString())
-    setEditAlphabetId(bookItem.alphabet_id.toString())
-    setEditStatusId(bookItem.status_id.toString())
-    setEditKafedraId(bookItem.kafedra_id.toString())
-    setEditBookSearchTerm(bookItem.book?.name || "")
-    setEditLanguageSearchTerm(bookItem.language?.name || "")
-    setEditAlphabetSearchTerm(bookItem.alphabet?.name || "")
-    setEditStatusSearchTerm(bookItem.status?.name || "")
-    setEditKafedraSearchTerm(bookItem.kafedra?.name || "")
-    setEditPdfFile(null)
-    setIsEditPdfAvailable(!!bookItem.PDFFile)
-    setIsUpdateModalVisible(true)
-  }
-
-  const handleUpdateOk = async () => {
-    setUpdateLoading(true)
-    try {
-      const token = localStorage.getItem("token")
-      const isRolesStr = localStorage.getItem("isRoles")
-      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
-      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
-      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
-
-      const formData = new FormData()
-      formData.append("book_id", editBookId)
-      formData.append("language_id", editLanguageId)
-      formData.append("alphabet_id", editAlphabetId)
-      formData.append("status_id", editStatusId)
-      formData.append("kafedra_id", editKafedraId)
-
-      if (isEditPdfAvailable && editPdfFile) {
-        formData.append("pdf", editPdfFile)
-      }
-
-      if (!isEditPdfAvailable) {
-        formData.append("pdf_remove", "true")
-      }
-
-      await axios.put(`${import.meta.env.VITE_API}/api/book-items/${selectedBookItem?.id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "X-permission": permissionIds[0],
-          "Content-Type": "multipart/form-data",
-        },
-      })
-
-      setIsUpdateModalVisible(false)
-      setSelectedBookItem(null)
-      setEditPdfFile(null)
-      setIsEditPdfAvailable(false)
-      fetchBookItems()
-      antdMessage.success("Kitob detallar muvaffaqiyatli yangilandi!")
-    } catch (error) {
-      console.error("Yangilashda xatolik yuz berdi:", error)
-      antdMessage.error("Yangilashda xatolik yuz berdi!")
-    } finally {
-      setUpdateLoading(false)
-    }
-  }
-
-  const handleUpdateCancel = () => {
-    setIsUpdateModalVisible(false)
-    setSelectedBookItem(null)
-    setEditPdfFile(null)
-    setIsEditPdfAvailable(false)
-  }
-
   const showDeleteModal = (bookItem: BookItemType) => {
     setSelectedBookItem(bookItem)
     setIsDeleteModalVisible(true)
@@ -707,7 +536,6 @@ const BookItem = () => {
         <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Kitob detallarni bog'lash</h3>
       </div>
-
       <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6 mt-6 mb-8">
         {/* Book Select */}
         <div className="w-full" ref={bookDropdownRef}>
@@ -760,7 +588,6 @@ const BookItem = () => {
             )}
           </div>
         </div>
-
         {/* Language Select */}
         <div className="w-full" ref={languageDropdownRef}>
           <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">Tilni tanlang! *</label>
@@ -812,7 +639,6 @@ const BookItem = () => {
             )}
           </div>
         </div>
-
         {/* Alphabet Select */}
         <div className="w-full" ref={alphabetDropdownRef}>
           <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">Alifboni tanlang! *</label>
@@ -864,7 +690,6 @@ const BookItem = () => {
             )}
           </div>
         </div>
-
         {/* Status Select */}
         <div className="w-full" ref={statusDropdownRef}>
           <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">Statusni tanlang! *</label>
@@ -916,7 +741,6 @@ const BookItem = () => {
             )}
           </div>
         </div>
-
         {/* Kafedra Select */}
         <div className="w-full" ref={kafedraDropdownRef}>
           <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">Kafedralarni tanlang!</label>
@@ -968,7 +792,6 @@ const BookItem = () => {
             )}
           </div>
         </div>
-
         {/* PDF Availability Checkbox */}
         <div className="w-full md:col-span-2">
           <div className="flex items-center gap-3 mb-4">
@@ -1041,6 +864,7 @@ const BookItem = () => {
             </p>
           </div>
         )}
+
         {/* Submit Button */}
         <div className="md:col-span-2">
           <button
@@ -1102,9 +926,6 @@ const BookItem = () => {
                     PDF
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
-                    Yangilash
-                  </th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     O'chirish
                   </th>
                 </tr>
@@ -1131,29 +952,21 @@ const BookItem = () => {
                       {bookItem.kafedra?.name || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-  {bookItem.PDFFile && 
-   bookItem.PDFFile.file_url && 
-   bookItem.PDFFile.original_name && 
-   bookItem.PDFFile.original_name !== "salom.pdf" ? (
-    <a
-      href={bookItem.PDFFile.file_url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-500 hover:text-blue-600 underline flex items-center gap-1"
-    >
-      Ko'rish
-    </a>
-  ) : (
-    <span className="text-gray-400 dark:text-gray-500">pdf yo'q</span>
-  )}
-</td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
-                      <button
-                        className="text-blue-500 hover:text-blue-600 px-3 py-1 rounded-md transition-all duration-300"
-                        onClick={() => showUpdateModal(bookItem)}
-                      >
-                        Yangilash
-                      </button>
+                      {bookItem.PDFFile &&
+                      bookItem.PDFFile.file_url &&
+                      bookItem.PDFFile.original_name &&
+                      bookItem.PDFFile.original_name !== "salom.pdf" ? (
+                        <a
+                          href={bookItem.PDFFile.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600 underline flex items-center gap-1"
+                        >
+                          Ko'rish
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 dark:text-gray-500">pdf yo'q</span>
+                      )}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
                       <button
@@ -1170,356 +983,6 @@ const BookItem = () => {
           </div>
         )}
       </div>
-      {/* UPDATE MODAL */}
-      <Modal
-        title="Kitob detallarni tahrirlash"
-        open={isUpdateModalVisible}
-        onOk={handleUpdateOk}
-        onCancel={handleUpdateCancel}
-        okText={updateLoading ? "Yangilanmoqda..." : "Yangilash"}
-        confirmLoading={updateLoading}
-        width={900}
-      >
-        <div className="grid md:grid-cols-2 gap-4 mt-4">
-          {/* Edit Book Select */}
-          <div className="w-full" ref={editBookDropdownRef}>
-            <label className="block font-medium text-gray-700 mb-2">Kitobni tanlang! *</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={editBookSearchTerm}
-                onChange={(e) => {
-                  setEditBookSearchTerm(e.target.value)
-                  setIsEditBookDropdownOpen(true)
-                  if (!e.target.value) {
-                    setEditBookId("")
-                  }
-                }}
-                onFocus={() => setIsEditBookDropdownOpen(true)}
-                placeholder="Kitobni tanlang!"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
-                autoComplete="off"
-              />
-              <div
-                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                onClick={() => setIsEditBookDropdownOpen(!isEditBookDropdownOpen)}
-              >
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${isEditBookDropdownOpen ? "rotate-180" : ""}`}
-                />
-              </div>
-              {isEditBookDropdownOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                  {editFilteredBooks.length > 0 ? (
-                    editFilteredBooks.map((book) => (
-                      <div
-                        key={book.id}
-                        onClick={() => handleEditBookSelect(book)}
-                        className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${
-                          editBookId === book.id ? "bg-blue-50 text-blue-900" : ""
-                        }`}
-                      >
-                        {book.name}
-                        {editBookId === book.id && <span className="float-right">✓</span>}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-gray-500">Kitob topilmadi</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          {/* Edit Language Select */}
-          <div className="w-full" ref={editLanguageDropdownRef}>
-            <label className="block font-medium text-gray-700 mb-2">Tilni tanlang! *</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={editLanguageSearchTerm}
-                onChange={(e) => {
-                  setEditLanguageSearchTerm(e.target.value)
-                  setIsEditLanguageDropdownOpen(true)
-                  if (!e.target.value) {
-                    setEditLanguageId("")
-                  }
-                }}
-                onFocus={() => setIsEditLanguageDropdownOpen(true)}
-                placeholder="Tilni tanlang!"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
-                autoComplete="off"
-              />
-              <div
-                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                onClick={() => setIsEditLanguageDropdownOpen(!isEditLanguageDropdownOpen)}
-              >
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${isEditLanguageDropdownOpen ? "rotate-180" : ""}`}
-                />
-              </div>
-              {isEditLanguageDropdownOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                  {editFilteredLanguages.length > 0 ? (
-                    editFilteredLanguages.map((language) => (
-                      <div
-                        key={language.id}
-                        onClick={() => handleEditLanguageSelect(language)}
-                        className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${
-                          editLanguageId === language.id ? "bg-blue-50 text-blue-900" : ""
-                        }`}
-                      >
-                        {language.name}
-                        {editLanguageId === language.id && <span className="float-right">✓</span>}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-gray-500">Til topilmadi</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          {/* Edit Alphabet Select */}
-          <div className="w-full" ref={editAlphabetDropdownRef}>
-            <label className="block font-medium text-gray-700 mb-2">Alifboni tanlang! *</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={editAlphabetSearchTerm}
-                onChange={(e) => {
-                  setEditAlphabetSearchTerm(e.target.value)
-                  setIsEditAlphabetDropdownOpen(true)
-                  if (!e.target.value) {
-                    setEditAlphabetId("")
-                  }
-                }}
-                onFocus={() => setIsEditAlphabetDropdownOpen(true)}
-                placeholder="Alifboni tanlang!"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
-                autoComplete="off"
-              />
-              <div
-                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                onClick={() => setIsEditAlphabetDropdownOpen(!isEditAlphabetDropdownOpen)}
-              >
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${isEditAlphabetDropdownOpen ? "rotate-180" : ""}`}
-                />
-              </div>
-              {isEditAlphabetDropdownOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                  {editFilteredAlphabets.length > 0 ? (
-                    editFilteredAlphabets.map((alphabet) => (
-                      <div
-                        key={alphabet.id}
-                        onClick={() => handleEditAlphabetSelect(alphabet)}
-                        className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${
-                          editAlphabetId === alphabet.id ? "bg-blue-50 text-blue-900" : ""
-                        }`}
-                      >
-                        {alphabet.name}
-                        {editAlphabetId === alphabet.id && <span className="float-right">✓</span>}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-gray-500">Alifbo topilmadi</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          {/* Edit Status Select */}
-          <div className="w-full" ref={editStatusDropdownRef}>
-            <label className="block font-medium text-gray-700 mb-2">Statusni tanlang! *</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={editStatusSearchTerm}
-                onChange={(e) => {
-                  setEditStatusSearchTerm(e.target.value)
-                  setIsEditStatusDropdownOpen(true)
-                  if (!e.target.value) {
-                    setEditStatusId("")
-                  }
-                }}
-                onFocus={() => setIsEditStatusDropdownOpen(true)}
-                placeholder="Statusni tanlang!"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
-                autoComplete="off"
-              />
-              <div
-                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                onClick={() => setIsEditStatusDropdownOpen(!isEditStatusDropdownOpen)}
-              >
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${isEditStatusDropdownOpen ? "rotate-180" : ""}`}
-                />
-              </div>
-              {isEditStatusDropdownOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                  {editFilteredStatuses.length > 0 ? (
-                    editFilteredStatuses.map((status) => (
-                      <div
-                        key={status.id}
-                        onClick={() => handleEditStatusSelect(status)}
-                        className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${
-                          editStatusId === status.id ? "bg-blue-50 text-blue-900" : ""
-                        }`}
-                      >
-                        {status.name}
-                        {editStatusId === status.id && <span className="float-right">✓</span>}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-gray-500">Status topilmadi</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          {/* Edit Kafedra Select */}
-          <div className="w-full md:col-span-2" ref={editKafedraDropdownRef}>
-            <label className="block font-medium text-gray-700 mb-2">Kafedralarni tanlang!</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={editKafedraSearchTerm}
-                onChange={(e) => {
-                  setEditKafedraSearchTerm(e.target.value)
-                  setIsEditKafedraDropdownOpen(true)
-                  if (!e.target.value) {
-                    setEditKafedraId("")
-                  }
-                }}
-                onFocus={() => setIsEditKafedraDropdownOpen(true)}
-                placeholder="Kafedralarni tanlang!"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
-                autoComplete="off"
-              />
-              <div
-                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                onClick={() => setIsEditKafedraDropdownOpen(!isEditKafedraDropdownOpen)}
-              >
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${isEditKafedraDropdownOpen ? "rotate-180" : ""}`}
-                />
-              </div>
-              {isEditKafedraDropdownOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                  {editFilteredKafedras.length > 0 ? (
-                    editFilteredKafedras.map((kafedra) => (
-                      <div
-                        key={kafedra.id}
-                        onClick={() => handleEditKafedraSelect(kafedra)}
-                        className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${
-                          editKafedraId === kafedra.id ? "bg-blue-50 text-blue-900" : ""
-                        }`}
-                      >
-                        {kafedra.name}
-                        {editKafedraId === kafedra.id && <span className="float-right">✓</span>}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-gray-500">Kafedra topilmadi</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          {/* Edit PDF Availability Checkbox */}
-          <div className="w-full md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <input
-                type="checkbox"
-                id="edit-pdf-available"
-                checked={isEditPdfAvailable}
-                onChange={(e) => {
-                  setIsEditPdfAvailable(e.target.checked)
-                  if (!e.target.checked) {
-                    setEditPdfFile(null)
-                    if (editFileInputRef.current) {
-                      editFileInputRef.current.value = ""
-                    }
-                  }
-                }}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
-              <label htmlFor="edit-pdf-available" className="text-sm font-medium text-gray-700 cursor-pointer">
-                Kitob PDF mavjudmi?
-              </label>
-            </div>
-          </div>
-          {/* Edit PDF Upload - Only show if checkbox is checked */}
-          {isEditPdfAvailable && (
-            <div className="w-full md:col-span-2">
-              <label className="block font-medium text-gray-700 mb-2">
-                {selectedBookItem?.PDFFile ? "Yangi PDF faylni yuklang (ixtiyoriy)" : "PDF faylni yuklang! *"}
-              </label>
-              <div className="relative">
-                <input
-                  ref={editFileInputRef}
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  onChange={handleEditPdfFileChange}
-                  className="hidden"
-                  id="edit-pdf-upload"
-                />
-                <label
-                  htmlFor="edit-pdf-upload"
-                  className="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 transition-colors flex items-center justify-center gap-2 min-h-[60px] bg-gray-50 hover:bg-gray-100"
-                >
-                  <Upload className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-600">
-                    {editPdfFile
-                      ? editPdfFile.name
-                      : selectedBookItem?.PDFFile
-                        ? "Yangi PDF faylni tanlang (ixtiyoriy)"
-                        : "PDF faylni tanlang"}
-                  </span>
-                </label>
-                {editPdfFile && (
-                  <div className="mt-2 flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm text-blue-800 font-medium">{editPdfFile.name}</span>
-                      <span className="text-xs text-blue-600">({(editPdfFile.size / 1024 / 1024).toFixed(2)} MB)</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={removeEditPdfFile}
-                      className="text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-                {selectedBookItem?.PDFFile && !editPdfFile && (
-                  <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-green-600" />
-                      <span className="text-sm text-green-800">Hozirgi PDF mavjud</span>
-                      <a
-                        href={selectedBookItem.PDFFile.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-600 underline text-xs"
-                      >
-                        Ko'rish
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {selectedBookItem?.PDFFile
-                  ? "Agar yangi PDF yuklasangiz, eski fayl almashtiriladi. Maksimal hajm: 10MB"
-                  : "Faqat PDF fayllar qabul qilinadi. Maksimal hajm: 10MB"}
-              </p>
-            </div>
-          )}
-        </div>
-      </Modal>
-
       {/* DELETE MODAL */}
       <Modal
         title="Kitob detallarni o'chirish"
