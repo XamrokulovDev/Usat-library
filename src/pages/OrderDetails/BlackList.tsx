@@ -1,5 +1,7 @@
+"use client"
+
 import axios from "axios"
-import { Ban } from 'lucide-react'
+import { Ban, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics"
 
@@ -43,6 +45,7 @@ const BlackList = () => {
   const [userGroups, setUserGroups] = useState<PermissionType[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [removingIds, setRemovingIds] = useState<string[]>([])
+  const [searchTerm, setSearchTerm] = useState<string>("")
 
   const rolesStr = localStorage.getItem("isRoles") || "[]"
   const roles: string[] = JSON.parse(rolesStr)
@@ -80,16 +83,27 @@ const BlackList = () => {
     setBlacklistedOrders(filtered)
   }
 
+  const filteredBlacklistedOrders = blacklistedOrders.filter((order) => {
+    const searchLower = searchTerm.toLowerCase()
+    const buyurtmachi = order.User?.full_name?.toLowerCase() || ""
+    const kitobNomi = order.Book?.name?.toLowerCase() || ""
+    const kitobKodi = order.book_code?.toLowerCase() || ""
+
+    return buyurtmachi.includes(searchLower) || kitobNomi.includes(searchLower) || kitobKodi.includes(searchLower)
+  })
+
   useEffect(() => {
     fetchPermissions()
   }, [])
 
   useEffect(() => {
     if (userGroups.length === 0) return
+
     const rolesStr = localStorage.getItem("isRoles") || "[]"
     const roles: string[] = JSON.parse(rolesStr)
     const matched = userGroups.filter((g) => roles.includes(g.group_id))
     const permissionCode = matched[0]?.permissionInfo.code_name || ""
+
     fetchOrders(permissionCode).finally(() => setLoading(false))
   }, [userGroups])
 
@@ -114,7 +128,6 @@ const BlackList = () => {
     try {
       setRemovingIds((prev) => [...prev, orderId])
       const token = localStorage.getItem("token")
-
       await axios.patch(
         `${import.meta.env.VITE_API}/api/user-order/${orderId}/remove-blacklist`,
         {},
@@ -127,6 +140,7 @@ const BlackList = () => {
       const roles: string[] = JSON.parse(rolesStr)
       const matched = userGroups.filter((g) => roles.includes(g.group_id))
       const permissionCode = matched[0]?.permissionInfo.code_name || ""
+
       await fetchOrders(permissionCode)
     } catch (error) {
       console.error("Qora ro'yxatdan chiqarishda xatolik:", error)
@@ -137,7 +151,9 @@ const BlackList = () => {
 
   if (loading) {
     return (
-      <div className={`overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 ${!shouldHideMetrics ? 'mt-6' : ''}`}>
+      <div
+        className={`overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 ${!shouldHideMetrics ? "mt-6" : ""}`}
+      >
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -150,105 +166,128 @@ const BlackList = () => {
 
   return (
     <>
-    {!shouldHideMetrics && <EcommerceMetrics />}
-    <div className={`overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 ${!shouldHideMetrics ? 'mt-6' : ''}`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Ban className="w-6 h-6 text-blue-500 dark:text-blue-400" />
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Qora ro'yxat</h3>
-        </div>
-        <h4 className="text-md font-semibold text-gray-800 dark:text-white/90">Jami: {blacklistedOrders.length} ta</h4>
-      </div>
-
-      <div className="space-y-6 mt-6">
-        {blacklistedOrders.length === 0 ? (
-          <div className="text-center py-12">
-            <Ban className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400 text-lg">Qora ro'yxatda hech kim yo'q!</p>
+      {!shouldHideMetrics && <EcommerceMetrics />}
+      <div
+        className={`overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 ${!shouldHideMetrics ? "mt-6" : ""}`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Ban className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Qora ro'yxat</h3>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-              <thead className="bg-gray-50 dark:bg-gray-700/50">
-                <tr>
-                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                    #
-                  </th>
-                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                    Buyurtmachi
-                  </th>
-                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                    Telefon raqami
-                  </th>
-                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                    Kitob nomi
-                  </th>
-                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                    Status
-                  </th>
-                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                    Yaratilgan vaqt
-                  </th>
-                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                    Kitob kodi
-                  </th>
-                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                    Amallar
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                {blacklistedOrders.map((order, index) => (
-                  <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {index + 1}
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {order.User?.full_name || "Foydalanuvchi ma'lumoti yo'q"}
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {order.User?.phone ? (
-                        <a
-                          href={`tel:${order.User.phone}`}
-                          className="px-6 py-3 whitespace-nowrap text-center text-[13px] font-medium text-gray-600 dark:text-gray-400 underline"
-                        >
-                          {order.User.phone}
-                        </a>
-                      ) : (
-                        "Ma'lumot yo'q"
-                      )}
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                      {order.Book?.name || "Kitob ma'lumoti yo'q"}
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium">
-                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                        {order.status_message || "Qora ro'yxat"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-600 dark:text-gray-400">
-                      {formatDate(order.created_at)}
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-600 dark:text-gray-400">
-                      {order.book_code || "Kod yo'q"}
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium">
-                      <button
-                        onClick={() => removeFromBlacklist(order.id)}
-                        disabled={removingIds.includes(order.id)}
-                        className="px-3 py-1 text-xs font-medium rounded-md bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        {removingIds.includes(order.id) ? "Chiqarilmoqda..." : "Ro'yxatdan chiqarish"}
-                      </button>
-                    </td>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              id="search"
+              name="name"
+              placeholder="Qidiruv..."
+              className="w-55 pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="space-y-6 mt-6">
+          {filteredBlacklistedOrders.length === 0 ? (
+            <div className="text-center py-12">
+              <Ban className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                {searchTerm ? "Qidiruv natijasi topilmadi!" : "Qora ro'yxatda hech kim yo'q!"}
+              </p>
+              {searchTerm && (
+                <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
+                  "{searchTerm}" bo'yicha hech narsa topilmadi
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                <thead className="bg-gray-50 dark:bg-gray-700/50">
+                  <tr>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      #
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Buyurtmachi
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Telefon raqami
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Kitob nomi
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Status
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Yaratilgan vaqt
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Kitob kodi
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Amallar
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                  {filteredBlacklistedOrders.map((order, index) => (
+                    <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                        {index + 1}
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                        {order.User?.full_name || "-"}
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                        {order.User?.phone ? (
+                          <a
+                            href={`tel:${order.User.phone}`}
+                            className="px-6 py-3 whitespace-nowrap text-center text-[13px] font-medium text-gray-600 dark:text-gray-400 underline"
+                          >
+                            {order.User.phone}
+                          </a>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                        {order.Book?.name || "-"}
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium">
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                          {order.status_message || "-"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {formatDate(order.created_at)}
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {order.book_code || "-"}
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium">
+                        <button
+                          onClick={() => removeFromBlacklist(order.id)}
+                          disabled={removingIds.includes(order.id)}
+                          className="px-3 py-1 text-xs font-medium rounded-md bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {removingIds.includes(order.id) ? "Chiqarilmoqda..." : "Ro'yxatdan chiqarish"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+        {searchTerm && filteredBlacklistedOrders.length > 0 && (
+          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+            {filteredBlacklistedOrders.length} ta natija topildi "{searchTerm}" uchun
           </div>
         )}
       </div>
-    </div>
     </>
   )
 }

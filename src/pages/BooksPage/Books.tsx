@@ -57,8 +57,8 @@ const Books = () => {
 
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
-      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
-      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id));
+      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name);
 
       const response = await axios.get<{ data: BookType[] }>(`${import.meta.env.VITE_API}/api/books`, {
         headers: {
@@ -66,7 +66,7 @@ const Books = () => {
           "X-permission": permissionIds[0],
         },
       })
-      setData(response.data.data)
+      setData(response.data.data);
     } catch (error) {
       console.error("Foydalanuvchilarni olishda xatolik:", error)
     } finally {

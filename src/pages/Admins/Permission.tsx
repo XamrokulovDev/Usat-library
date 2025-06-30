@@ -109,7 +109,7 @@ const Permission: React.FC = () => {
           },
         },
       )
-      setPermission(refreshResponse.data.data)
+      setPermission(refreshResponse.data.data);
     } catch (error) {
       const err = error as AxiosError<{ message: string }>
       antdMessage.error("Xatolik: " + (err.response?.data.message || err.message))

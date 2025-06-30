@@ -10,14 +10,27 @@ interface ResultType {
   issued: number;
 }
 
+interface PermissionInfoType {
+  id: string;
+  code_name: string;
+}
+
 interface PermissionType {
   id: string;
   group_id: string;
   permission_id: string;
-  permissionInfo: {
-    id: string;
-    code_name: string;
-  };
+  permissionInfo: PermissionInfoType;
+}
+
+interface BookType {
+  id: string;
+  name: string;
+  year: number;
+  page: number;
+  books: number;
+  auther_id: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function EcommerceMetrics() {
@@ -46,18 +59,17 @@ export default function EcommerceMetrics() {
     }
   };
 
-  const fetchGroups = async () => {
+  const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const isRolesStr = localStorage.getItem("isRoles");
-      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : [];
+      const isRoles: string[] = isRolesStr ? JSON.parse(isRolesStr) : [];
 
       const matchedGroups = userGroup.filter((item) =>
         isRoles.includes(item.group_id)
       );
 
-      const permissionIds = matchedGroups?.map(
+      const permissionIds = matchedGroups.map(
         (item) => item.permissionInfo.code_name
       );
 
@@ -70,19 +82,75 @@ export default function EcommerceMetrics() {
           },
         }
       );
-      setState(response.data.data);
+
+      setState((prev) => ({
+        ...prev,
+        users: response.data.data.users,
+        issued: response.data.data.issued,
+      }));
     } catch (err) {
       console.error("Dashboard ma'lumotlarini olishda xatolik:", err);
     }
   };
 
+  const fetchBooksCount = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const isRolesStr = localStorage.getItem("isRoles");
+      const isRoles: string[] = isRolesStr ? JSON.parse(isRolesStr) : [];
+
+      const permissionRes = await axios.get<{ data: PermissionType[] }>(
+        `${import.meta.env.VITE_API}/api/group-permissions`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const allPermissions = permissionRes.data.data;
+
+      const matchedGroups = allPermissions.filter((item) =>
+        isRoles.includes(item.group_id)
+      );
+
+      const permissionCodes = matchedGroups.map(
+        (item) => item.permissionInfo.code_name
+      );
+
+      if (permissionCodes.length === 0) return;
+
+      const booksRes = await axios.get<{ data: BookType[] }>(
+        `${import.meta.env.VITE_API}/api/books`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-permission": permissionCodes[0],
+          },
+        }
+      );
+
+      const totalBooks = booksRes.data.data.reduce((sum, book) => {
+        return sum + book.books;
+      }, 0);
+
+      setState((prev) => ({
+        ...prev,
+        books: totalBooks,
+      }));
+    } catch (error) {
+      console.error("Kitoblar sonini olishda yoki ruxsatda xatolik:", error);
+    }
+  };
+
   useEffect(() => {
     fetchPermission();
+    fetchBooksCount();
   }, []);
 
   useEffect(() => {
     if (userGroup.length > 0) {
-      fetchGroups();
+      fetchDashboardData();
     }
   }, [userGroup]);
 
@@ -93,13 +161,11 @@ export default function EcommerceMetrics() {
         label="Barcha foydalanuvchilar soni"
         value={state.users}
       />
-      {/* Kitoblar */}
       <Card
         icon={<GoBook className="text-gray-800 size-6 dark:text-white/90" />}
         label="Barcha kitoblar soni"
         value={state.books}
       />
-      {/* Berilgan kitoblar */}
       <Card
         icon={<MdOutlineBook className="text-gray-800 size-6 dark:text-white/90" />}
         label="Foydalanishga berilgan kitoblar soni"
