@@ -297,10 +297,10 @@ const Kafedra = () => {
                     #
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
-                    Kafedra nomi (O'zbekcha)
+                    Kafedra nomi
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
-                    Название кафедры (Русский)
+                    Название кафедры
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     Yangilash
@@ -357,7 +357,7 @@ const Kafedra = () => {
       >
         <div className="space-y-4">
           <div>
-            <label className="block font-medium text-gray-700 mb-2">Kafedra nomi (O'zbekcha)</label>
+            <label className="block font-medium text-gray-700 mb-2">Kafedra nomi</label>
             <Input 
               value={editedTitleUz} 
               onChange={(e) => setEditedTitleUz(e.target.value)} 
@@ -365,7 +365,7 @@ const Kafedra = () => {
             />
           </div>
           <div>
-            <label className="block font-medium text-gray-700 mb-2">Название кафедры (Русский)</label>
+            <label className="block font-medium text-gray-700 mb-2">Название кафедры</label>
             <Input 
               value={editedTitleRu} 
               onChange={(e) => setEditedTitleRu(e.target.value)} 

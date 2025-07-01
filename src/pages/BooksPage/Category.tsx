@@ -85,7 +85,7 @@ const Category = () => {
           "X-permission": permissionIds[0],
         },
       })
-      setGroups(response.data.data)
+      setGroups(response.data.data);
     } catch (err) {
       console.error("Muallifni olishda xatolik:", err)
       setError("Muallifni olishda xatolik yuz berdi.")
@@ -122,7 +122,7 @@ const Category = () => {
         { 
           name_uz: nameUz,
           name_ru: nameRu,
-          code: generatedCode
+          code: generatedCode,
         },
         {
           headers: {
@@ -323,10 +323,10 @@ const Category = () => {
                     #
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
-                    Kategoriya nomi (O'zbekcha)
+                    Kategoriya nomi
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
-                    Название категории (Русский)
+                    Название категории
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     Yangilash
@@ -385,22 +385,22 @@ const Category = () => {
         <div className="space-y-4">
           <div>
             <label className="block font-medium text-gray-700 mb-2">
-              Kategoriya nomi (O'zbekcha)
+              Kategoriya nomi
             </label>
             <Input
               value={editedTitleUz}
               onChange={(e) => setEditedTitleUz(e.target.value)}
-              placeholder="Yangi kategoriya nomi (O'zbekcha)"
+              placeholder="Yangi kategoriya nomi"
             />
           </div>
           <div>
             <label className="block font-medium text-gray-700 mb-2">
-              Название категории (Русский)
+              Название категории
             </label>
             <Input
               value={editedTitleRu}
               onChange={(e) => setEditedTitleRu(e.target.value)}
-              placeholder="Новое название категории (Русский)"
+              placeholder="Новое название категории"
             />
           </div>
         </div>

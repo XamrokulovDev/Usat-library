@@ -41,6 +41,11 @@ interface KafedraType {
   name_uz: string
 }
 
+interface CategoryType {
+  id: string
+  name_uz: string
+}
+
 interface BookItemType {
   id: string
   book_id: number
@@ -48,6 +53,7 @@ interface BookItemType {
   alphabet_id: number
   status_id: number
   kafedra_id: number
+  category_id?: number
   PDFFile: {
     file_url: string
     original_name?: string
@@ -74,6 +80,10 @@ interface BookItemType {
     id: string
     name_uz: string
   }
+  category?: {
+    id: string
+    name_uz: string
+  }
 }
 
 const BookItem = () => {
@@ -84,6 +94,7 @@ const BookItem = () => {
   const [alphabets, setAlphabetType] = useState<AlphabetType[]>([])
   const [statuses, setStatuses] = useState<StatusType[]>([])
   const [kafedras, setKafedras] = useState<KafedraType[]>([])
+  const [categories, setCategories] = useState<CategoryType[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
   const [submitLoading, setSubmitLoading] = useState<boolean>(false)
@@ -91,19 +102,21 @@ const BookItem = () => {
   const [selectedLanguageId, setSelectedLanguageId] = useState<string>("")
   const [selectedAlphabetId, setSelectedAlphabetId] = useState<string>("")
   const [selectedStatusId, setSelectedStatusId] = useState<string>("")
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("")
   const [selectedKafedraId, setSelectedKafedraId] = useState<string>("")
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("")
   const [selectedPdfFile, setSelectedPdfFile] = useState<File | null>(null)
   const [bookSearchTerm, setBookSearchTerm] = useState<string>("")
   const [languageSearchTerm, setLanguageSearchTerm] = useState<string>("")
   const [alphabetSearchTerm, setAlphabetSearchTerm] = useState<string>("")
   const [statusSearchTerm, setStatusSearchTerm] = useState<string>("")
   const [kafedraSearchTerm, setKafedraSearchTerm] = useState<string>("")
+  const [categorySearchTerm, setCategorySearchTerm] = useState<string>("")
   const [isBookDropdownOpen, setIsBookDropdownOpen] = useState<boolean>(false)
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState<boolean>(false)
   const [isAlphabetDropdownOpen, setIsAlphabetDropdownOpen] = useState<boolean>(false)
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState<boolean>(false)
   const [isKafedraDropdownOpen, setIsKafedraDropdownOpen] = useState<boolean>(false)
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedBookItem, setSelectedBookItem] = useState<BookItemType | null>(null)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
@@ -114,6 +127,7 @@ const BookItem = () => {
   const alphabetDropdownRef = useRef<HTMLDivElement>(null)
   const statusDropdownRef = useRef<HTMLDivElement>(null)
   const kafedraDropdownRef = useRef<HTMLDivElement>(null)
+  const categoryDropdownRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const populateBookItems = (items: BookItemType[]): BookItemType[] => {
@@ -124,6 +138,7 @@ const BookItem = () => {
       alphabet: alphabets.find((alpha) => alpha.id === item.alphabet_id.toString()),
       status: statuses.find((status) => status.id === item.status_id.toString()),
       kafedra: kafedras.find((kafedra) => kafedra.id === item.kafedra_id.toString()),
+      category: categories.find((category) => category.id === item.category_id?.toString()), 
     }))
   }
 
@@ -164,6 +179,26 @@ const BookItem = () => {
     }
   }
 
+  const fetchCategories = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const isRolesStr = localStorage.getItem("isRoles")
+      const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
+      const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
+      const permissionIds = matchedGroups?.map((item) => item.permissionInfo.code_name)
+
+      const response = await axios.get(`${import.meta.env.VITE_API}/api/categories`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-permission": permissionIds[0],
+        },
+      })
+      setCategories(response.data.data)
+    } catch (err) {
+      console.error("❌ Kategoriyalarni olishda xatolik:", err)
+    }
+  }
+
   const fetchBookItems = async () => {
     setError(null)
     setFetchLoading(true)
@@ -181,14 +216,15 @@ const BookItem = () => {
         },
       })
 
-      const rawBookItems = response.data.data;
+      const rawBookItems = response.data.data
 
       if (
         books.length > 0 &&
         languages.length > 0 &&
         alphabets.length > 0 &&
         statuses.length > 0 &&
-        kafedras.length > 0
+        kafedras.length > 0 &&
+        categories.length > 0
       ) {
         const populatedItems = populateBookItems(rawBookItems)
         setBookItems(populatedItems)
@@ -290,7 +326,14 @@ const BookItem = () => {
   useEffect(() => {
     if (userGroup.length > 0) {
       const fetchAllData = async () => {
-        await Promise.all([fetchBooks(), fetchLanguages(), fetchAlphabets(), fetchStatuses(), fetchKafedras()])
+        await Promise.all([
+          fetchBooks(),
+          fetchLanguages(),
+          fetchAlphabets(),
+          fetchStatuses(),
+          fetchKafedras(),
+          fetchCategories(),
+        ])
       }
       fetchAllData()
     }
@@ -302,11 +345,12 @@ const BookItem = () => {
       languages.length > 0 &&
       alphabets.length > 0 &&
       statuses.length > 0 &&
-      kafedras.length > 0
+      kafedras.length > 0 &&
+      categories.length > 0
     ) {
       fetchBookItems()
     }
-  }, [books, languages, alphabets, statuses, kafedras])
+  }, [books, languages, alphabets, statuses, kafedras, categories])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -325,6 +369,9 @@ const BookItem = () => {
       if (kafedraDropdownRef.current && !kafedraDropdownRef.current.contains(event.target as Node)) {
         setIsKafedraDropdownOpen(false)
       }
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+        setIsCategoryDropdownOpen(false)
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside)
@@ -334,17 +381,25 @@ const BookItem = () => {
   }, [])
 
   const filteredBooks = books.filter((book) => book.name.toLowerCase().includes(bookSearchTerm.toLowerCase()))
+
   const filteredLanguages = languages.filter((language) =>
     language.name.toLowerCase().includes(languageSearchTerm.toLowerCase()),
   )
+
   const filteredAlphabets = alphabets.filter((alphabet) =>
     alphabet.name.toLowerCase().includes(alphabetSearchTerm.toLowerCase()),
   )
+
   const filteredStatuses = statuses.filter((status) =>
     status.name.toLowerCase().includes(statusSearchTerm.toLowerCase()),
   )
+
   const filteredKafedras = kafedras.filter((kafedra) =>
     kafedra.name_uz.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
+  )
+
+  const filteredCategories = categories.filter((category) =>
+    category.name_uz.toLowerCase().includes(categorySearchTerm.toLowerCase()),
   )
 
   const handleBookSelect = (book: BookType) => {
@@ -377,6 +432,12 @@ const BookItem = () => {
     setIsKafedraDropdownOpen(false)
   }
 
+  const handleCategorySelect = (category: CategoryType) => {
+    setSelectedCategoryId(category.id)
+    setCategorySearchTerm(category.name_uz)
+    setIsCategoryDropdownOpen(false)
+  }
+
   const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -403,16 +464,19 @@ const BookItem = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
     if (!selectedBookId || !selectedLanguageId || !selectedAlphabetId || !selectedStatusId) {
       antdMessage.warning("Barcha majburiy maydonlarni to'ldiring!")
       return
     }
+
     if (isPdfAvailable && !selectedPdfFile) {
       antdMessage.warning("PDF faylni yuklang!")
       return
     }
 
     setSubmitLoading(true)
+
     try {
       const token = localStorage.getItem("token")
       const isRolesStr = localStorage.getItem("isRoles")
@@ -427,11 +491,28 @@ const BookItem = () => {
       formData.append("status_id", selectedStatusId)
       formData.append("kafedra_id", selectedKafedraId)
 
+      if (selectedCategoryId) {
+        formData.append("category_id", selectedCategoryId)
+      }
+
       if (isPdfAvailable && selectedPdfFile) {
         formData.append("pdf", selectedPdfFile)
       } else {
         const dummyFile = new File([""], "salom.pdf", { type: "application/pdf" })
         formData.append("pdf", dummyFile)
+      }
+
+      console.log("book_id:", selectedBookId)
+      console.log("language_id:", selectedLanguageId)
+      console.log("alphabet_id:", selectedAlphabetId)
+      console.log("status_id:", selectedStatusId)
+      console.log("kafedra_id:", selectedKafedraId)
+      console.log("category_id:", selectedCategoryId)
+      console.log("isPdfAvailable:", isPdfAvailable)
+      console.log("selectedPdfFile:", selectedPdfFile)
+      console.log("FormData entries:")
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value)
       }
 
       await axios.post(`${import.meta.env.VITE_API}/api/book-items`, formData, {
@@ -442,27 +523,14 @@ const BookItem = () => {
         },
       })
 
-      if (selectedCategoryId) {
-        const bookCategoryData = {
-          book_id: Number.parseInt(selectedBookId),
-          category_id: Number.parseInt(selectedCategoryId),
-        }
-        await axios.post(`${import.meta.env.VITE_API}/api/book-categories`, bookCategoryData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "X-permission": permissionIds[0],
-            "Content-Type": "application/json",
-          },
-        })
-      }
-
       antdMessage.success("Kitob detallar muvaffaqiyatli bog'landi!")
+
       setSelectedBookId("")
       setSelectedLanguageId("")
       setSelectedAlphabetId("")
       setSelectedStatusId("")
-      setSelectedCategoryId("")
       setSelectedKafedraId("")
+      setSelectedCategoryId("")
       setSelectedPdfFile(null)
       setIsPdfAvailable(false)
       setBookSearchTerm("")
@@ -470,9 +538,12 @@ const BookItem = () => {
       setAlphabetSearchTerm("")
       setStatusSearchTerm("")
       setKafedraSearchTerm("")
+      setCategorySearchTerm("")
+
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
+
       await fetchBookItems()
     } catch (error) {
       console.error("Xatolik yuz berdi:", error)
@@ -792,6 +863,58 @@ const BookItem = () => {
             )}
           </div>
         </div>
+        {/* Category Select - YANGI QO'SHILDI */}
+        <div className="w-full" ref={categoryDropdownRef}>
+          <label className="block font-medium text-gray-700 dark:text-gray-300 mb-2">Kategoriyani tanlang!</label>
+          <div className="relative">
+            <input
+              type="text"
+              value={categorySearchTerm}
+              onChange={(e) => {
+                setCategorySearchTerm(e.target.value)
+                setIsCategoryDropdownOpen(true)
+                if (!e.target.value) {
+                  setSelectedCategoryId("")
+                }
+              }}
+              onFocus={() => setIsCategoryDropdownOpen(true)}
+              placeholder="Kategoriyani tanlang!"
+              className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white cursor-pointer"
+              autoComplete="off"
+            />
+            <div
+              className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+              onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+            >
+              <ChevronDown
+                className={`w-4 h-4 text-gray-400 transition-transform ${isCategoryDropdownOpen ? "rotate-180" : ""}`}
+              />
+            </div>
+            {isCategoryDropdownOpen && (
+              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-auto">
+                {filteredCategories.length > 0 ? (
+                  filteredCategories.map((category) => (
+                    <div
+                      key={category.id}
+                      onClick={() => handleCategorySelect(category)}
+                      className={`px-4 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white transition-colors ${
+                        selectedCategoryId === category.id
+                          ? "bg-blue-50 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100"
+                          : ""
+                      }`}
+                    >
+                      {category.name_uz}
+                      {selectedCategoryId === category.id && <span className="float-right">✓</span>}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-2 text-gray-500 dark:text-gray-400">Kategoriya topilmadi</div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* PDF Availability Checkbox */}
         <div className="w-full md:col-span-2">
           <div className="flex items-center gap-3 mb-4">
@@ -818,6 +941,7 @@ const BookItem = () => {
             </label>
           </div>
         </div>
+
         {/* PDF Upload - Only show if checkbox is checked */}
         {isPdfAvailable && (
           <div className="w-full md:col-span-2">
@@ -876,6 +1000,7 @@ const BookItem = () => {
           </button>
         </div>
       </form>
+
       {/* Book Items List */}
       <div className="space-y-6 mt-15 my-4">
         <div className="flex items-center gap-2">
@@ -883,6 +1008,7 @@ const BookItem = () => {
             {bookItems.length === 0 ? "Kitob detallari yo'q!" : "Barcha kitob detallari"}
           </h4>
         </div>
+
         {fetchLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
@@ -950,6 +1076,9 @@ const BookItem = () => {
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
                       {bookItem.kafedra?.name_uz || "-"}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {bookItem.category?.name_uz || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
                       {bookItem.PDFFile &&

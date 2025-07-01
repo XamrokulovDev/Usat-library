@@ -11,7 +11,6 @@ interface OrderType {
 interface KafedraUserType {
   full_name: string
   phone: string
-  kafedra: string
   yonalish: string
   group: string
   orders: OrderType[]
@@ -20,7 +19,6 @@ interface KafedraUserType {
 interface FlattenedOrderType {
   full_name: string
   phone: string
-  kafedra: string
   yonalish: string
   group: string
   order_name: string
@@ -65,7 +63,7 @@ const Direktor = () => {
   const fetchKafedraOrders = async (permissionHeader: string) => {
     try {
       const token = localStorage.getItem("token")
-      const { data } = await axios.get(`${import.meta.env.VITE_API}/api/all-orders-kafedra?`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API}/api/all-orders-kafedra/kafedra`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "X-permission": permissionHeader,
@@ -86,7 +84,6 @@ const Direktor = () => {
           flattened.push({
             full_name: user.full_name,
             phone: user.phone,
-            kafedra: user.kafedra,
             yonalish: user.yonalish,
             group: user.group,
             order_name: order.name,
@@ -96,8 +93,7 @@ const Direktor = () => {
         })
       }
     })
-
-    setFlattenedOrders(flattened)
+    setFlattenedOrders(flattened);
   }
 
   const getUniqueYonalishlar = () => {
@@ -215,7 +211,7 @@ const Direktor = () => {
         </div>
       </div>
 
-      <div className="space-y-6 mt-15">
+      <div className="space-y-6 mt-15 mb-3">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
             <thead className="bg-gray-50 dark:bg-gray-700/50">
