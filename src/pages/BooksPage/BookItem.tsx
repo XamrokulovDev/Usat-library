@@ -53,7 +53,15 @@ interface BookItemType {
   alphabet_id: number
   status_id: number
   kafedra_id: number
-  category_id?: number
+  category_id: number | string
+  BookCategoryKafedra?: {
+    category: {
+      name_uz: string
+    }
+    kafedra: {
+      name_uz: string
+    }
+  }
   PDFFile: {
     file_url: string
     original_name?: string
@@ -75,14 +83,6 @@ interface BookItemType {
   status?: {
     id: string
     name: string
-  }
-  kafedra?: {
-    id: string
-    name_uz: string
-  }
-  category?: {
-    id: string
-    name_uz: string
   }
 }
 
@@ -133,12 +133,12 @@ const BookItem = () => {
   const populateBookItems = (items: BookItemType[]): BookItemType[] => {
     return items.map((item) => ({
       ...item,
-      book: books.find((book) => book.id === item.book_id.toString()),
-      language: languages.find((lang) => lang.id === item.language_id.toString()),
-      alphabet: alphabets.find((alpha) => alpha.id === item.alphabet_id.toString()),
-      status: statuses.find((status) => status.id === item.status_id.toString()),
-      kafedra: kafedras.find((kafedra) => kafedra.id === item.kafedra_id.toString()),
-      category: categories.find((category) => category.id === item.category_id?.toString()), 
+      book: item.book_id ? books.find((book) => book.id === item.book_id.toString()) : undefined,
+      language: item.language_id ? languages.find((lang) => lang.id === item.language_id.toString()) : undefined,
+      alphabet: item.alphabet_id ? alphabets.find((alpha) => alpha.id === item.alphabet_id.toString()) : undefined,
+      status: item.status_id ? statuses.find((status) => status.id === item.status_id.toString()) : undefined,
+      kafedra: item.kafedra_id ? kafedras.find((kafedra) => kafedra.id === item.kafedra_id.toString()) : undefined,
+      category: item.category_id != null ? categories.find((category) => category.id === item.category_id.toString()) : undefined,
     }))
   }
 
@@ -500,19 +500,6 @@ const BookItem = () => {
       } else {
         const dummyFile = new File([""], "salom.pdf", { type: "application/pdf" })
         formData.append("pdf", dummyFile)
-      }
-
-      console.log("book_id:", selectedBookId)
-      console.log("language_id:", selectedLanguageId)
-      console.log("alphabet_id:", selectedAlphabetId)
-      console.log("status_id:", selectedStatusId)
-      console.log("kafedra_id:", selectedKafedraId)
-      console.log("category_id:", selectedCategoryId)
-      console.log("isPdfAvailable:", isPdfAvailable)
-      console.log("selectedPdfFile:", selectedPdfFile)
-      console.log("FormData entries:")
-      for (const [key, value] of formData.entries()) {
-        console.log(key, value)
       }
 
       await axios.post(`${import.meta.env.VITE_API}/api/book-items`, formData, {
@@ -1049,6 +1036,9 @@ const BookItem = () => {
                     Kafedra
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                    Kategoriya
+                  </th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
                     PDF
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
@@ -1056,58 +1046,58 @@ const BookItem = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                {bookItems.map((bookItem, index) => (
-                  <tr key={bookItem.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {index + 1}
-                    </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.book?.name || "-"}
-                    </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.language?.name || "-"}
-                    </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.alphabet?.name || "-"}
-                    </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.status?.name || "-"}
-                    </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.kafedra?.name_uz || "-"}
-                    </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.category?.name_uz || "-"}
-                    </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.PDFFile &&
-                      bookItem.PDFFile.file_url &&
-                      bookItem.PDFFile.original_name &&
-                      bookItem.PDFFile.original_name !== "salom.pdf" ? (
-                        <a
-                          href={bookItem.PDFFile.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-600 underline flex items-center gap-1"
+                <tbody>
+                  {bookItems.map((bookItem, index) => (
+                    <tr key={bookItem.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                        {index + 1}
+                      </td>
+                      <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                        {bookItem.book?.name || "-"}
+                      </td>
+                      <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                        {bookItem.language?.name || "-"}
+                      </td>
+                      <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                        {bookItem.alphabet?.name || "-"}
+                      </td>
+                      <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                        {bookItem.status?.name || "-"}
+                      </td>
+                      <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                        {bookItem.BookCategoryKafedra?.kafedra.name_uz || "-"}
+                      </td>
+                      <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                        {bookItem.BookCategoryKafedra?.category.name_uz || "-"}
+                      </td>
+                      <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                        {bookItem.PDFFile &&
+                        bookItem.PDFFile.file_url &&
+                        bookItem.PDFFile.original_name &&
+                        bookItem.PDFFile.original_name !== "salom.pdf" ? (
+                          <a
+                            href={bookItem.PDFFile.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-600 underline flex items-center gap-1"
+                          >
+                            Ko'rish
+                          </a>
+                        ) : (
+                          <span className="text-gray-400 dark:text-gray-500">pdf yo'q</span>
+                        )}
+                      </td>
+                      <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
+                        <button
+                          className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
+                          onClick={() => showDeleteModal(bookItem)}
                         >
-                          Ko'rish
-                        </a>
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-500">pdf yo'q</span>
-                      )}
-                    </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
-                      <button
-                        className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
-                        onClick={() => showDeleteModal(bookItem)}
-                      >
-                        O'chirish
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+                          O'chirish
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
             </table>
           </div>
         )}

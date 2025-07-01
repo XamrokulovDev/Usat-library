@@ -1,4 +1,3 @@
-import type React from "react"
 import { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import { Modal, Input, message as antdMessage } from "antd"
@@ -7,6 +6,10 @@ import { Users, ChevronDown } from "lucide-react"
 interface FacultyType {
   id: string
   name: string
+  yonalish_id: string
+  yonalish?: {
+    name_uz: string
+  }
 }
 
 interface KafedraType {
@@ -32,18 +35,15 @@ const StudentGroup = () => {
   const [submitLoading, setSubmitLoading] = useState<boolean>(false)
   const [updateLoading, setUpdateLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-
   const [kafedras, setKafedras] = useState<KafedraType[]>([])
   const [selectedKafedraId, setSelectedKafedraId] = useState<string | null>(null)
   const [kafedraSearchTerm, setKafedraSearchTerm] = useState<string>("")
   const [isKafedraDropdownOpen, setIsKafedraDropdownOpen] = useState<boolean>(false)
-
   const [selectedFaculty, setSelectedFaculty] = useState<FacultyType | null>(null)
   const [editedKafedraId, setEditedKafedraId] = useState<string | null>(null)
   const [editedTitle, setEditedTitle] = useState<string>("")
   const [editKafedraSearchTerm, setEditKafedraSearchTerm] = useState<string>("")
   const [isEditKafedraDropdownOpen, setIsEditKafedraDropdownOpen] = useState<boolean>(false)
-
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
 
@@ -77,7 +77,6 @@ const StudentGroup = () => {
     setError(null)
     try {
       const token = localStorage.getItem("token")
-
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
@@ -89,7 +88,14 @@ const StudentGroup = () => {
           "X-permission": permissionIds[0],
         },
       })
-      setFaculties(response.data.data)
+
+      // Ma'lumotlarni yo'nalish bilan bog'lash
+      const groupsWithYonalish = response.data.data.map((group: FacultyType) => ({
+        ...group,
+        yonalish: kafedras.find((kafedra) => kafedra.id === group.yonalish_id),
+      }))
+
+      setFaculties(groupsWithYonalish)
     } catch (err) {
       console.error("Guruhlarni olishda xatolik:", err)
       setError("Guruhlarni olishda xatolik yuz berdi.")
@@ -101,7 +107,6 @@ const StudentGroup = () => {
   const fetchKafedras = async () => {
     try {
       const token = localStorage.getItem("token")
-
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
@@ -122,8 +127,9 @@ const StudentGroup = () => {
 
   useEffect(() => {
     if (userGroup.length > 0) {
-      fetchFaculties()
-      fetchKafedras()
+      fetchKafedras().then(() => {
+        fetchFaculties()
+      })
     }
   }, [userGroup])
 
@@ -144,11 +150,11 @@ const StudentGroup = () => {
   }, [])
 
   const filteredKafedras = kafedras.filter((kafedra) =>
-    kafedra.name.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
+    kafedra?.name?.toLowerCase().includes(kafedraSearchTerm.toLowerCase()),
   )
 
   const filteredEditKafedras = kafedras.filter((kafedra) =>
-    kafedra.name.toLowerCase().includes(editKafedraSearchTerm.toLowerCase()),
+    kafedra?.name?.toLowerCase().includes(editKafedraSearchTerm.toLowerCase()),
   )
 
   const handleKafedraSelect = (kafedra: KafedraType) => {
@@ -165,12 +171,10 @@ const StudentGroup = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-
     if (!selectedKafedraId) {
       antdMessage.warning("Yo'nalishni tanlang!")
       return
     }
-
     if (!name.trim() || !selectedKafedraId) {
       antdMessage.warning("Guruh nomini va yo'nalishni to'liq to'ldiring!")
       return
@@ -179,7 +183,6 @@ const StudentGroup = () => {
     setSubmitLoading(true)
     try {
       const token = localStorage.getItem("token")
-
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
@@ -198,6 +201,7 @@ const StudentGroup = () => {
           },
         },
       )
+
       antdMessage.success("Guruh muvaffaqiyatli qo'shildi!")
       setName("")
       setSelectedKafedraId(null)
@@ -214,7 +218,7 @@ const StudentGroup = () => {
   const showUpdateModal = (faculty: FacultyType) => {
     setSelectedFaculty(faculty)
     setEditedTitle(faculty.name)
-    const matched = kafedras.find((k) => k.name === faculty.name)
+    const matched = kafedras.find((k) => k.id === faculty.yonalish_id)
     setEditedKafedraId(matched?.id || null)
     setEditKafedraSearchTerm(matched?.name || "")
     setIsUpdateModalVisible(true)
@@ -229,7 +233,6 @@ const StudentGroup = () => {
     setUpdateLoading(true)
     try {
       const token = localStorage.getItem("token")
-
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
@@ -248,6 +251,7 @@ const StudentGroup = () => {
           },
         },
       )
+
       setIsUpdateModalVisible(false)
       setSelectedFaculty(null)
       fetchFaculties()
@@ -273,7 +277,6 @@ const StudentGroup = () => {
   const handleDeleteOk = async () => {
     try {
       const token = localStorage.getItem("token")
-
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id))
@@ -285,6 +288,7 @@ const StudentGroup = () => {
           "X-permission": permissionIds[0],
         },
       })
+
       setIsDeleteModalVisible(false)
       setSelectedFaculty(null)
       fetchFaculties()
@@ -334,6 +338,7 @@ const StudentGroup = () => {
             className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
           />
         </div>
+
         {/* Searchable Yo'nalish Select */}
         <div className="w-full md:col-span-2" ref={kafedraDropdownRef}>
           <label htmlFor="kafedra" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -355,7 +360,6 @@ const StudentGroup = () => {
               className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white cursor-pointer"
               autoComplete="off"
             />
-
             <div
               className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
               onClick={() => setIsKafedraDropdownOpen(!isKafedraDropdownOpen)}
@@ -364,7 +368,6 @@ const StudentGroup = () => {
                 className={`w-4 h-4 text-gray-400 transition-transform ${isKafedraDropdownOpen ? "rotate-180" : ""}`}
               />
             </div>
-
             {isKafedraDropdownOpen && (
               <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-auto">
                 {filteredKafedras.length > 0 ? (
@@ -435,6 +438,9 @@ const StudentGroup = () => {
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
                     Guruh nomi
                   </th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                    Yo'nalish
+                  </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     Yangilash
                   </th>
@@ -451,6 +457,9 @@ const StudentGroup = () => {
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
                       {faculty.name}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {faculty.yonalish?.name_uz || "-"}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
                       <button
@@ -507,7 +516,6 @@ const StudentGroup = () => {
                 className="w-full px-4 py-1 border border-gray-300 dark:border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-white dark:text-gray-600"
                 autoComplete="off"
               />
-
               <div
                 className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                 onClick={() => setIsEditKafedraDropdownOpen(!isEditKafedraDropdownOpen)}
@@ -518,7 +526,6 @@ const StudentGroup = () => {
                   }`}
                 />
               </div>
-
               {isEditKafedraDropdownOpen && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                   {filteredEditKafedras.length > 0 ? (
@@ -543,7 +550,6 @@ const StudentGroup = () => {
           </div>
         </div>
       </Modal>
-
       {/* DELETE MODAL */}
       <Modal
         title="Guruhni o'chirish"

@@ -307,10 +307,10 @@ const Direction = () => {
                     #
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
-                    Yo'nalish nomi (O'zbek)
+                    Yo'nalish nomi
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
-                    Yo'nalish nomi (Rus)
+                    Yo'nalish nomi
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     Yangilash
@@ -368,22 +368,22 @@ const Direction = () => {
         <div className="flex flex-col gap-4">
           <div>
             <label className="block font-medium text-gray-700 mb-2">
-              Yo'nalish nomi (O'zbek tilida)
+              Yo'nalish nomi
             </label>
             <Input
               value={editedTitleUz}
               onChange={(e) => setEditedTitleUz(e.target.value)}
-              placeholder="Yangi yo'nalish nomi (O'zbek)"
+              placeholder="Yangi yo'nalish nomi"
             />
           </div>
           <div>
             <label className="block font-medium text-gray-700 mb-2">
-              Yo'nalish nomi (Rus tilida)
+              Название направления
             </label>
             <Input
               value={editedTitleRu}
               onChange={(e) => setEditedTitleRu(e.target.value)}
-              placeholder="Новое название направления (Русский)"
+              placeholder="Название направления"
             />
           </div>
         </div>
