@@ -6,7 +6,8 @@ import { Navigation } from "lucide-react"
 
 interface FacultyType {
   id: string
-  name: string
+  name_uz: string
+  name_ru: string
 }
 
 interface PermissionType {
@@ -20,7 +21,8 @@ interface PermissionType {
 }
 
 const Direction = () => {
-  const [name, setName] = useState<string>("")
+  const [nameUz, setNameUz] = useState<string>("")
+  const [nameRu, setNameRu] = useState<string>("")
   const [faculties, setFaculties] = useState<FacultyType[]>([])
   const [userGroup, setUserGroup] = useState<PermissionType[]>([])
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
@@ -29,7 +31,8 @@ const Direction = () => {
   const [error, setError] = useState<string | null>(null)
 
   const [selectedFaculty, setSelectedFaculty] = useState<FacultyType | null>(null)
-  const [editedTitle, setEditedTitle] = useState<string>("")
+  const [editedTitleUz, setEditedTitleUz] = useState<string>("")
+  const [editedTitleRu, setEditedTitleRu] = useState<string>("")
 
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
@@ -91,8 +94,8 @@ const Direction = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (!name.trim()) {
-      antdMessage.warning("Iltimos, yo'nalish nomini to'ldiring!")
+    if (!nameUz.trim() || !nameRu.trim()) {
+      antdMessage.warning("Iltimos, yo'nalish nomlarini to'ldiring!")
       return
     }
 
@@ -108,7 +111,8 @@ const Direction = () => {
       await axios.post(
         `${import.meta.env.VITE_API}/api/yonalish`,
         {
-          name: name,
+          name_uz: nameUz,
+          name_ru: nameRu,
         },
         {
           headers: {
@@ -118,7 +122,8 @@ const Direction = () => {
         },
       )
       antdMessage.success("Yo'nalish muvaffaqiyatli qo'shildi!")
-      setName("")
+      setNameUz("")
+      setNameRu("")
       fetchFaculties()
     } catch (error) {
       console.error("Xatolik yuz berdi:", error)
@@ -130,13 +135,14 @@ const Direction = () => {
 
   const showUpdateModal = (faculty: FacultyType) => {
     setSelectedFaculty(faculty)
-    setEditedTitle(faculty.name)
+    setEditedTitleUz(faculty.name_uz)
+    setEditedTitleRu(faculty.name_ru)
     setIsUpdateModalVisible(true)
   }
 
   const handleUpdateOk = async () => {
-    if (!editedTitle.trim()) {
-      antdMessage.warning("Iltimos, yo'nalish nomini kiriting!")
+    if (!editedTitleUz.trim() || !editedTitleRu.trim()) {
+      antdMessage.warning("Iltimos, yo'nalish nomlarini kiriting!")
       return
     }
 
@@ -152,7 +158,8 @@ const Direction = () => {
       await axios.put(
         `${import.meta.env.VITE_API}/api/yonalish/${selectedFaculty?.id}`,
         {
-          name: editedTitle,
+          name_uz: editedTitleUz,
+          name_ru: editedTitleRu,
         },
         {
           headers: {
@@ -235,15 +242,29 @@ const Direction = () => {
 
       <form onSubmit={handleSubmit} className="grid gap-6 mb-8 mt-6">
         <div className="w-full">
-          <label htmlFor="direction" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="direction_uz" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
             Yo'nalish nomi
           </label>
           <input
-            id="direction"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            id="direction_uz"
+            name="name_uz"
+            value={nameUz}
+            onChange={(e) => setNameUz(e.target.value)}
             placeholder="Masalan: Marketing"
+            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
+          />
+        </div>
+
+        <div className="w-full">
+          <label htmlFor="direction_ru" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Название направления
+          </label>
+          <input
+            id="direction_ru"
+            name="name_ru"
+            value={nameRu}
+            onChange={(e) => setNameRu(e.target.value)}
+            placeholder="Например: Маркетинг"
             className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
           />
         </div>
@@ -258,14 +279,12 @@ const Direction = () => {
           </button>
         </div>
       </form>
-
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300">
             {faculties.length === 0 ? "Yo'nalishlar mavjud emas" : "Barcha yo'nalishlar"}
           </h4>
         </div>
-
         {fetchLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
@@ -291,7 +310,10 @@ const Direction = () => {
                     #
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
-                    Yo'nalish nomi
+                    Yo'nalish nomi (O'zbek)
+                  </th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                    Yo'nalish nomi (Rus)
                   </th>
                   <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
                     Yangilash
@@ -308,7 +330,10 @@ const Direction = () => {
                       {index + 1}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {faculty.name}
+                      {faculty.name_uz}
+                    </td>
+                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                      {faculty.name_ru}
                     </td>
                     <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
                       <button
@@ -333,7 +358,6 @@ const Direction = () => {
           </div>
         )}
       </div>
-
       {/* UPDATE MODAL */}
       <Modal
         title="Yo'nalishni Tahrirlash"
@@ -345,14 +369,28 @@ const Direction = () => {
         confirmLoading={updateLoading}
       >
         <div className="flex flex-col gap-4">
-          <Input
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            placeholder="Yangi yo'nalish nomi"
-          />
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">
+              Yo'nalish nomi (O'zbek tilida)
+            </label>
+            <Input
+              value={editedTitleUz}
+              onChange={(e) => setEditedTitleUz(e.target.value)}
+              placeholder="Yangi yo'nalish nomi (O'zbek)"
+            />
+          </div>
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">
+              Yo'nalish nomi (Rus tilida)
+            </label>
+            <Input
+              value={editedTitleRu}
+              onChange={(e) => setEditedTitleRu(e.target.value)}
+              placeholder="Новое название направления (Русский)"
+            />
+          </div>
         </div>
       </Modal>
-
       {/* DELETE MODAL */}
       <Modal
         title="yo'nalishni o'chirish"
@@ -362,7 +400,7 @@ const Direction = () => {
         okText="O'chirish"
         cancelText="Yo'q"
       >
-        <p>{selectedFaculty ? `"${selectedFaculty.name}" Yo'nalishni o'chirmoqchimisiz?` : ""}</p>
+        <p>{selectedFaculty ? `"${selectedFaculty.name_uz}" / "${selectedFaculty.name_ru}" Yo'nalishni o'chirmoqchimisiz?` : ""}</p>
       </Modal>
     </div>
   )

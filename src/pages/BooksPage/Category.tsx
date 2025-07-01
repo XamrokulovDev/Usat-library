@@ -256,7 +256,7 @@ const Category = () => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6 mb-8 mt-15">
         <div className="w-full">
           <label htmlFor="categoryUz" className="block font-medium text-gray-700 dark:text-gray-300 cursor-pointer mb-2">
-            Kategoriya nomi (O'zbekcha)
+            Kategoriya nomi
           </label>
           <input
             id="categoryUz"
@@ -269,7 +269,7 @@ const Category = () => {
         </div>
         <div className="w-full">
           <label htmlFor="categoryRu" className="block font-medium text-gray-700 dark:text-gray-300 cursor-pointer mb-2">
-            Название категории (Русский)
+            Название категории
           </label>
           <input
             id="categoryRu"

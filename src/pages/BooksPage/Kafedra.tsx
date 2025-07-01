@@ -227,10 +227,10 @@ const Kafedra = () => {
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Kafedra Qo'shish</h3>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6 mb-8 mt-15">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6 mb-8 mt-15">
         <div className="w-full">
           <label htmlFor="kafedra_uz" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Kafedra nomi (O'zbekcha)
+            Kafedra nomi
           </label>
           <input
             id="kafedra_uz"
@@ -243,7 +243,7 @@ const Kafedra = () => {
         </div>
         <div className="w-full">
           <label htmlFor="kafedra_ru" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Название кафедры (Русский)
+            Название кафедры
           </label>
           <input
             id="kafedra_ru"
@@ -254,7 +254,7 @@ const Kafedra = () => {
             className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
           />
         </div>
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 mt-4">
           <button
             type="submit"
             disabled={submitLoading}
