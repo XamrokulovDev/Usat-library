@@ -13,7 +13,7 @@ export interface UsersType {
     name: string
     Yonalish: {
       id: string
-      name: string
+      name_uz: string
     }
   }
 }
@@ -58,7 +58,7 @@ const UsersAll: React.FC = () => {
     fetchPermission()
   }, [])
 
-  const getUniqueYonalishlar = (): { id: string; name: string }[] => {
+  const getUniqueYonalishlar = (): { id: string; name_uz: string }[] => {
     const validData = data.filter((u) => u.StudentGroup && u.StudentGroup.Yonalish)
     const yonalishlar = validData.map((u) => u.StudentGroup.Yonalish)
     return Array.from(new Map(yonalishlar.map((y) => [y.id, y])).values())
@@ -197,7 +197,7 @@ const UsersAll: React.FC = () => {
                       <option value="">Yo'nalish</option>
                       {getUniqueYonalishlar().map((y) => (
                         <option key={y.id} value={y.id}>
-                          {y.name}
+                          {y.name_uz}
                         </option>
                       ))}
                     </select>
@@ -231,7 +231,7 @@ const UsersAll: React.FC = () => {
                       {item.passport_id}
                     </td>
                     <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {item.StudentGroup.Yonalish.name}
+                      {item.StudentGroup.Yonalish.name_uz}
                     </td>
                     <td className="w-1/4 text-center px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                       {item.StudentGroup.name}

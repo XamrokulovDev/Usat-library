@@ -89,7 +89,6 @@ const StudentGroup = () => {
         },
       })
 
-      // Ma'lumotlarni yo'nalish bilan bog'lash
       const groupsWithYonalish = response.data.data.map((group: FacultyType) => ({
         ...group,
         yonalish: kafedras.find((kafedra) => kafedra.id === group.yonalish_id),
