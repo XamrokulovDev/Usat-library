@@ -165,7 +165,7 @@ export default function MonthlyOrderChart() {
     },
     yaxis: {
       title: {
-        text: "Buyurtmalar soni",
+        text: "",
         style: {
           fontSize: "14px",
           fontWeight: 600,
@@ -226,7 +226,7 @@ export default function MonthlyOrderChart() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex flex-col items-center justify-center gap-3 h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         <span className="ml-2 text-gray-600 dark:text-gray-400">Yuklanmoqda...</span>
       </div>

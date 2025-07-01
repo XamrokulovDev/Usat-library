@@ -29,8 +29,6 @@ import UsersBuild from "./pages/Admins/UsersBuild"
 import BookItem from "./pages/BooksPage/BookItem"
 import BlackList from "./pages/OrderDetails/BlackList"
 import Direktor from "./pages/OrderDetails/Direktor"
-import CategoryItem from "./pages/BooksPage/CategoryItem"
-// import KafedraDetail from "./pages/OrderDetails/KafedraDetails"
 
 export default function App() {
   useEffect(() => {
@@ -95,7 +93,6 @@ export default function App() {
             {/* Foydalanuvchilar bo'limi */}
             <Route path="users-all" element={<UsersAll />} />
             <Route path="kafedra" element={<Kafedra />} />
-            {/* <Route path="kafedra/:kafedraName" element={<KafedraDetail />} /> */}
             <Route path="direction" element={<Direction />} />
             <Route path="student_group" element={<StudentGroup />} />
             {/* Buyurtmalar va tarix */}
@@ -103,7 +100,6 @@ export default function App() {
             <Route path="history" element={<History />} />
             <Route path="black-list" element={<BlackList />} />
             <Route path="direktor" element={<Direktor />} />
-            <Route path="category-faculty" element={<CategoryItem />} />
             {/* Statistika va grafiklar */}
             <Route path="bar-chart" element={<BarChart />} />
           </Route>

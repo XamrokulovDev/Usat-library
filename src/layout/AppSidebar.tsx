@@ -39,7 +39,6 @@ const AppSidebar: React.FC = () => {
         { name: "Kitob mualliflari", permission: "kitob_muallif", path: "/auther", pro: false },
         { name: "Kitob kategoriyalari", permission: "kategoriya", path: "/categories", pro: false },
         { name: "Kafedralar", permission: "kafedra", path: "/kafedra", pro: false },
-        // { name: "Kategory bog'lash", permission: "kategoriya_kafedra", path: "/category-faculty", pro: false },
         { name: "Kitob tillari", permission: "kitob_tili", path: "/languages", pro: false },
         { name: "Kitob alifbolari", permission: "kitob_alifbo", path: "/alphabet", pro: false },
         { name: "Kitob statuslari", permission: "kitob_status", path: "/status", pro: false },
