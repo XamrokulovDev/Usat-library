@@ -216,7 +216,7 @@ const BookItem = () => {
         },
       })
 
-      const rawBookItems = response.data.data
+      const rawBookItems = response.data.data;
 
       if (
         books.length > 0 &&
