@@ -33,6 +33,28 @@ interface BookType {
   updatedAt: string;
 }
 
+interface UserOrderType {
+  id: string;
+  user_id: string;
+  book_id: string;
+  book_code: string | null;
+  status_id: number;
+  created_at: string;
+  finished_at: string | null;
+  taking_at: string | null;
+  User: {
+    id: string;
+    full_name: string;
+    phone: string;
+    telegram_id: string;
+  };
+  Book: {
+    id: string;
+    name: string;
+  };
+  status_message: string;
+}
+
 export default function EcommerceMetrics() {
   const [state, setState] = useState<ResultType>({
     books: 0,
@@ -86,7 +108,6 @@ export default function EcommerceMetrics() {
       setState((prev) => ({
         ...prev,
         users: response.data.data.users,
-        issued: response.data.data.issued,
       }));
     } catch (err) {
       console.error("Dashboard ma'lumotlarini olishda xatolik:", err);
@@ -143,9 +164,60 @@ export default function EcommerceMetrics() {
     }
   };
 
+  const fetchIssuedBooksCount = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const isRolesStr = localStorage.getItem("isRoles");
+      const isRoles: string[] = isRolesStr ? JSON.parse(isRolesStr) : [];
+
+      const permissionRes = await axios.get<{ data: PermissionType[] }>(
+        `${import.meta.env.VITE_API}/api/group-permissions`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const allPermissions = permissionRes.data.data;
+
+      const matchedGroups = allPermissions.filter((item) =>
+        isRoles.includes(item.group_id)
+      );
+
+      const permissionCodes = matchedGroups.map(
+        (item) => item.permissionInfo.code_name
+      );
+
+      if (permissionCodes.length === 0) return;
+
+      const ordersRes = await axios.get<{ data: UserOrderType[] }>(
+        `${import.meta.env.VITE_API}/api/user-order`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-permission": permissionCodes[0],
+          },
+        }
+      );
+
+      const issuedCount = ordersRes.data.data.filter(
+        (order) => order.status_id === 3
+      ).length;
+
+      setState((prev) => ({
+        ...prev,
+        issued: issuedCount,
+      }));
+    } catch (error) {
+      console.error("Berilgan kitoblar sonini olishda xatolik:", error);
+    }
+  };
+
   useEffect(() => {
     fetchPermission();
     fetchBooksCount();
+    fetchIssuedBooksCount();
   }, []);
 
   useEffect(() => {

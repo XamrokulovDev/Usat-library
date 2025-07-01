@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
 import axios from "axios"
@@ -43,10 +45,12 @@ const CreateBooks: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false)
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
   const [submitLoading, setSubmitLoading] = useState<boolean>(false)
-
   const [tableSearchTerm, setTableSearchTerm] = useState<string>("")
   const [isEditMode, setIsEditMode] = useState<boolean>(false)
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
+
+  // Yangi state - edit qilayotgan kitobning asl ma'lumotlarini saqlash uchun
+  const [originalBookData, setOriginalBookData] = useState<BookType | null>(null)
 
   const dropdownRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -83,7 +87,6 @@ const CreateBooks: React.FC = () => {
         isRoles.includes(item.group_id),
       )
       const permissionIds: string[] = matchedGroups?.map((item: PermissionType) => item.permissionInfo.code_name)
-
       const response = await axios.get(`${import.meta.env.VITE_API}/api/auther`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -108,7 +111,6 @@ const CreateBooks: React.FC = () => {
         isRoles.includes(item.group_id),
       )
       const permissionIds: string[] = matchedGroups?.map((item: PermissionType) => item.permissionInfo.code_name)
-
       const response = await axios.get<{ data: BookType[] }>(`${import.meta.env.VITE_API}/api/books`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -136,7 +138,6 @@ const CreateBooks: React.FC = () => {
         setIsDropdownOpen(false)
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside)
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
@@ -178,14 +179,15 @@ const CreateBooks: React.FC = () => {
   }
 
   const handleEditBook = (book: BookType): void => {
+    // Asl kitob ma'lumotlarini saqlash
+    setOriginalBookData(book)
+
     setBookName(book.name)
     setYear(book.year.toString())
     setPage(book.page.toString())
     setBooks(book.books)
-
     if (book.auther_id) {
       const selectedAuthor: AutherType | undefined = auther.find((author: AutherType) => author.id === book.auther_id)
-
       if (selectedAuthor) {
         setSelectedAutherId(selectedAuthor.id.toString())
         setSearchTerm(selectedAuthor.name)
@@ -194,10 +196,8 @@ const CreateBooks: React.FC = () => {
       setSelectedAutherId(null)
       setSearchTerm("")
     }
-
     setIsEditMode(true)
     setEditingBookId(book.id)
-
     scrollToForm()
   }
 
@@ -210,6 +210,25 @@ const CreateBooks: React.FC = () => {
     setBooks("")
     setIsEditMode(false)
     setEditingBookId(null)
+    setOriginalBookData(null)
+  }
+
+  // book_count ni avtomatik hisoblash funksiyasi
+  const calculateBookCount = (newBooks: string, originalBooks?: string, originalBookCount?: string): string => {
+    if (isEditMode && originalBooks && originalBookCount) {
+      // Edit mode: yangi book_count = eski book_count + (yangi books - eski books)
+      const newBooksNum = Number(newBooks) || 0
+      const originalBooksNum = Number(originalBooks) || 0
+      const originalBookCountNum = Number(originalBookCount) || 0
+
+      const difference = newBooksNum - originalBooksNum
+      const newBookCount = originalBookCountNum + difference
+
+      return Math.max(0, newBookCount).toString() // Manfiy bo'lmasligi uchun
+    } else {
+      // Create mode: book_count = books
+      return newBooks
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -219,13 +238,16 @@ const CreateBooks: React.FC = () => {
       return
     }
 
+    // book_count ni avtomatik hisoblash
+    const calculatedBookCount = calculateBookCount(books, originalBookData?.books, originalBookData?.book_count)
+
     const requestData = {
       name: bookName,
       auther_id: Number(selectedAutherId),
       year: Number(year),
       page: Number(page),
       books: books,
-      book_count: books,
+      book_count: calculatedBookCount, // Avtomatik hisoblangan qiymat
     }
 
     setSubmitLoading(true)
@@ -255,7 +277,6 @@ const CreateBooks: React.FC = () => {
         })
         antdMessage.success("Kitob muvaffaqiyatli qo'shildi!")
       }
-
       resetForm()
       await fetchData()
     } catch (err) {
@@ -306,6 +327,7 @@ const CreateBooks: React.FC = () => {
             </button>
           )}
         </div>
+
         {fetchLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
@@ -329,6 +351,7 @@ const CreateBooks: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
+
             {/* Searchable Author Select */}
             <div className="w-full" ref={dropdownRef}>
               <label htmlFor="auther" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -346,7 +369,6 @@ const CreateBooks: React.FC = () => {
                   className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white cursor-pointer"
                   autoComplete="off"
                 />
-                {/* Dropdown arrow */}
                 <div
                   className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                   onClick={handleDropdownToggle}
@@ -355,7 +377,6 @@ const CreateBooks: React.FC = () => {
                     className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
                   />
                 </div>
-                {/* Dropdown List */}
                 {isDropdownOpen && (
                   <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-auto">
                     {filteredAuthers.length > 0 ? (
@@ -380,6 +401,7 @@ const CreateBooks: React.FC = () => {
                 )}
               </div>
             </div>
+
             <div>
               <label htmlFor="year" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Kitob chiqarilgan yilni kiriting!
@@ -393,6 +415,7 @@ const CreateBooks: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
+
             <div>
               <label htmlFor="page" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Kitob necha betligini kiriting!
@@ -406,6 +429,7 @@ const CreateBooks: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
+
             <div>
               <label htmlFor="books" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Kitob sonini kiriting!
@@ -419,6 +443,7 @@ const CreateBooks: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
+
             <button
               type="submit"
               disabled={submitLoading}
@@ -429,6 +454,7 @@ const CreateBooks: React.FC = () => {
           </form>
         )}
       </div>
+
       {/* Books Table */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 mt-6">
         <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -448,12 +474,13 @@ const CreateBooks: React.FC = () => {
             />
           </div>
         </div>
+
         <div className="space-y-6">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
-                {/* <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p> */}
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
               </div>
             </div>
           ) : filteredBooks.length === 0 ? (

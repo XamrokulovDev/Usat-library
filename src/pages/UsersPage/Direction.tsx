@@ -239,7 +239,6 @@ const Direction = () => {
         <Navigation className="w-6 h-6 text-blue-600 dark:text-blue-400" />
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">Yo'nalish Qo'shish</h3>
       </div>
-
       <form onSubmit={handleSubmit} className="grid gap-6 mb-8 mt-6">
         <div className="w-full">
           <label htmlFor="direction_uz" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -254,7 +253,6 @@ const Direction = () => {
             className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
           />
         </div>
-
         <div className="w-full">
           <label htmlFor="direction_ru" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
             Название направления
@@ -268,8 +266,7 @@ const Direction = () => {
             className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
           />
         </div>
-
-        <div>
+        <div className="mt-4">
           <button
             type="submit"
             disabled={submitLoading}
