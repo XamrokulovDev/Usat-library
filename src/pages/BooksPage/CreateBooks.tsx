@@ -1,6 +1,3 @@
-"use client"
-
-import type React from "react"
 import { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import { message as antdMessage } from "antd"
