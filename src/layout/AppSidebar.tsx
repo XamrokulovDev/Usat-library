@@ -80,7 +80,12 @@ const AppSidebar: React.FC = () => {
     {
       icon: <PieChartIcon />,
       name: "Statistika",
-      subItems: [{ name: "Yillik Statistika", permission: "", path: "/bar-chart", pro: false }],
+      subItems: [
+        { name: "Yillik Statistika", permission: "", path: "/yearly-chart", pro: false },
+        { name: "Oylik Statistika", permission: "", path: "/monthly-chart", pro: false },
+        { name: "Haftalik Statistika", permission: "", path: "/weekly-chart", pro: false },
+        { name: "Kunlik Statistika", permission: "", path: "/daily-chart", pro: false }
+      ]
     },
   ]
 

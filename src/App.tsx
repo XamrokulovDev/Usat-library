@@ -3,7 +3,6 @@ import { useEffect } from "react"
 import { ThemeProvider } from "./context/ThemeContext"
 import { ScrollToTop } from "./components/common/ScrollToTop"
 import SignIn from "./pages/AuthPages/SignIn"
-import BarChart from "./pages/Charts/MonthlyOrderStatistics"
 import AppLayout from "./layout/AppLayout"
 import Home from "./pages/Dashboard/Home"
 import Books from "./pages/BooksPage/Books"
@@ -29,6 +28,10 @@ import UsersBuild from "./pages/Admins/UsersBuild"
 import BookItem from "./pages/BooksPage/BookItem"
 import BlackList from "./pages/OrderDetails/BlackList"
 import Direktor from "./pages/OrderDetails/Direktor"
+import YearStatistics from "./pages/Charts/YearlyOrderStatistics"
+import MonthStatistics from "./pages/Charts/MonthOrderStatistics"
+import WeekStatistics from "./pages/Charts/WeekOrderStatistics"
+import DayStatistics from "./pages/Charts/DayOrderStatistics"
 
 export default function App() {
   useEffect(() => {
@@ -101,7 +104,10 @@ export default function App() {
             <Route path="black-list" element={<BlackList />} />
             <Route path="direktor" element={<Direktor />} />
             {/* Statistika va grafiklar */}
-            <Route path="bar-chart" element={<BarChart />} />
+            <Route path="yearly-chart" element={<YearStatistics />} />
+            <Route path="monthly-chart" element={<MonthStatistics />} />
+            <Route path="weekly-chart" element={<WeekStatistics />} />
+            <Route path="daily-chart" element={<DayStatistics />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
