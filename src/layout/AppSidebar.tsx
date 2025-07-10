@@ -70,6 +70,7 @@ const AppSidebar: React.FC = () => {
       subItems: [
         { name: "Xodim qo'shish", permission: "", path: "/admins", pro: false },
         { name: "Huquq qo'shish", permission: "", path: "/permission-create", pro: false },
+        { name: "O'qituvchi qo'shish", permission: "", path: "/teacher-create", pro: false },
         { name: "Xodimlarni boshqarish", permission: "", path: "/roles", pro: false },
         { name: "Foydalanuvchilarni tiklash", permission: "", path: "/users-build", pro: false },
       ],

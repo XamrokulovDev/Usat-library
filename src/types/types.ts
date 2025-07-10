@@ -1,19 +1,18 @@
-import type React from "react"
-// Order interface
-export interface OrderData {
-  created_at: string
+export interface BookType {
+  id: string
   name: string
-  status: string
+  year: number
+  page: number
+  books: number
+  auther_id: number
+  book_count: number
+  description: string
+  image: string
 }
 
-// KafedraData interface - any ishlatmasdan
-export interface KafedraData {
-  kafedra: string
-  full_name: string
-  phone: string
-  yonalish: string
-  group: string
-  orders: OrderData[]
+export interface AutherType {
+  id: number
+  name: string
 }
 
 export interface PermissionType {
@@ -23,18 +22,5 @@ export interface PermissionType {
   permissionInfo: {
     id: string
     code_name: string
-    table: string
   }
-}
-
-export interface KafedraPermission {
-  kafedra: string
-  permission: string
-}
-
-export type NavItem = {
-  name: string
-  icon: React.ReactNode
-  path?: string
-  subItems?: { name: string; permission: string; path: string; pro?: boolean; new?: boolean }[]
 }

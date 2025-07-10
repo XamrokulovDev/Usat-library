@@ -150,7 +150,7 @@ export default function EcommerceMetrics() {
           },
         }
       );
-
+      
       const totalBooks = booksRes.data.data.reduce((sum, book) => {
         return sum + book.books;
       }, 0);

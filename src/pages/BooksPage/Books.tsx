@@ -1,6 +1,6 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { BookOpen, Search } from "lucide-react"
+import { BookOpen, Search, X } from "lucide-react"
 import { Modal } from "antd"
 
 interface BookType {
@@ -10,6 +10,10 @@ interface BookType {
   page: number
   books: string
   book_count: string
+  description: string
+  image?: {
+    url: string
+  }
 }
 
 interface PermissionType {
@@ -29,12 +33,21 @@ const Books = () => {
   const [loading, setLoading] = useState<boolean>(false)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
   const [selectedBook, setSelectedBook] = useState<BookType | null>(null)
+  const [selectedBooks, setSelectedBooks] = useState<BookType | null>(null)
+
+  const sliceDescription = (text: string): string => {
+    if (!text) return ""
+    const words = text.trim().split(/\s+/)
+    if (words.length <= 3) {
+      return words.join(" ")
+    }
+    return words.slice(0, 3).join(" ") + "..."
+  }
 
   const fetchPermission = async () => {
     setLoading(true)
     try {
       const token = localStorage.getItem("token")
-
       const isRolesStr = localStorage.getItem("isRoles")
       const isRoles = isRolesStr ? JSON.parse(isRolesStr) : []
       const matchedGroups = userGroup.filter((item) => isRoles.includes(item.group_id));
@@ -141,6 +154,7 @@ const Books = () => {
   }
 
   return (
+    <>
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
@@ -159,8 +173,7 @@ const Books = () => {
           />
         </div>
       </div>
-
-      <div className="space-y-6 mt-15">
+      <div className="space-y-6 mt-15 mb-3">
         {filteredBooks.length === 0 ? (
           <div className="text-center py-12">
             <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
@@ -178,6 +191,9 @@ const Books = () => {
                     Kitob nomi
                   </th>
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Kitob tavsifi
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Kitob chiqarilgan yil
                   </th>
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
@@ -188,6 +204,9 @@ const Books = () => {
                   </th>
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Qolgan kitoblar
+                  </th>
+                  <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    Rasmi
                   </th>
                   <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     O'chirish
@@ -204,6 +223,9 @@ const Books = () => {
                       {item.name}
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {sliceDescription(item?.description)}
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.year}
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
@@ -214,6 +236,11 @@ const Books = () => {
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                       {item.book_count}
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-center text-blue-500 dark:text-blue-500 underline cursor-pointer">
+                      <button onClick={() => setSelectedBooks(item)}>
+                        ko'rish
+                      </button>
                     </td>
                     <td className="px-6 py-2 whitespace-nowrap text-center">
                       <button
@@ -242,6 +269,26 @@ const Books = () => {
         <p>{selectedBook ? `"${selectedBook.name}" kitobini o'chirmoqchimisiz?` : ""}</p>
       </Modal>
     </div>
+    {selectedBooks && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50">
+        <div className="h-[90%] bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-lg relative overflow-hidden flex items-center justify-center">
+          <button
+            onClick={() => setSelectedBooks(null)}
+            className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          {selectedBook?.image?.url && (
+            <img
+              src={`${import.meta.env.VITE_API}${selectedBook.image.url.startsWith('/') ? '' : '/'}${selectedBook.image.url}`}
+              alt={selectedBook.name}
+              className="rounded-lg w-full h-full object-contain"
+            />
+          )}
+        </div>
+      </div>
+    )}
+    </>
   )
 }
 

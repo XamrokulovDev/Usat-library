@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import { message as antdMessage } from "antd"
-import { BookOpen, BookPlus, ChevronDown, Search } from "lucide-react"
+import { BookOpen, BookPlus, ChevronDown, Search, Upload, X } from "lucide-react"
 
 interface BookType {
   id: string
@@ -11,6 +11,10 @@ interface BookType {
   books: string
   auther_id?: number
   book_count: string
+  description: string
+  image?: {
+    url: string
+  }
 }
 
 interface AutherType {
@@ -38,6 +42,9 @@ const CreateBooks: React.FC = () => {
   const [year, setYear] = useState<string>("")
   const [page, setPage] = useState<string>("")
   const [books, setBooks] = useState<string>("")
+  const [description, setDescription] = useState<string>("")
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [data, setData] = useState<BookType[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [fetchLoading, setFetchLoading] = useState<boolean>(false)
@@ -45,13 +52,53 @@ const CreateBooks: React.FC = () => {
   const [tableSearchTerm, setTableSearchTerm] = useState<string>("")
   const [isEditMode, setIsEditMode] = useState<boolean>(false)
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
-
-  // Yangi state - edit qilayotgan kitobning asl ma'lumotlarini saqlash uchun
   const [originalBookData, setOriginalBookData] = useState<BookType | null>(null)
+  const [selectedBook, setSelectedBook] = useState<BookType | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const formRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const sliceDescription = (text: string): string => {
+    if (!text) return ""
+    const words = text.trim().split(/\s+/)
+    if (words.length <= 3) {
+      return words.join(" ")
+    }
+    return words.slice(0, 3).join(" ") + "..."
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        antdMessage.error("Faqat rasm fayllari ruxsat etilgan!")
+        return
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        antdMessage.error("Rasm hajmi 5MB dan oshmasligi kerak!")
+        return
+      }
+
+      setSelectedImage(file)
+
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeImage = (): void => {
+    setSelectedImage(null)
+    setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
 
   const fetchPermission = async (): Promise<void> => {
     const token: string | null = localStorage.getItem("token")
@@ -114,7 +161,8 @@ const CreateBooks: React.FC = () => {
           "X-permission": permissionIds[0],
         },
       })
-      setData(response.data.data)
+      setData(response.data.data);
+      console.log(response.data.data);
     } catch (error) {
       console.error("Foydalanuvchilarni olishda xatolik:", error)
     } finally {
@@ -176,13 +224,20 @@ const CreateBooks: React.FC = () => {
   }
 
   const handleEditBook = (book: BookType): void => {
-    // Asl kitob ma'lumotlarini saqlash
     setOriginalBookData(book)
-
     setBookName(book.name)
     setYear(book.year.toString())
     setPage(book.page.toString())
+    setDescription(book.description || "")
     setBooks(book.books)
+
+    if (book.image) {
+      setImagePreview(book.image.url)
+    } else {
+      setImagePreview(null)
+    }
+    setSelectedImage(null)
+
     if (book.auther_id) {
       const selectedAuthor: AutherType | undefined = auther.find((author: AutherType) => author.id === book.auther_id)
       if (selectedAuthor) {
@@ -205,25 +260,26 @@ const CreateBooks: React.FC = () => {
     setYear("")
     setPage("")
     setBooks("")
+    setDescription("")
+    setSelectedImage(null)
+    setImagePreview(null)
     setIsEditMode(false)
     setEditingBookId(null)
     setOriginalBookData(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
   }
 
-  // book_count ni avtomatik hisoblash funksiyasi
   const calculateBookCount = (newBooks: string, originalBooks?: string, originalBookCount?: string): string => {
     if (isEditMode && originalBooks && originalBookCount) {
-      // Edit mode: yangi book_count = eski book_count + (yangi books - eski books)
       const newBooksNum = Number(newBooks) || 0
       const originalBooksNum = Number(originalBooks) || 0
       const originalBookCountNum = Number(originalBookCount) || 0
-
       const difference = newBooksNum - originalBooksNum
       const newBookCount = originalBookCountNum + difference
-
-      return Math.max(0, newBookCount).toString() // Manfiy bo'lmasligi uchun
+      return Math.max(0, newBookCount).toString()
     } else {
-      // Create mode: book_count = books
       return newBooks
     }
   }
@@ -235,16 +291,19 @@ const CreateBooks: React.FC = () => {
       return
     }
 
-    // book_count ni avtomatik hisoblash
     const calculatedBookCount = calculateBookCount(books, originalBookData?.books, originalBookData?.book_count)
 
-    const requestData = {
-      name: bookName,
-      auther_id: Number(selectedAutherId),
-      year: Number(year),
-      page: Number(page),
-      books: books,
-      book_count: calculatedBookCount, // Avtomatik hisoblangan qiymat
+    const formData = new FormData()
+    formData.append("name", bookName)
+    formData.append("auther_id", selectedAutherId)
+    formData.append("year", year)
+    formData.append("page", page)
+    formData.append("books", books)
+    formData.append("book_count", calculatedBookCount)
+    formData.append("description", description)
+
+    if (selectedImage) {
+      formData.append("image", selectedImage)
     }
 
     setSubmitLoading(true)
@@ -258,18 +317,20 @@ const CreateBooks: React.FC = () => {
       const permissionIds: string[] = matchedGroups?.map((item: PermissionType) => item.permissionInfo.code_name)
 
       if (isEditMode && editingBookId) {
-        await axios.put(`${import.meta.env.VITE_API}/api/books/${editingBookId}`, requestData, {
+        await axios.put(`${import.meta.env.VITE_API}/api/books/${editingBookId}`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             "X-permission": permissionIds[0],
+            "Content-Type": "multipart/form-data",
           },
         })
         antdMessage.success("Kitob muvaffaqiyatli yangilandi!")
       } else {
-        await axios.post(`${import.meta.env.VITE_API}/api/books`, requestData, {
+        await axios.post(`${import.meta.env.VITE_API}/api/books`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             "X-permission": permissionIds[0],
+            "Content-Type": "multipart/form-data",
           },
         })
         antdMessage.success("Kitob muvaffaqiyatli qo'shildi!")
@@ -324,7 +385,6 @@ const CreateBooks: React.FC = () => {
             </button>
           )}
         </div>
-
         {fetchLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
@@ -348,7 +408,6 @@ const CreateBooks: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
-
             {/* Searchable Author Select */}
             <div className="w-full" ref={dropdownRef}>
               <label htmlFor="auther" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -398,7 +457,6 @@ const CreateBooks: React.FC = () => {
                 )}
               </div>
             </div>
-
             <div>
               <label htmlFor="year" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Kitob chiqarilgan yilni kiriting!
@@ -412,7 +470,6 @@ const CreateBooks: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
-
             <div>
               <label htmlFor="page" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Kitob necha betligini kiriting!
@@ -426,7 +483,6 @@ const CreateBooks: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
-
             <div>
               <label htmlFor="books" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Kitob sonini kiriting!
@@ -440,7 +496,77 @@ const CreateBooks: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
-
+            <div>
+              <label htmlFor="description" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Kitob tavsifini kiriting!
+              </label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
+                placeholder="Tavsifingiz..."
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
+              />
+            </div>
+            {/* Image Upload Section */}
+            <div>
+              <label htmlFor="image" className="block font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Kitob rasmini yuklang!
+              </label>
+              <div className="space-y-4">
+                <div className="flex items-center justify-center w-full">
+                  <label
+                    htmlFor="image-upload"
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">Rasm yuklash uchun bosing</span> yoki sudrab tashlang
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, JPEG (MAX. 5MB)</p>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {/* Image Preview */}
+                {imagePreview && (
+                  <div className="relative">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={imagePreview || "/placeholder.svg"}
+                          alt="Preview"
+                          className="w-16 h-16 object-cover rounded-lg"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            {selectedImage ? selectedImage.name : "Mavjud rasm"}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {selectedImage ? `${(selectedImage.size / 1024 / 1024).toFixed(2)} MB` : "Yuklangan"}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
             <button
               type="submit"
               disabled={submitLoading}
@@ -451,7 +577,6 @@ const CreateBooks: React.FC = () => {
           </form>
         )}
       </div>
-
       {/* Books Table */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 mt-6">
         <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -471,7 +596,6 @@ const CreateBooks: React.FC = () => {
             />
           </div>
         </div>
-
         <div className="space-y-6">
           {loading ? (
             <div className="flex items-center justify-center py-8">
@@ -497,6 +621,9 @@ const CreateBooks: React.FC = () => {
                       Kitob nomi
                     </th>
                     <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Kitob tavsifi
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Kitob chiqarilgan yil
                     </th>
                     <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
@@ -507,6 +634,9 @@ const CreateBooks: React.FC = () => {
                     </th>
                     <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Qolgan kitoblar
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Rasmi
                     </th>
                     <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Yangilash
@@ -523,6 +653,9 @@ const CreateBooks: React.FC = () => {
                         {item.name}
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                        {sliceDescription(item?.description)}
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                         {item.year}
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
@@ -533,6 +666,11 @@ const CreateBooks: React.FC = () => {
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                         {item.book_count}
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-center text-blue-500 dark:text-blue-500 underline cursor-pointer">
+                        <button onClick={() => setSelectedBook(item)}>
+                          ko'rish
+                        </button>
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center">
                         <button
@@ -550,6 +688,25 @@ const CreateBooks: React.FC = () => {
           )}
         </div>
       </div>
+      {selectedBook && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50">
+          <div className="h-[90%] bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-lg relative overflow-hidden flex items-center justify-center">
+            <button
+              onClick={() => setSelectedBook(null)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            {selectedBook?.image?.url && (
+              <img
+                src={`${import.meta.env.VITE_API}${selectedBook.image.url.startsWith('/') ? '' : '/'}${selectedBook.image.url}`}
+                alt={selectedBook.name}
+                className="rounded-lg w-full h-full object-contain"
+              />
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }

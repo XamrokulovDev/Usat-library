@@ -32,6 +32,7 @@ import YearStatistics from "./pages/Charts/YearlyOrderStatistics"
 import MonthStatistics from "./pages/Charts/MonthOrderStatistics"
 import WeekStatistics from "./pages/Charts/WeekOrderStatistics"
 import DayStatistics from "./pages/Charts/DayOrderStatistics"
+import Teacher from "./pages/Admins/Teacher"
 
 export default function App() {
   useEffect(() => {
@@ -84,6 +85,7 @@ export default function App() {
             <Route path="roles/:id" element={<PermissionGroup />} />
             <Route path="permission-create" element={<Permission />} />
             <Route path="users-build" element={<UsersBuild />} />
+            <Route path="teacher-create" element={<Teacher />} />
             {/* Kitoblar bo'limi */}
             <Route path="books-all" element={<Books />} />
             <Route path="book-create" element={<CreateBooks />} />
