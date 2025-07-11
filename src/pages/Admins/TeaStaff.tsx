@@ -5,7 +5,7 @@ interface TeacherType {
   id: number;
   fullname: string;
   phone: string;
-  passport_id: string;
+  passpost_id: string;
 }
 
 interface PermissionType {
@@ -122,7 +122,7 @@ const TeacherStaff = forwardRef<StaffRef>((_, ref) => {
                 <td className="text-center text-gray-800 dark:text-white px-6 py-4">{index + 1}</td>
                 <td className="text-center text-gray-800 dark:text-white px-6 py-4">{item.fullname}</td>
                 <td className="text-center text-gray-800 dark:text-white px-6 py-4">{item.phone}</td>
-                <td className="text-center text-gray-800 dark:text-white px-6 py-4">{item.passport_id}</td>
+                <td className="text-center text-gray-800 dark:text-white px-6 py-4">{item.passpost_id}</td>
                 <td className="text-center text-gray-800 dark:text-white px-6 py-4">
                   {deleteLoadingId === item.id ? (
                     <span className="text-gray-500 dark:text-gray-400">O‘chirilmoqda...</span>

@@ -6,7 +6,7 @@ import { Users } from "lucide-react";
 
 interface FormData {
   fullname: string;
-  passport_id: string;
+  passpost_id: string;
   phone: string;
   password: string;
   is_active: boolean;
@@ -23,7 +23,7 @@ interface PermissionType {
 }
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+  <label className="block text-sm font-medium text-gray-800 dark:text-gray-800 mb-1">
     {children}
   </label>
 );
@@ -32,7 +32,7 @@ const Teacher = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [fullname, setFullName] = useState("");
-  const [passport_id, setPassportId] = useState("");
+  const [passpost_id, setPassportId] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [userGroup, setUserGroup] = useState<PermissionType[]>([]);
@@ -76,7 +76,7 @@ const Teacher = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!fullname || !passport_id || !phone || !password) {
+    if (!fullname || !passpost_id || !phone || !password) {
       antdMessage.warning("Barcha maydonlarni to‘ldiring!");
       return;
     }
@@ -89,7 +89,7 @@ const Teacher = () => {
 
     const payload: FormData = {
       fullname,
-      passport_id,
+      passpost_id,
       phone,
       password,
       is_active: true,
@@ -168,7 +168,7 @@ const Teacher = () => {
           </div>
           <div>
             <Label>Passport ID</Label>
-            <Input value={passport_id} onChange={(e) => setPassportId(e.target.value)} placeholder="AD1234567" />
+            <Input value={passpost_id} onChange={(e) => setPassportId(e.target.value)} placeholder="AD1234567" />
           </div>
           <div>
             <Label>Telefon raqami</Label>
