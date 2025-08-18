@@ -11,6 +11,7 @@ interface BookType {
   books: string;
   book_count: string;
   description: string;
+  auther_id?: number;
   image?: {
     url: string;
   };
@@ -26,6 +27,12 @@ interface PermissionType {
   };
 }
 
+interface AutherType {
+  id: number;
+  auther_id: string;
+  name: string;
+}
+
 const Books = () => {
   const [data, setData] = useState<BookType[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -35,6 +42,7 @@ const Books = () => {
     useState<boolean>(false);
   const [selectedBook, setSelectedBook] = useState<BookType | null>(null);
   const [selectedBooks, setSelectedBooks] = useState<BookType | null>(null);
+  const [auther, setAuthers] = useState<AutherType[]>([]);
 
   const sliceDescription = (text: string): string => {
     if (!text) return "";
@@ -103,7 +111,6 @@ const Books = () => {
         }
       );
       setData(response.data.data);
-      console.log(response.data.data);
     } catch (error) {
       console.error("Foydalanuvchilarni olishda xatolik:", error);
     } finally {
@@ -153,6 +160,37 @@ const Books = () => {
       console.error("Kitobni o'chirishda xatolik:", error);
     }
   };
+
+  const fetchAuthers = async (): Promise<void> => {
+    try {
+      const token: string | null = localStorage.getItem("token");
+      const isRolesStr: string | null = localStorage.getItem("isRoles");
+      const isRoles: string[] = isRolesStr ? JSON.parse(isRolesStr) : [];
+      const matchedGroups: PermissionType[] = userGroup.filter(
+        (item: PermissionType) => isRoles.includes(item.group_id)
+      );
+      const permissionIds: string[] = matchedGroups?.map(
+        (item: PermissionType) => item.permissionInfo.code_name
+      );
+      const response = await axios.get(
+        `${import.meta.env.VITE_API}/api/auther`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-permission": permissionIds[0],
+          },
+        }
+      );
+      setAuthers(response.data.data);
+    } catch (err) {
+      console.error("Autherlarni olishda xatolik:", err);
+    }
+  };
+  useEffect(() => {
+    if (userGroup.length > 0) {
+      fetchAuthers();
+    }
+  }, [userGroup]);
 
   const handleDeleteCancel = () => {
     setIsDeleteModalVisible(false);
@@ -220,6 +258,9 @@ const Books = () => {
                       Kitob nomi
                     </th>
                     <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Kitob muallifi
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Kitob tavsifi
                     </th>
                     <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
@@ -253,6 +294,9 @@ const Books = () => {
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                         {item.name}
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                        {auther.find((a) => a.id === item.auther_id)?.name || "-"}
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                         {sliceDescription(item?.description)}

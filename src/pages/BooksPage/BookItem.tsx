@@ -446,8 +446,8 @@ const BookItem = () => {
         e.target.value = ""
         return
       }
-      if (file.size > 10 * 1024 * 1024) {
-        antdMessage.error("Fayl hajmi 10MB dan oshmasligi kerak!")
+      if (file.size > 100 * 1024 * 1024) {
+        antdMessage.error("Fayl hajmi 100MB dan oshmasligi kerak!")
         e.target.value = ""
         return
       }
@@ -971,7 +971,7 @@ const BookItem = () => {
               )}
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Faqat PDF fayllar qabul qilinadi. Maksimal hajm: 10MB
+              Faqat PDF fayllar qabul qilinadi. Maksimal hajm: 100MB
             </p>
           </div>
         )}

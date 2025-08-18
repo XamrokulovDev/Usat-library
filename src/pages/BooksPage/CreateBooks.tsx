@@ -86,8 +86,8 @@ const CreateBooks: React.FC = () => {
         return;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        antdMessage.error("Rasm hajmi 5MB dan oshmasligi kerak!");
+      if (file.size > 100 * 1024 * 1024) {
+        antdMessage.error("Rasm hajmi 100MB dan oshmasligi kerak!");
         return;
       }
 
@@ -615,7 +615,7 @@ const CreateBooks: React.FC = () => {
                         yoki sudrab tashlang
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        PNG, JPG, JPEG (MAX. 5MB)
+                        PNG, JPG, JPEG (MAX. 100MB)
                       </p>
                     </div>
                     <input
@@ -729,6 +729,9 @@ const CreateBooks: React.FC = () => {
                       Kitob nomi
                     </th>
                     <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Kitob Muallifi
+                    </th>
+                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Kitob tavsifi
                     </th>
                     <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
@@ -762,6 +765,9 @@ const CreateBooks: React.FC = () => {
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                         {item.name}
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                        {auther.find((a) => a.id === item.auther_id)?.name || "-"}
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
                         {sliceDescription(item?.description)}
