@@ -36,8 +36,8 @@ const AppSidebar: React.FC = () => {
       name: "Kitoblar",
       icon: <GoBook />,
       subItems: [
-        { name: "Kitob qo'shish", permission: "kitob_qoshish", path: "/book-create", pro: false },
         { name: "Barcha Kitoblar", permission: "kitob_korish", path: "/books-all", pro: false },
+        { name: "Kitob qo'shish", permission: "kitob_qoshish", path: "/book-create", pro: false },
         { name: "Kitob detallarini bog'lash", permission: "kitob_detal", path: "/books-detail", pro: false },
         { name: "Kitob mualliflari", permission: "kitob_muallif", path: "/auther", pro: false },
         { name: "Kitob kategoriyalari", permission: "kategoriya", path: "/categories", pro: false },

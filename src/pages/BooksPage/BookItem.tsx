@@ -1200,89 +1200,83 @@ const BookItem = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-200 dark:border-gray-700 rounded-lg">
-              <thead className="bg-gray-50 dark:bg-gray-700/50">
+          <div className="overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+            <table className="min-w-full table-fixed border border-gray-300 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-800">
+              <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-300 dark:border-gray-600">
                 <tr>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="w-[50px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     #
                   </th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="w-[200px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Kitob nomi
                   </th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="w-[120px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Til
                   </th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="w-[120px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Alifbo
                   </th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="w-[120px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Status
                   </th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="w-[150px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Kafedra
                   </th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="w-[150px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     Kategoriya
                   </th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-left text-gray-800 dark:text-white">
+                  <th className="w-[100px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     PDF
                   </th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-4 py-3 text-center text-gray-800 dark:text-white">
+                  <th className="w-[80px] text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                     O'chirish
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {bookItems.map((bookItem, index) => (
                   <tr
                     key={bookItem.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   >
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {index}
+                    <td className="px-6 py-2 border-r border-gray-300 dark:border-gray-600 text-center text-sm font-medium text-gray-800 dark:text-white">
+                      {index + 1}
                     </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                    <td className="border-r border-gray-300 dark:border-gray-600 px-6 py-2 text-center text-[13px] font-medium text-gray-800 dark:text-white whitespace-normal break-words">
                       {bookItem.book?.name || "-"}
                     </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                    <td className="border-r border-gray-300 dark:border-gray-600 px-6 py-2 text-center text-[13px] font-medium text-gray-800 dark:text-white">
                       {bookItem.language?.name || "-"}
                     </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                    <td className="border-r border-gray-300 dark:border-gray-600 px-6 py-2 text-center text-[13px] font-medium text-gray-800 dark:text-white">
                       {bookItem.alphabet?.name || "-"}
                     </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                    <td className="border-r border-gray-300 dark:border-gray-600 px-6 py-2 text-center text-[13px] font-medium text-gray-800 dark:text-white">
                       {bookItem.status?.name || "-"}
                     </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                    <td className="border-r border-gray-300 dark:border-gray-600 px-6 py-2 text-center text-[13px] font-medium text-gray-800 dark:text-white whitespace-normal break-words">
                       {bookItem.BookCategoryKafedra?.kafedra.name_uz || "-"}
                     </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
+                    <td className="border-r border-gray-300 dark:border-gray-600 px-6 py-2 text-center text-[13px] font-medium text-gray-800 dark:text-white whitespace-normal break-words">
                       {bookItem.BookCategoryKafedra?.category.name_uz || "-"}
                     </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-white">
-                      {bookItem.PDFFile &&
-                      bookItem.PDFFile.file_url &&
-                      bookItem.PDFFile.original_name &&
-                      bookItem.PDFFile.original_name !== "salom.pdf" ? (
+                    <td className="border-r border-gray-300 dark:border-gray-600 px-6 py-2 text-center text-blue-500 dark:text-blue-500 underline cursor-pointer">
+                      {bookItem.PDFFile?.file_url ? (
                         <a
                           href={bookItem.PDFFile.file_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-600 underline flex items-center gap-1"
                         >
                           Ko'rish
                         </a>
                       ) : (
-                        <span className="text-gray-400 dark:text-gray-500">
-                          pdf yo'q
-                        </span>
+                        "-"
                       )}
                     </td>
-                    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-center">
+                    <td className="px-6 py-2 text-center">
                       <button
-                        className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
                         onClick={() => showDeleteModal(bookItem)}
+                        className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
                       >
                         O'chirish
                       </button>

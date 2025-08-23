@@ -210,7 +210,6 @@ const Direktor = () => {
           />
         </div>
       </div>
-
       <div className="space-y-6 mt-15 mb-3">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">

@@ -247,78 +247,79 @@ const Books = () => {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-                <thead className="bg-gray-50 dark:bg-gray-700/50">
+            <div className="overflow-x-auto mt-15 my-4">
+              <table className="min-w-full table-fixed border border-gray-300 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-800 rounded-lg overflow-hidden">
+                <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-300 dark:border-gray-600">
                   <tr>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    <th className="w-[50px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       #
                     </th>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    <th className="w-[300px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Kitob nomi
                     </th>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    <th className="w-[150px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Kitob muallifi
                     </th>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    <th className="w-[200px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Kitob tavsifi
                     </th>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                      Kitob chiqarilgan yil
+                    <th className="w-[120px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Yil
                     </th>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                      Kitob varaqasi
+                    <th className="w-[100px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Varaq
                     </th>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                      Kitob soni
+                    <th className="w-[100px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Soni
                     </th>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
-                      Qolgan kitoblar
+                    <th className="w-[100px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                      Qolgan
                     </th>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    <th className="w-[100px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       Rasmi
                     </th>
-                    <th className="text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
+                    <th className="w-[80px] border-r border-gray-300 dark:border-gray-600 text-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-white tracking-wider">
                       O'chirish
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                  {filteredBooks.map((item, index) => (
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredBooks.map((item: BookType, index: number) => (
                     <tr
                       key={item.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                     >
-                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                        {index}
+                      <td className="px-6 py-2 border-r border-gray-300 dark:border-gray-600 text-center text-sm font-medium text-gray-800 dark:text-white">
+                        {index + 1}
                       </td>
-                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      <td className="w-[300px] border-r border-gray-300 dark:border-gray-600 px-6 py-2 whitespace-normal break-words text-center text-[13px] font-medium text-gray-800 dark:text-white">
                         {item.name}
                       </td>
-                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                        {auther.find((a) => a.id === item.auther_id)?.name || "-"}
+                      <td className="px-6 py-2 border-r border-gray-300 dark:border-gray-600 whitespace-normal break-words text-center text-[13px] font-medium text-gray-800 dark:text-white">
+                        {auther.find((a) => a.id === item.auther_id)?.name ||
+                          "-"}
                       </td>
-                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
-                        {sliceDescription(item?.description)}
+                      <td className="px-6 py-2 border-r border-gray-300 dark:border-gray-600 whitespace-normal break-words text-center text-[13px] font-medium text-gray-800 dark:text-white">
+                        {sliceDescription(item.description)}
                       </td>
-                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      <td className="px-6 py-2 border-r border-gray-300 dark:border-gray-600 text-center text-sm font-medium text-gray-800 dark:text-white">
                         {item.year}
                       </td>
-                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      <td className="px-6 py-2 border-r border-gray-300 dark:border-gray-600 text-center text-sm font-medium text-gray-800 dark:text-white">
                         {item.page}
                       </td>
-                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      <td className="px-6 py-2 border-r border-gray-300 dark:border-gray-600 text-center text-sm font-medium text-gray-800 dark:text-white">
                         {item.books}
                       </td>
-                      <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium text-gray-800 dark:text-white">
+                      <td className="px-6 py-2 border-r border-gray-300 dark:border-gray-600 text-center text-sm font-medium text-gray-800 dark:text-white">
                         {item.book_count}
                       </td>
-                      <td className="px-6 py-2 whitespace-nowrap text-center text-blue-500 dark:text-blue-500 underline cursor-pointer">
+                      <td className="px-6 py-2 border-r border-gray-300 dark:border-gray-600 text-center text-blue-500 dark:text-blue-500 underline cursor-pointer">
                         <button onClick={() => setSelectedBooks(item)}>
                           ko'rish
                         </button>
                       </td>
-                      <td className="px-6 py-2 whitespace-nowrap text-center">
+                      <td className="px-6 py-2 text-center">
                         <button
                           className="text-red-500 hover:text-red-600 px-3 py-1 rounded-md transition-all duration-300"
                           onClick={() => showDeleteModal(item)}
